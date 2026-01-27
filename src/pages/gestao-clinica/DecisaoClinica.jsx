@@ -74,6 +74,7 @@ export default function DecisaoClinica() {
         setAnalysisResult(null);
         setSelectedDiagnosis(null);
         setRecommendations(null);
+        setAiInsights(null);
 
         try {
             // Combine selected symptoms with text symptoms
@@ -87,6 +88,8 @@ export default function DecisaoClinica() {
                 allSymptoms.push(...textSymptoms);
             }
 
+            console.log('Enviando sintomas para análise:', allSymptoms);
+
             const result = await clinicalDecisionService.analyzeSymptoms(allSymptoms, {
                 age: samplePatient.idade,
                 sex: samplePatient.sexo,
@@ -95,24 +98,16 @@ export default function DecisaoClinica() {
                 medications: samplePatient.medications
             });
 
+            console.log('Resultado da análise:', result);
             setAnalysisResult(result);
 
-            // Auto-load AI insights
-            loadAIInsights(allSymptoms, result.possibleDiagnoses);
+            // Auto-load AI insights if we have diagnoses
+            if (result.possibleDiagnoses?.length > 0) {
+                loadAIInsights(allSymptoms, result.possibleDiagnoses);
+            }
         } catch (error) {
             console.error('Erro na análise:', error);
-            // Fallback: use demo data
-            setAnalysisResult({
-                possibleDiagnoses: [
-                    { name: 'Hipertensão Descompensada', probability: 90, matchingSymptoms: 2 },
-                    { name: 'Síndrome Gripal', probability: 65, matchingSymptoms: 1 },
-                    { name: 'Descompensação Diabética', probability: 45, matchingSymptoms: 1 }
-                ],
-                recommendedExams: ['Hemograma completo', 'PCR', 'Glicemia', 'Função renal'],
-                suggestedTreatments: ['Antitérmicos', 'Hidratação', 'Repouso', 'Ajuste de anti-hipertensivo'],
-                symptomCount: selectedSymptoms.length,
-                analyzedAt: new Date().toISOString()
-            });
+            alert(`Erro ao analisar sintomas: ${error.message}\n\nVerifique se o backend está rodando e a API DeepSeek está configurada.`);
         } finally {
             setIsAnalyzing(false);
         }
@@ -121,6 +116,7 @@ export default function DecisaoClinica() {
     const loadAIInsights = async (symptoms, diagnoses) => {
         setIsLoadingInsights(true);
         try {
+            console.log('Carregando insights de IA para:', { symptoms, diagnoses });
             const insights = await clinicalDecisionService.getAIInsights(
                 symptoms,
                 {
@@ -132,15 +128,16 @@ export default function DecisaoClinica() {
                 },
                 diagnoses
             );
+            console.log('Insights recebidos:', insights);
             setAiInsights(insights);
         } catch (error) {
             console.error('Erro ao carregar insights:', error);
-            // Fallback demo insights
             setAiInsights({
-                insights: ['Paciente com histórico de hipertensão e diabetes apresenta risco aumentado para complicações cardiovasculares.'],
-                alerts: ['Possível interação medicamentosa entre anti-hipertensivos e anti-inflamatórios em uso.'],
-                recommendations: ['Considerar monitoramento mais frequente da pressão arterial e glicemia.'],
-                aiEnhanced: false
+                insights: [],
+                alerts: [`Erro ao carregar insights de IA: ${error.message}`],
+                recommendations: [],
+                aiEnhanced: false,
+                aiError: error.message
             });
         } finally {
             setIsLoadingInsights(false);
@@ -150,18 +147,19 @@ export default function DecisaoClinica() {
     const selectDiagnosis = async (diagnosis) => {
         setSelectedDiagnosis(diagnosis);
         try {
+            console.log('Carregando recomendações para:', diagnosis.name);
             const recs = await clinicalDecisionService.getRecommendations(diagnosis.name);
+            console.log('Recomendações recebidas:', recs);
             setRecommendations(recs);
         } catch (error) {
             console.error('Erro ao carregar recomendações:', error);
-            // Fallback
             setRecommendations({
                 diagnosis: diagnosis.name,
-                medications: ['Medicamento 1', 'Medicamento 2'],
-                exams: ['Exame 1', 'Exame 2'],
-                treatments: ['Tratamento 1', 'Tratamento 2'],
-                warnings: [],
-                protocols: ['Protocolo de Atendimento na APS']
+                medications: [],
+                exams: [],
+                treatments: [],
+                warnings: [`Erro ao carregar recomendações: ${error.message}`],
+                protocols: []
             });
         }
     };

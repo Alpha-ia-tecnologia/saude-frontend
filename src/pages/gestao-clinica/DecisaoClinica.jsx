@@ -537,10 +537,15 @@ export default function DecisaoClinica() {
             {/* AI Insights */}
             <div className="card" style={{ marginTop: '1.5rem' }}>
                 <div className="card-header" style={{ background: 'var(--sus-light-blue)', color: 'white' }}>
-                    <i className="fas fa-robot"></i> Insights de IA
+                    <i className="fas fa-robot"></i> Insights de IA (DeepSeek)
                     {aiInsights?.aiEnhanced && (
                         <span className="badge badge-success" style={{ marginLeft: '0.5rem' }}>
-                            IA Ativa
+                            <i className="fas fa-check-circle"></i> IA Ativa
+                        </span>
+                    )}
+                    {aiInsights?.aiModel && (
+                        <span className="badge badge-info" style={{ marginLeft: '0.5rem' }}>
+                            {aiInsights.aiModel}
                         </span>
                     )}
                 </div>
@@ -548,10 +553,11 @@ export default function DecisaoClinica() {
                     {isLoadingInsights ? (
                         <div style={{ textAlign: 'center', padding: '2rem' }}>
                             <i className="fas fa-spinner fa-spin fa-2x" style={{ color: 'var(--sus-blue)' }}></i>
-                            <p style={{ marginTop: '1rem' }}>Gerando insights...</p>
+                            <p style={{ marginTop: '1rem' }}>Gerando insights com DeepSeek...</p>
                         </div>
                     ) : aiInsights ? (
                         <>
+                            {/* Standard Insights */}
                             {aiInsights.insights?.map((insight, i) => (
                                 <div key={i} className="alert alert-info">
                                     <i className="fas fa-lightbulb"></i> <strong>Análise:</strong> {insight}
@@ -567,10 +573,84 @@ export default function DecisaoClinica() {
                                     <i className="fas fa-check-circle"></i> <strong>Recomendação:</strong> {rec}
                                 </div>
                             ))}
-                            {aiInsights.aiAnalysis && (
+
+                            {/* DeepSeek AI Advanced Insights */}
+                            {aiInsights.aiInsights && (
+                                <div className="card" style={{ marginTop: '1rem', border: '2px solid var(--sus-blue)' }}>
+                                    <div className="card-header" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+                                        <i className="fas fa-brain"></i> Análise Avançada DeepSeek
+                                    </div>
+                                    <div className="card-body">
+                                        {/* Análise Integrada */}
+                                        {aiInsights.aiInsights.analise_integrada && (
+                                            <div style={{ marginBottom: '1rem' }}>
+                                                <h6><i className="fas fa-search-plus"></i> Análise Integrada</h6>
+                                                <p style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '0.5rem' }}>
+                                                    {aiInsights.aiInsights.analise_integrada}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Riscos Identificados */}
+                                        {aiInsights.aiInsights.riscos_identificados?.length > 0 && (
+                                            <div style={{ marginBottom: '1rem' }}>
+                                                <h6><i className="fas fa-exclamation-circle" style={{ color: 'var(--sus-red)' }}></i> Riscos Identificados</h6>
+                                                <ul style={{ marginBottom: 0 }}>
+                                                    {aiInsights.aiInsights.riscos_identificados.map((risco, i) => (
+                                                        <li key={i} style={{ color: '#dc3545' }}>{risco}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {/* Interações Medicamentosas */}
+                                        {aiInsights.aiInsights.interacoes_medicamentosas?.length > 0 && (
+                                            <div style={{ marginBottom: '1rem' }}>
+                                                <h6><i className="fas fa-pills" style={{ color: 'var(--sus-yellow)' }}></i> Interações Medicamentosas</h6>
+                                                <ul style={{ marginBottom: 0 }}>
+                                                    {aiInsights.aiInsights.interacoes_medicamentosas.map((interacao, i) => (
+                                                        <li key={i} style={{ color: '#856404' }}>{interacao}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {/* Recomendações Personalizadas */}
+                                        {aiInsights.aiInsights.recomendacoes_personalizadas?.length > 0 && (
+                                            <div style={{ marginBottom: '1rem' }}>
+                                                <h6><i className="fas fa-star" style={{ color: 'var(--sus-green)' }}></i> Recomendações Personalizadas</h6>
+                                                <ul style={{ marginBottom: 0 }}>
+                                                    {aiInsights.aiInsights.recomendacoes_personalizadas.map((rec, i) => (
+                                                        <li key={i} style={{ color: '#155724' }}>{rec}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {/* Prognóstico e Encaminhamento */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            {aiInsights.aiInsights.prognostico_estimado && (
+                                                <div style={{ background: '#e3f2fd', padding: '1rem', borderRadius: '0.5rem' }}>
+                                                    <h6><i className="fas fa-chart-line"></i> Prognóstico</h6>
+                                                    <p style={{ margin: 0 }}>{aiInsights.aiInsights.prognostico_estimado}</p>
+                                                </div>
+                                            )}
+                                            {aiInsights.aiInsights.necessidade_encaminhamento && (
+                                                <div style={{ background: '#fff3cd', padding: '1rem', borderRadius: '0.5rem' }}>
+                                                    <h6><i className="fas fa-user-md"></i> Encaminhamento</h6>
+                                                    <p style={{ margin: 0 }}>{aiInsights.aiInsights.necessidade_encaminhamento}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Legacy AI Analysis (texto livre) */}
+                            {aiInsights.aiAnalysis && !aiInsights.aiInsights && (
                                 <div className="card" style={{ marginTop: '1rem', background: '#f8f9fa' }}>
                                     <div className="card-body">
-                                        <h6><i className="fas fa-brain"></i> Análise Avançada de IA</h6>
+                                        <h6><i className="fas fa-brain"></i> Análise de IA</h6>
                                         <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0 }}>
                                             {aiInsights.aiAnalysis}
                                         </pre>
@@ -580,7 +660,7 @@ export default function DecisaoClinica() {
                         </>
                     ) : (
                         <div className="alert alert-info">
-                            <i className="fas fa-info-circle"></i> Analise os sintomas para gerar insights de IA.
+                            <i className="fas fa-info-circle"></i> Analise os sintomas para gerar insights de IA com DeepSeek.
                         </div>
                     )}
                 </div>

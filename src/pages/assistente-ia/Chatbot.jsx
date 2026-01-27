@@ -7,7 +7,7 @@ export function Chatbot() {
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-    const [provider, setProvider] = useState('openai');
+    const [provider, setProvider] = useState('deepseek');
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -84,9 +84,9 @@ export function Chatbot() {
                         value={provider}
                         onChange={(e) => setProvider(e.target.value)}
                     >
+                        <option value="deepseek">DeepSeek</option>
                         <option value="openai">OpenAI (GPT-4)</option>
                         <option value="gemini">Google Gemini</option>
-                        <option value="deepseek">DeepSeek</option>
                     </select>
                     <button className="btn btn-outline-primary" onClick={clearChat}>
                         <i className="fas fa-trash"></i> Limpar

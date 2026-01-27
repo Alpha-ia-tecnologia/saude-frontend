@@ -27,7 +27,7 @@ class ClinicalDecisionService {
     /**
      * Get AI-powered insights
      */
-    async getAIInsights(symptoms, patientData, diagnoses, provider = 'openai') {
+    async getAIInsights(symptoms, patientData, diagnoses, provider = 'deepseek') {
         const response = await fetch(`${this.baseUrl}/ai-insights`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

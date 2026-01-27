@@ -47,6 +47,9 @@ import Planejamento from './pages/gestores/Planejamento';
 // Agendamento
 import Agendamento from './pages/agendamento/Agendamento';
 
+// Atendimento
+import AtendimentoWhatsApp from './pages/atendimento/AtendimentoWhatsApp';
+
 // Componente para proteger rotas
 function ProtectedRoute({ children }) {
     const { isAuthenticated, loading } = useAuth();
@@ -116,7 +119,10 @@ export const router = createBrowserRouter([
             { path: 'gestores/planejamento', element: <Planejamento /> },
 
             // Agendamento
-            { path: 'agendamento', element: <Agendamento /> }
+            { path: 'agendamento', element: <Agendamento /> },
+
+            // Atendimento
+            { path: 'atendimento/whatsapp', element: <AtendimentoWhatsApp /> }
         ]
     }
 ]);

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { aiService } from '../services/ai.service';
 
-export function useAI(initialProvider = 'openai') {
+export function useAI(initialProvider = 'deepseek') {
     const [provider, setProvider] = useState(initialProvider);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);

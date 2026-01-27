@@ -2,7 +2,8 @@ import { config } from '../config/app.config';
 
 class AIService {
     constructor() {
-        this.provider = 'openai';
+        // DeepSeek como provedor padrão
+        this.provider = 'deepseek';
     }
 
     setProvider(provider) {

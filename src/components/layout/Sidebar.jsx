@@ -77,6 +77,14 @@ const menuItems = [
             { path: '/gestores/rh', label: 'Recursos Humanos', icon: 'fa-users' },
             { path: '/gestores/planejamento', label: 'Planejamento Estratégico', icon: 'fa-tasks' }
         ]
+    },
+    {
+        label: 'Atendimento',
+        icon: 'fa-headset',
+        children: [
+            { path: '/agendamento', label: 'Agendamento', icon: 'fa-calendar-check' },
+            { path: '/atendimento/whatsapp', label: 'WhatsApp', icon: 'fab fa-whatsapp' }
+        ]
     }
 ];
 

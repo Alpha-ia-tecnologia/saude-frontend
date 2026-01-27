@@ -2,7 +2,7 @@ import { config } from '../config/app.config';
 
 class ClinicalDecisionService {
     constructor() {
-        this.baseUrl = `${config.api.base}/clinical-decision`;
+        this.baseUrl = `${config.api.baseUrl}/clinical-decision`;
     }
 
     /**

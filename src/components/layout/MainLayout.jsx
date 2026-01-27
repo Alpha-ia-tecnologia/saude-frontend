@@ -33,7 +33,7 @@ export function MainLayout() {
                     color: 'var(--sus-gray)',
                     fontSize: '0.875rem'
                 }}>
-                    © 2025 PEC - Prontuário Eletrônico do Cidadão
+                    © 2026 PEC - Prontuário Eletrônico do Cidadão
                 </footer>
             </main>
 

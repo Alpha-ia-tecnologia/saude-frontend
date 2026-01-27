@@ -3,7 +3,18 @@ import { config } from '../../config/app.config';
 
 export function Chatbot() {
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: 'Olá! Sou o assistente de IA do PEC. Como posso ajudar você hoje?' }
+        {
+            role: 'assistant', content: `Olá! Sou o assistente de IA do **PEC (Prontuário Eletrônico do Cidadão)**, sistema de saúde pública do Brasil.
+
+**Minhas habilidades incluem:**
+- Apoio à decisão clínica baseada em evidências
+- Análise de sintomas e sugestão de diagnósticos diferenciais
+- Recomendação de exames laboratoriais e de imagem
+- Identificação de alertas de segurança e interações medicamentosas
+- Orientações sobre protocolos do Ministério da Saúde e SUS
+- Sugestão de medicamentos da RENAME
+
+Como posso ajudar você hoje?` }
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);

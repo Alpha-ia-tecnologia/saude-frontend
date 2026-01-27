@@ -48,21 +48,21 @@ class AIService {
     // Helper methods for specific use cases
     async analyzeSymptoms(symptoms) {
         return this.chat([
-            { role: 'system', content: 'Você é um assistente médico especializado em análise de sintomas.' },
+            { role: 'system', content: 'Você é o assistente de IA do PEC (Prontuário Eletrônico do Cidadão). Analise sintomas e sugira diagnósticos diferenciais, exames e alertas. Lembre-se que suas sugestões são apoio à decisão do profissional de saúde.' },
             { role: 'user', content: `Analise os seguintes sintomas: ${symptoms}` }
         ]);
     }
 
     async suggestDiagnosis(patientData) {
         return this.chat([
-            { role: 'system', content: 'Você é um assistente de apoio à decisão clínica.' },
+            { role: 'system', content: 'Você é o assistente de IA do PEC (Prontuário Eletrônico do Cidadão). Forneça apoio à decisão clínica baseada em evidências e protocolos do SUS. Suas sugestões são apoio à decisão do profissional de saúde.' },
             { role: 'user', content: JSON.stringify(patientData) }
         ]);
     }
 
     async summarizeRecord(recordData) {
         return this.chat([
-            { role: 'system', content: 'Resuma o prontuário do paciente de forma clara e concisa.' },
+            { role: 'system', content: 'Você é o assistente de IA do PEC (Prontuário Eletrônico do Cidadão). Resuma o prontuário do paciente de forma clara, destacando informações relevantes para o atendimento.' },
             { role: 'user', content: JSON.stringify(recordData) }
         ]);
     }

@@ -1,4 +1,24 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+    HeartPulse,
+    FileOutput,
+    Plus,
+    PieChart,
+    Bot,
+    AlertTriangle,
+    Lightbulb,
+    CheckCircle,
+    XCircle,
+    AlertCircle,
+    Bell,
+    Eye,
+    ClipboardPlus,
+    Calendar,
+    User,
+    X,
+    FileHeart,
+} from 'lucide-react';
 
 // Sample chronic patients data
 const pacientesCronicos = [
@@ -118,147 +138,188 @@ export default function CondicoesCronicas() {
     });
 
     const getRiscoBadge = (risco) => {
-        const colors = { alto: 'danger', medio: 'warning', baixo: 'success' };
+        const config = {
+            alto: 'bg-destructive/10 text-destructive',
+            medio: 'bg-accent/10 text-amber-700',
+            baixo: 'bg-secondary/10 text-secondary-dark',
+        };
         const labels = { alto: 'Alto', medio: 'Médio', baixo: 'Baixo' };
-        return <span className={`badge badge-${colors[risco]}`}>{labels[risco]}</span>;
+        return (
+            <span className={cn('rounded-md px-2 py-0.5 text-xs font-medium', config[risco])}>
+                {labels[risco]}
+            </span>
+        );
     };
 
     const getStatusBadge = (status) => {
         const config = {
-            controlado: { color: 'success', label: 'Controlado', icon: 'fa-check-circle' },
-            atencao: { color: 'warning', label: 'Atenção', icon: 'fa-exclamation-circle' },
-            critico: { color: 'danger', label: 'Crítico', icon: 'fa-times-circle' }
+            controlado: {
+                classes: 'bg-secondary/10 text-secondary-dark',
+                label: 'Controlado',
+                Icon: CheckCircle,
+            },
+            atencao: {
+                classes: 'bg-accent/10 text-amber-700',
+                label: 'Atenção',
+                Icon: AlertCircle,
+            },
+            critico: {
+                classes: 'bg-destructive/10 text-destructive',
+                label: 'Crítico',
+                Icon: XCircle,
+            },
         };
         const s = config[status] || config.controlado;
         return (
-            <span className={`badge badge-${s.color}`}>
-                <i className={`fas ${s.icon}`} style={{ marginRight: '0.25rem' }}></i>
+            <span className={cn('inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium', s.classes)}>
+                <s.Icon className="h-3 w-3" />
                 {s.label}
             </span>
         );
     };
 
     return (
-        <div className="fade-in">
+        <div className="space-y-6">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1 style={{ margin: 0 }}>
-                    <i className="fas fa-heartbeat" style={{ color: 'var(--sus-red, #dc3545)', marginRight: '0.5rem' }}></i>
+            <div className="flex items-center justify-between">
+                <h1 className="flex items-center gap-2 text-2xl font-bold">
+                    <HeartPulse className="h-7 w-7 text-destructive" />
                     Condições Crônicas
                 </h1>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-file-export"></i> Exportar
+                <div className="flex gap-2">
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                        <FileOutput className="h-4 w-4" /> Exportar
                     </button>
-                    <button className="btn btn-primary">
-                        <i className="fas fa-plus"></i> Cadastrar Paciente
+                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                        <Plus className="h-4 w-4" /> Cadastrar Paciente
                     </button>
                 </div>
             </div>
 
             {/* Dashboard Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-blue)' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <h2 style={{ color: 'var(--sus-blue)', margin: 0 }}>{estatisticas.total}</h2>
-                        <p style={{ margin: 0, color: 'var(--sus-gray)' }}>Total de Pacientes</p>
-                    </div>
+            <div className="grid grid-cols-4 gap-4">
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-primary p-5 text-center">
+                    <h2 className="text-3xl font-bold text-primary">{estatisticas.total}</h2>
+                    <p className="text-sm text-muted-foreground">Total de Pacientes</p>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-green)' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <h2 style={{ color: 'var(--sus-green)', margin: 0 }}>{estatisticas.controlados}</h2>
-                        <p style={{ margin: 0, color: 'var(--sus-gray)' }}>Controlados</p>
-                    </div>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-secondary p-5 text-center">
+                    <h2 className="text-3xl font-bold text-secondary">{estatisticas.controlados}</h2>
+                    <p className="text-sm text-muted-foreground">Controlados</p>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-yellow)' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <h2 style={{ color: 'var(--sus-yellow)', margin: 0 }}>{estatisticas.atencao}</h2>
-                        <p style={{ margin: 0, color: 'var(--sus-gray)' }}>Atenção Necessária</p>
-                    </div>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-accent p-5 text-center">
+                    <h2 className="text-3xl font-bold text-accent">{estatisticas.atencao}</h2>
+                    <p className="text-sm text-muted-foreground">Atenção Necessária</p>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid #dc3545' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <h2 style={{ color: '#dc3545', margin: 0 }}>{estatisticas.criticos}</h2>
-                        <p style={{ margin: 0, color: 'var(--sus-gray)' }}>Situação Crítica</p>
-                    </div>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-destructive p-5 text-center">
+                    <h2 className="text-3xl font-bold text-destructive">{estatisticas.criticos}</h2>
+                    <p className="text-sm text-muted-foreground">Situação Crítica</p>
                 </div>
             </div>
 
             {/* Conditions Distribution */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <i className="fas fa-chart-pie"></i> Distribuição por Condição
+            <div className="grid grid-cols-2 gap-6">
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="border-b border-border bg-muted px-5 py-3 text-sm font-semibold">
+                        <span className="flex items-center gap-1.5">
+                            <PieChart className="h-4 w-4" /> Distribuição por Condição
+                        </span>
                     </div>
-                    <div className="card-body">
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span>Hipertensão</span>
-                                    <strong>{estatisticas.hipertensao}</strong>
-                                </div>
-                                <div style={{ height: '8px', background: '#e9ecef', borderRadius: '4px' }}>
-                                    <div style={{ width: `${(estatisticas.hipertensao / estatisticas.total) * 100}%`, height: '100%', background: 'var(--sus-blue)', borderRadius: '4px' }}></div>
-                                </div>
+                    <div className="p-5 space-y-4">
+                        {/* Hipertensão */}
+                        <div>
+                            <div className="mb-1 flex items-center justify-between text-sm">
+                                <span>Hipertensão</span>
+                                <strong>{estatisticas.hipertensao}</strong>
                             </div>
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span>Diabetes</span>
-                                    <strong>{estatisticas.diabetes}</strong>
-                                </div>
-                                <div style={{ height: '8px', background: '#e9ecef', borderRadius: '4px' }}>
-                                    <div style={{ width: `${(estatisticas.diabetes / estatisticas.total) * 100}%`, height: '100%', background: 'var(--sus-green)', borderRadius: '4px' }}></div>
-                                </div>
+                            <div className="h-2 w-full rounded-full bg-border">
+                                <div
+                                    className="h-full rounded-full bg-primary"
+                                    style={{ width: `${(estatisticas.hipertensao / estatisticas.total) * 100}%` }}
+                                />
                             </div>
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span>DPOC</span>
-                                    <strong>{estatisticas.dpoc}</strong>
-                                </div>
-                                <div style={{ height: '8px', background: '#e9ecef', borderRadius: '4px' }}>
-                                    <div style={{ width: `${(estatisticas.dpoc / estatisticas.total) * 100}%`, height: '100%', background: 'var(--sus-yellow)', borderRadius: '4px' }}></div>
-                                </div>
+                        </div>
+                        {/* Diabetes */}
+                        <div>
+                            <div className="mb-1 flex items-center justify-between text-sm">
+                                <span>Diabetes</span>
+                                <strong>{estatisticas.diabetes}</strong>
                             </div>
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span>Outras</span>
-                                    <strong>{estatisticas.outros}</strong>
-                                </div>
-                                <div style={{ height: '8px', background: '#e9ecef', borderRadius: '4px' }}>
-                                    <div style={{ width: `${(estatisticas.outros / estatisticas.total) * 100}%`, height: '100%', background: '#6c757d', borderRadius: '4px' }}></div>
-                                </div>
+                            <div className="h-2 w-full rounded-full bg-border">
+                                <div
+                                    className="h-full rounded-full bg-secondary"
+                                    style={{ width: `${(estatisticas.diabetes / estatisticas.total) * 100}%` }}
+                                />
+                            </div>
+                        </div>
+                        {/* DPOC */}
+                        <div>
+                            <div className="mb-1 flex items-center justify-between text-sm">
+                                <span>DPOC</span>
+                                <strong>{estatisticas.dpoc}</strong>
+                            </div>
+                            <div className="h-2 w-full rounded-full bg-border">
+                                <div
+                                    className="h-full rounded-full bg-accent"
+                                    style={{ width: `${(estatisticas.dpoc / estatisticas.total) * 100}%` }}
+                                />
+                            </div>
+                        </div>
+                        {/* Outras */}
+                        <div>
+                            <div className="mb-1 flex items-center justify-between text-sm">
+                                <span>Outras</span>
+                                <strong>{estatisticas.outros}</strong>
+                            </div>
+                            <div className="h-2 w-full rounded-full bg-border">
+                                <div
+                                    className="h-full rounded-full bg-muted-foreground"
+                                    style={{ width: `${(estatisticas.outros / estatisticas.total) * 100}%` }}
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="card">
-                    <div className="card-header" style={{ background: 'var(--sus-light-blue)', color: 'white' }}>
-                        <i className="fas fa-robot"></i> Insights de IA
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="border-b border-border bg-primary px-5 py-3 text-sm font-semibold text-white">
+                        <span className="flex items-center gap-1.5">
+                            <Bot className="h-4 w-4" /> Insights de IA
+                        </span>
                     </div>
-                    <div className="card-body">
-                        <div className="alert alert-warning" style={{ marginBottom: '0.75rem' }}>
-                            <strong><i className="fas fa-exclamation-triangle"></i> Alerta:</strong> 23 pacientes diabéticos não realizaram exame de hemoglobina glicada nos últimos 6 meses.
+                    <div className="p-5 space-y-3">
+                        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm">
+                            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                            <p>
+                                <span className="font-semibold">Alerta:</span> 23 pacientes diabéticos não realizaram exame de hemoglobina glicada nos últimos 6 meses.
+                            </p>
                         </div>
-                        <div className="alert alert-info" style={{ marginBottom: '0.75rem' }}>
-                            <strong><i className="fas fa-lightbulb"></i> Sugestão:</strong> 15 pacientes hipertensos podem se beneficiar de atividades em grupo.
+                        <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+                            <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                            <p>
+                                <span className="font-semibold">Sugestão:</span> 15 pacientes hipertensos podem se beneficiar de atividades em grupo.
+                            </p>
                         </div>
-                        <div className="alert alert-success" style={{ margin: 0 }}>
-                            <strong><i className="fas fa-check-circle"></i> Positivo:</strong> Taxa de controle pressórico aumentou 12% no último trimestre.
+                        <div className="flex items-start gap-3 rounded-lg border border-secondary/20 bg-secondary/5 p-4 text-sm">
+                            <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
+                            <p>
+                                <span className="font-semibold">Positivo:</span> Taxa de controle pressórico aumentou 12% no último trimestre.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-body">
-                    <h5 style={{ marginBottom: '1rem' }}>Filtrar Pacientes</h5>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="p-5">
+                    <h5 className="mb-4 text-sm font-semibold">Filtrar Pacientes</h5>
+                    <div className="grid grid-cols-4 gap-4">
                         <div>
-                            <label className="form-label">Condição</label>
+                            <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
+                                Condição
+                            </label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroCondicao}
                                 onChange={(e) => setFiltroCondicao(e.target.value)}
                             >
@@ -268,9 +329,11 @@ export default function CondicoesCronicas() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Risco</label>
+                            <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
+                                Risco
+                            </label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroRisco}
                                 onChange={(e) => setFiltroRisco(e.target.value)}
                             >
@@ -281,9 +344,11 @@ export default function CondicoesCronicas() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Status</label>
+                            <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
+                                Status
+                            </label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroStatus}
                                 onChange={(e) => setFiltroStatus(e.target.value)}
                             >
@@ -294,10 +359,12 @@ export default function CondicoesCronicas() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Pesquisar</label>
+                            <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
+                                Pesquisar
+                            </label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 placeholder="Nome ou CNS..."
                                 value={pesquisa}
                                 onChange={(e) => setPesquisa(e.target.value)}
@@ -308,177 +375,191 @@ export default function CondicoesCronicas() {
             </div>
 
             {/* Patients Table */}
-            <div className="card">
-                <div className="card-body" style={{ padding: 0 }}>
-                    <div style={{ padding: '1rem 1rem 0.5rem' }}>
-                        <h5>Pacientes com Condições Crônicas ({pacientesFiltrados.length})</h5>
-                    </div>
-                    <table className="table" style={{ marginBottom: 0 }}>
-                        <thead>
-                            <tr>
-                                <th>Paciente</th>
-                                <th>Condições</th>
-                                <th>Risco</th>
-                                <th>Status</th>
-                                <th>Último Atend.</th>
-                                <th>Próximo Retorno</th>
-                                <th>Alertas</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {pacientesFiltrados.map(paciente => (
-                                <tr key={paciente.id}>
-                                    <td>
-                                        <strong>{paciente.nome}</strong>
-                                        <br />
-                                        <small style={{ color: 'var(--sus-gray)' }}>
-                                            {paciente.idade} anos • CNS: {paciente.cns}
-                                        </small>
-                                    </td>
-                                    <td>
+            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+                <div className="px-5 pt-4 pb-2">
+                    <h5 className="text-sm font-semibold">
+                        Pacientes com Condições Crônicas ({pacientesFiltrados.length})
+                    </h5>
+                </div>
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="border-b border-border bg-muted/50">
+                            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Paciente</th>
+                            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Condições</th>
+                            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Risco</th>
+                            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Último Atend.</th>
+                            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Próximo Retorno</th>
+                            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Alertas</th>
+                            <th className="px-4 py-3 text-left font-medium text-muted-foreground">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                        {pacientesFiltrados.map(paciente => (
+                            <tr key={paciente.id} className="hover:bg-muted/30">
+                                <td className="px-4 py-3">
+                                    <strong className="block text-sm">{paciente.nome}</strong>
+                                    <span className="text-xs text-muted-foreground">
+                                        {paciente.idade} anos &bull; CNS: {paciente.cns}
+                                    </span>
+                                </td>
+                                <td className="px-4 py-3">
+                                    <div className="flex flex-wrap gap-1">
                                         {paciente.condicoes.map((c, i) => (
-                                            <span key={i} className="badge badge-info" style={{ marginRight: '0.25rem', marginBottom: '0.25rem' }}>
+                                            <span
+                                                key={i}
+                                                className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+                                            >
                                                 {c}
                                             </span>
                                         ))}
-                                    </td>
-                                    <td>{getRiscoBadge(paciente.risco)}</td>
-                                    <td>{getStatusBadge(paciente.status)}</td>
-                                    <td>{paciente.ultimoAtendimento}</td>
-                                    <td>{paciente.proximoRetorno}</td>
-                                    <td>
-                                        {paciente.alertas > 0 ? (
-                                            <span className="badge badge-danger">
-                                                <i className="fas fa-bell"></i> {paciente.alertas}
-                                            </span>
-                                        ) : (
-                                            <span className="badge badge-secondary">0</span>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                            <button
-                                                className="btn btn-sm btn-outline-primary"
-                                                onClick={() => setPacienteSelecionado(paciente)}
-                                                title="Ver Detalhes"
-                                            >
-                                                <i className="fas fa-eye"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-outline-success" title="Registrar Atendimento">
-                                                <i className="fas fa-notes-medical"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-outline-secondary" title="Agendar">
-                                                <i className="fas fa-calendar"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </td>
+                                <td className="px-4 py-3">{getRiscoBadge(paciente.risco)}</td>
+                                <td className="px-4 py-3">{getStatusBadge(paciente.status)}</td>
+                                <td className="px-4 py-3 text-muted-foreground">{paciente.ultimoAtendimento}</td>
+                                <td className="px-4 py-3 text-muted-foreground">{paciente.proximoRetorno}</td>
+                                <td className="px-4 py-3">
+                                    {paciente.alertas > 0 ? (
+                                        <span className="inline-flex items-center gap-1 rounded-md bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                                            <Bell className="h-3 w-3" /> {paciente.alertas}
+                                        </span>
+                                    ) : (
+                                        <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                                            0
+                                        </span>
+                                    )}
+                                </td>
+                                <td className="px-4 py-3">
+                                    <div className="flex gap-1">
+                                        <button
+                                            className="inline-flex items-center rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-muted hover:text-primary"
+                                            onClick={() => setPacienteSelecionado(paciente)}
+                                            title="Ver Detalhes"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                            className="inline-flex items-center rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-muted hover:text-secondary"
+                                            title="Registrar Atendimento"
+                                        >
+                                            <ClipboardPlus className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                            className="inline-flex items-center rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-muted hover:text-primary"
+                                            title="Agendar"
+                                        >
+                                            <Calendar className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
 
             {/* Patient Detail Modal */}
             {pacienteSelecionado && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setPacienteSelecionado(null)}
                 >
                     <div
-                        className="card"
-                        style={{ width: '700px', maxWidth: '90%', maxHeight: '80vh', overflow: 'auto' }}
+                        className="w-[700px] max-w-[90%] max-h-[80vh] overflow-auto rounded-xl border border-border bg-card shadow-sm"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="card-header" style={{ background: 'var(--sus-green)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-user"></i> {pacienteSelecionado.nome}</span>
-                                <button
-                                    className="btn btn-sm btn-light"
-                                    onClick={() => setPacienteSelecionado(null)}
-                                >
-                                    <i className="fas fa-times"></i>
-                                </button>
-                            </div>
+                        <div className="flex items-center justify-between border-b border-border bg-secondary px-5 py-3 text-white rounded-t-xl">
+                            <span className="flex items-center gap-2 text-sm font-semibold">
+                                <User className="h-4 w-4" /> {pacienteSelecionado.nome}
+                            </span>
+                            <button
+                                className="inline-flex items-center rounded-lg p-1 text-white/80 hover:bg-white/20 hover:text-white"
+                                onClick={() => setPacienteSelecionado(null)}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
                         </div>
-                        <div className="card-body">
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                                <div>
+                        <div className="p-5 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2 text-sm">
                                     <p><strong>Idade:</strong> {pacienteSelecionado.idade} anos</p>
                                     <p><strong>CNS:</strong> {pacienteSelecionado.cns}</p>
-                                    <p><strong>Risco:</strong> {getRiscoBadge(pacienteSelecionado.risco)}</p>
+                                    <p className="flex items-center gap-2">
+                                        <strong>Risco:</strong> {getRiscoBadge(pacienteSelecionado.risco)}
+                                    </p>
                                 </div>
-                                <div>
-                                    <p><strong>Status:</strong> {getStatusBadge(pacienteSelecionado.status)}</p>
+                                <div className="space-y-2 text-sm">
+                                    <p className="flex items-center gap-2">
+                                        <strong>Status:</strong> {getStatusBadge(pacienteSelecionado.status)}
+                                    </p>
                                     <p><strong>Último Atendimento:</strong> {pacienteSelecionado.ultimoAtendimento}</p>
                                     <p><strong>Próximo Retorno:</strong> {pacienteSelecionado.proximoRetorno}</p>
                                 </div>
                             </div>
 
-                            <h6>Condições de Saúde</h6>
-                            <div style={{ marginBottom: '1rem' }}>
-                                {pacienteSelecionado.condicoes.map((c, i) => (
-                                    <span key={i} className="badge badge-primary" style={{ marginRight: '0.5rem', padding: '0.5rem 0.75rem' }}>
-                                        {c}
-                                    </span>
-                                ))}
+                            <div>
+                                <h6 className="mb-2 text-sm font-semibold">Condições de Saúde</h6>
+                                <div className="flex flex-wrap gap-2">
+                                    {pacienteSelecionado.condicoes.map((c, i) => (
+                                        <span
+                                            key={i}
+                                            className="rounded-md bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                                        >
+                                            {c}
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
 
                             {pacienteSelecionado.alertas > 0 && (
-                                <>
-                                    <h6>Alertas Ativos</h6>
-                                    <div className="alert alert-warning">
-                                        <i className="fas fa-exclamation-triangle"></i> Paciente com exames em atraso. Verificar hemoglobina glicada e função renal.
+                                <div>
+                                    <h6 className="mb-2 text-sm font-semibold">Alertas Ativos</h6>
+                                    <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm">
+                                        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                                        <p>Paciente com exames em atraso. Verificar hemoglobina glicada e função renal.</p>
                                     </div>
-                                </>
+                                </div>
                             )}
 
-                            <h6>Últimos Registros</h6>
-                            <table className="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Data</th>
-                                        <th>Tipo</th>
-                                        <th>Observação</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{pacienteSelecionado.ultimoAtendimento}</td>
-                                        <td>Consulta</td>
-                                        <td>Acompanhamento de rotina. PA: 140/90</td>
-                                    </tr>
-                                    <tr>
-                                        <td>15/03/2025</td>
-                                        <td>Exame</td>
-                                        <td>Hemoglobina glicada: 7.2%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>01/03/2025</td>
-                                        <td>Visita ACS</td>
-                                        <td>Verificação domiciliar. Paciente estável.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div>
+                                <h6 className="mb-2 text-sm font-semibold">Últimos Registros</h6>
+                                <div className="overflow-hidden rounded-lg border border-border">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="border-b border-border bg-muted/50">
+                                                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Data</th>
+                                                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Tipo</th>
+                                                <th className="px-4 py-2 text-left font-medium text-muted-foreground">Observação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border">
+                                            <tr>
+                                                <td className="px-4 py-2">{pacienteSelecionado.ultimoAtendimento}</td>
+                                                <td className="px-4 py-2">Consulta</td>
+                                                <td className="px-4 py-2">Acompanhamento de rotina. PA: 140/90</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-2">15/03/2025</td>
+                                                <td className="px-4 py-2">Exame</td>
+                                                <td className="px-4 py-2">Hemoglobina glicada: 7.2%</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-2">01/03/2025</td>
+                                                <td className="px-4 py-2">Visita ACS</td>
+                                                <td className="px-4 py-2">Verificação domiciliar. Paciente estável.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
 
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                <button className="btn btn-outline-primary">
-                                    <i className="fas fa-file-medical"></i> Prontuário
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                                    <FileHeart className="h-4 w-4" /> Prontuário
                                 </button>
-                                <button className="btn btn-success">
-                                    <i className="fas fa-notes-medical"></i> Novo Atendimento
+                                <button className="inline-flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-2 text-sm font-medium text-white hover:bg-secondary-dark">
+                                    <ClipboardPlus className="h-4 w-4" /> Novo Atendimento
                                 </button>
                             </div>
                         </div>

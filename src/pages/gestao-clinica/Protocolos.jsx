@@ -1,4 +1,21 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+    FileText,
+    Bot,
+    Printer,
+    Plus,
+    Lightbulb,
+    CheckCircle,
+    AlertTriangle,
+    Search,
+    Eye,
+    Pencil,
+    Trash2,
+    X,
+    Download,
+    Play,
+} from 'lucide-react';
 
 // Sample protocols data
 const protocolsData = [
@@ -130,72 +147,90 @@ export default function Protocolos() {
 
     const getStatusBadge = (status) => {
         const statusInfo = statusOptions.find(s => s.value === status);
+        const colorMap = {
+            success: 'bg-secondary/10 text-secondary-dark',
+            warning: 'bg-amber-50 text-amber-800',
+            secondary: 'bg-muted text-muted-foreground',
+            danger: 'bg-red-50 text-destructive',
+        };
         return (
-            <span className={`badge badge-${statusInfo?.color || 'secondary'}`}>
+            <span
+                className={cn(
+                    'rounded-md px-2 py-0.5 text-xs font-medium',
+                    colorMap[statusInfo?.color] || 'bg-muted text-muted-foreground'
+                )}
+            >
                 {statusInfo?.label || status}
             </span>
         );
     };
 
     const getAdesaoColor = (adesao) => {
-        if (adesao >= 80) return 'var(--sus-green)';
-        if (adesao >= 60) return 'var(--sus-yellow)';
-        return 'var(--sus-red, #dc3545)';
+        if (adesao >= 80) return 'bg-secondary';
+        if (adesao >= 60) return 'bg-accent';
+        return 'bg-destructive';
+    };
+
+    const getAdesaoTextColor = (adesao) => {
+        if (adesao >= 80) return 'text-secondary-dark';
+        if (adesao >= 60) return 'text-accent';
+        return 'text-destructive';
     };
 
     return (
-        <div className="fade-in">
+        <div className="space-y-6">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1 style={{ margin: 0 }}>
-                    <i className="fas fa-file-medical-alt" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-foreground">
+                    <FileText className="mr-2 inline-block h-6 w-6 text-primary" />
                     Protocolos Clínicos
                 </h1>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-robot"></i> Análise IA
+                <div className="flex gap-2">
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                        <Bot className="h-4 w-4" /> Análise IA
                     </button>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-print"></i> Imprimir
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                        <Printer className="h-4 w-4" /> Imprimir
                     </button>
-                    <button className="btn btn-primary">
-                        <i className="fas fa-plus"></i> Novo Protocolo
+                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                        <Plus className="h-4 w-4" /> Novo Protocolo
                     </button>
                 </div>
             </div>
 
             {/* AI Insights */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-header" style={{ background: 'var(--sus-light-blue)', color: 'white' }}>
-                    <i className="fas fa-robot"></i> Insights de IA - Protocolos Clínicos
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="bg-primary-light px-5 py-3 text-sm font-semibold text-white rounded-t-xl">
+                    <Bot className="mr-1.5 inline-block h-4 w-4" /> Insights de IA - Protocolos Clínicos
                 </div>
-                <div className="card-body">
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', marginBottom: '1rem' }}>
-                        <div className="alert alert-primary" style={{ margin: 0 }}>
-                            <h6 style={{ margin: '0 0 0.5rem 0' }}>
-                                <i className="fas fa-lightbulb"></i> Análise de Adesão aos Protocolos
+                <div className="p-5 space-y-4">
+                    <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+                        <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                        <div>
+                            <h6 className="mb-1 font-semibold text-foreground">
+                                Análise de Adesão aos Protocolos
                             </h6>
-                            <p style={{ margin: 0 }}>
+                            <p className="text-muted-foreground">
                                 A IA analisou 1.245 atendimentos e identificou adesão média de 78% aos protocolos,
                                 com variação significativa entre equipes (62% a 91%). Recomenda-se capacitação focada.
                             </p>
                         </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div className="alert alert-success" style={{ margin: 0 }}>
-                            <h6 style={{ margin: '0 0 0.5rem 0' }}>
-                                <i className="fas fa-check-circle"></i> Protocolos Mais Efetivos
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="rounded-lg border border-secondary/20 bg-secondary/5 p-4 text-sm">
+                            <h6 className="mb-1 flex items-center gap-1.5 font-semibold text-secondary-dark">
+                                <CheckCircle className="h-4 w-4" /> Protocolos Mais Efetivos
                             </h6>
-                            <p style={{ margin: 0 }}>
+                            <p className="text-muted-foreground">
                                 O protocolo de Hipertensão atualizado em janeiro/2025 está associado a melhoria de 23%
                                 no controle pressórico quando seguido integralmente.
                             </p>
                         </div>
-                        <div className="alert alert-warning" style={{ margin: 0 }}>
-                            <h6 style={{ margin: '0 0 0.5rem 0' }}>
-                                <i className="fas fa-exclamation-triangle"></i> Oportunidades de Melhoria
+                        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm">
+                            <h6 className="mb-1 flex items-center gap-1.5 font-semibold text-amber-800">
+                                <AlertTriangle className="h-4 w-4" /> Oportunidades de Melhoria
                             </h6>
-                            <p style={{ margin: 0 }}>
+                            <p className="text-amber-800">
                                 Protocolo de Diabetes tem baixa adesão (58%). Sugere-se revisão para simplificação
                                 de passos frequentemente omitidos.
                             </p>
@@ -205,14 +240,14 @@ export default function Protocolos() {
             </div>
 
             {/* Filters */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-body">
-                    <h5 style={{ marginBottom: '1rem' }}>Filtros</h5>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="p-5">
+                    <h5 className="mb-4 text-base font-semibold text-foreground">Filtros</h5>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <div>
-                            <label className="form-label">Categoria</label>
+                            <label className="mb-1.5 block text-sm font-medium text-foreground">Categoria</label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroCategoria}
                                 onChange={(e) => setFiltroCategoria(e.target.value)}
                             >
@@ -222,9 +257,9 @@ export default function Protocolos() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Origem</label>
+                            <label className="mb-1.5 block text-sm font-medium text-foreground">Origem</label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroOrigem}
                                 onChange={(e) => setFiltroOrigem(e.target.value)}
                             >
@@ -234,9 +269,9 @@ export default function Protocolos() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Status</label>
+                            <label className="mb-1.5 block text-sm font-medium text-foreground">Status</label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroStatus}
                                 onChange={(e) => setFiltroStatus(e.target.value)}
                             >
@@ -246,17 +281,17 @@ export default function Protocolos() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Pesquisar</label>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <label className="mb-1.5 block text-sm font-medium text-foreground">Pesquisar</label>
+                            <div className="flex gap-2">
                                 <input
                                     type="text"
-                                    className="form-control"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                     placeholder="Nome ou palavra-chave..."
                                     value={pesquisa}
                                     onChange={(e) => setPesquisa(e.target.value)}
                                 />
-                                <button className="btn btn-primary">
-                                    <i className="fas fa-search"></i>
+                                <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                                    <Search className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
@@ -265,75 +300,77 @@ export default function Protocolos() {
             </div>
 
             {/* Protocols Table */}
-            <div className="card">
-                <div className="card-body" style={{ padding: 0 }}>
-                    <div style={{ padding: '1rem 1rem 0.5rem' }}>
-                        <h5>Protocolos Clínicos ({protocolosFiltrados.length})</h5>
-                    </div>
-                    <table className="table" style={{ marginBottom: 0 }}>
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="px-5 pt-4 pb-2">
+                    <h5 className="text-base font-semibold text-foreground">
+                        Protocolos Clínicos ({protocolosFiltrados.length})
+                    </h5>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
                         <thead>
-                            <tr>
-                                <th>Nome do Protocolo</th>
-                                <th>Categoria</th>
-                                <th>Origem</th>
-                                <th>Atualização</th>
-                                <th>Status</th>
-                                <th>Adesão</th>
-                                <th>Ações</th>
+                            <tr className="border-y border-border bg-muted/50">
+                                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome do Protocolo</th>
+                                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Categoria</th>
+                                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Origem</th>
+                                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Atualização</th>
+                                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Adesão</th>
+                                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-border">
                             {protocolosFiltrados.map(protocolo => (
-                                <tr key={protocolo.id}>
-                                    <td>
-                                        <strong>{protocolo.nome}</strong>
+                                <tr key={protocolo.id} className="hover:bg-muted/30 transition-colors">
+                                    <td className="px-5 py-3">
+                                        <span className="font-semibold text-foreground">{protocolo.nome}</span>
                                         <br />
-                                        <small style={{ color: 'var(--sus-gray)' }}>{protocolo.descricao}</small>
+                                        <span className="text-xs text-muted-foreground">{protocolo.descricao}</span>
                                     </td>
-                                    <td>
-                                        <span className="badge badge-info">{protocolo.categoria}</span>
+                                    <td className="px-5 py-3">
+                                        <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary-dark">
+                                            {protocolo.categoria}
+                                        </span>
                                     </td>
-                                    <td>{protocolo.origem}</td>
-                                    <td>{protocolo.atualizacao}</td>
-                                    <td>{getStatusBadge(protocolo.status)}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <div style={{
-                                                width: '80px',
-                                                height: '8px',
-                                                background: '#e9ecef',
-                                                borderRadius: '4px',
-                                                overflow: 'hidden'
-                                            }}>
-                                                <div style={{
-                                                    width: `${protocolo.adesao}%`,
-                                                    height: '100%',
-                                                    background: getAdesaoColor(protocolo.adesao),
-                                                    borderRadius: '4px'
-                                                }}></div>
+                                    <td className="px-5 py-3 text-muted-foreground">{protocolo.origem}</td>
+                                    <td className="px-5 py-3 text-muted-foreground">{protocolo.atualizacao}</td>
+                                    <td className="px-5 py-3">{getStatusBadge(protocolo.status)}</td>
+                                    <td className="px-5 py-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-20 overflow-hidden rounded-full bg-muted">
+                                                <div
+                                                    className={cn(
+                                                        'h-full rounded-full',
+                                                        getAdesaoColor(protocolo.adesao)
+                                                    )}
+                                                    style={{ width: `${protocolo.adesao}%` }}
+                                                />
                                             </div>
-                                            <span style={{
-                                                fontWeight: '600',
-                                                color: getAdesaoColor(protocolo.adesao)
-                                            }}>
+                                            <span className={cn('text-sm font-semibold', getAdesaoTextColor(protocolo.adesao))}>
                                                 {protocolo.adesao}%
                                             </span>
                                         </div>
                                     </td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                    <td className="px-5 py-3">
+                                        <div className="flex gap-1">
                                             <button
-                                                className="btn btn-sm btn-outline-primary"
+                                                className="inline-flex items-center rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-muted hover:text-primary"
                                                 onClick={() => setProtocoloSelecionado(protocolo)}
                                                 title="Visualizar"
                                             >
-                                                <i className="fas fa-eye"></i>
+                                                <Eye className="h-4 w-4" />
                                             </button>
-                                            <button className="btn btn-sm btn-outline-secondary" title="Editar">
-                                                <i className="fas fa-edit"></i>
+                                            <button
+                                                className="inline-flex items-center rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-muted hover:text-primary"
+                                                title="Editar"
+                                            >
+                                                <Pencil className="h-4 w-4" />
                                             </button>
-                                            <button className="btn btn-sm btn-outline-danger" title="Excluir">
-                                                <i className="fas fa-trash"></i>
+                                            <button
+                                                className="inline-flex items-center rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-muted hover:text-destructive"
+                                                title="Excluir"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
                                             </button>
                                         </div>
                                     </td>
@@ -341,75 +378,76 @@ export default function Protocolos() {
                             ))}
                         </tbody>
                     </table>
+                </div>
 
-                    {/* Pagination */}
-                    <div style={{ padding: '1rem', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                        <button className="btn btn-sm btn-outline-secondary" disabled>Anterior</button>
-                        <button className="btn btn-sm btn-primary">1</button>
-                        <button className="btn btn-sm btn-outline-secondary">2</button>
-                        <button className="btn btn-sm btn-outline-secondary">3</button>
-                        <button className="btn btn-sm btn-outline-secondary">Próximo</button>
-                    </div>
+                {/* Pagination */}
+                <div className="flex items-center justify-center gap-2 border-t border-border px-5 py-3">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled
+                    >
+                        Anterior
+                    </button>
+                    <button className="inline-flex items-center rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white">
+                        1
+                    </button>
+                    <button className="inline-flex items-center rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted">
+                        2
+                    </button>
+                    <button className="inline-flex items-center rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted">
+                        3
+                    </button>
+                    <button className="inline-flex items-center rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted">
+                        Próximo
+                    </button>
                 </div>
             </div>
 
             {/* Protocol Detail Modal */}
             {protocoloSelecionado && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setProtocoloSelecionado(null)}
                 >
                     <div
-                        className="card"
-                        style={{ width: '600px', maxWidth: '90%', maxHeight: '80vh', overflow: 'auto' }}
+                        className="w-[600px] max-w-[90%] max-h-[80vh] overflow-auto rounded-xl border border-border bg-card shadow-sm"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="card-header" style={{ background: 'var(--sus-blue)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-file-medical-alt"></i> {protocoloSelecionado.nome}</span>
-                                <button
-                                    className="btn btn-sm btn-light"
-                                    onClick={() => setProtocoloSelecionado(null)}
-                                >
-                                    <i className="fas fa-times"></i>
-                                </button>
-                            </div>
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <span className="flex items-center gap-1.5">
+                                <FileText className="h-4 w-4" /> {protocoloSelecionado.nome}
+                            </span>
+                            <button
+                                className="inline-flex items-center rounded-lg p-1 text-white/80 hover:bg-white/20 hover:text-white"
+                                onClick={() => setProtocoloSelecionado(null)}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
                         </div>
-                        <div className="card-body">
-                            <p><strong>Categoria:</strong> {protocoloSelecionado.categoria}</p>
-                            <p><strong>Origem:</strong> {protocoloSelecionado.origem}</p>
-                            <p><strong>Última Atualização:</strong> {protocoloSelecionado.atualizacao}</p>
-                            <p><strong>Status:</strong> {getStatusBadge(protocoloSelecionado.status)}</p>
-                            <p><strong>Taxa de Adesão:</strong> {protocoloSelecionado.adesao}%</p>
-                            <hr />
-                            <h6>Descrição</h6>
-                            <p>{protocoloSelecionado.descricao}</p>
-                            <hr />
-                            <h6>Diretrizes Principais</h6>
-                            <ul>
+                        <div className="space-y-3 p-5">
+                            <p className="text-sm text-foreground"><strong>Categoria:</strong> {protocoloSelecionado.categoria}</p>
+                            <p className="text-sm text-foreground"><strong>Origem:</strong> {protocoloSelecionado.origem}</p>
+                            <p className="text-sm text-foreground"><strong>Última Atualização:</strong> {protocoloSelecionado.atualizacao}</p>
+                            <p className="text-sm text-foreground"><strong>Status:</strong> {getStatusBadge(protocoloSelecionado.status)}</p>
+                            <p className="text-sm text-foreground"><strong>Taxa de Adesão:</strong> {protocoloSelecionado.adesao}%</p>
+                            <hr className="border-border" />
+                            <h6 className="text-sm font-semibold text-foreground">Descrição</h6>
+                            <p className="text-sm text-muted-foreground">{protocoloSelecionado.descricao}</p>
+                            <hr className="border-border" />
+                            <h6 className="text-sm font-semibold text-foreground">Diretrizes Principais</h6>
+                            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
                                 <li>Avaliação inicial completa do paciente</li>
                                 <li>Exames laboratoriais conforme indicação</li>
                                 <li>Tratamento baseado em evidências</li>
                                 <li>Acompanhamento periódico programado</li>
                                 <li>Educação em saúde para o paciente e família</li>
                             </ul>
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                <button className="btn btn-outline-primary">
-                                    <i className="fas fa-download"></i> Baixar PDF
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                                    <Download className="h-4 w-4" /> Baixar PDF
                                 </button>
-                                <button className="btn btn-primary">
-                                    <i className="fas fa-play"></i> Aplicar Protocolo
+                                <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                                    <Play className="h-4 w-4" /> Aplicar Protocolo
                                 </button>
                             </div>
                         </div>

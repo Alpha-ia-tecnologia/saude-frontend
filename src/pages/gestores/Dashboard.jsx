@@ -1,4 +1,9 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+    Gauge, FileText, RefreshCw, Coins, Smile, Syringe, Clock,
+    TrendingUp, PieChart, Hospital, Bell, AlertTriangle, AlertCircle, Info
+} from 'lucide-react';
 
 // Executive KPIs
 const kpisExecutivos = {
@@ -19,9 +24,9 @@ const desempenhoUnidades = [
 
 // Priority alerts
 const alertasPrioritarios = [
-    { tipo: 'critico', titulo: 'Estoque Crítico', descricao: '3 medicamentos essenciais abaixo do nível mínimo', acao: 'Ver Estoque' },
-    { tipo: 'atencao', titulo: 'Metas de Cobertura', descricao: 'UBS Oeste abaixo da meta de cobertura vacinal', acao: 'Ver Relatório' },
-    { tipo: 'info', titulo: 'Orçamento', descricao: 'R$ 400.000 disponíveis para investimento', acao: 'Ver Detalhes' }
+    { tipo: 'critico', titulo: 'Estoque Critico', descricao: '3 medicamentos essenciais abaixo do nivel minimo', acao: 'Ver Estoque' },
+    { tipo: 'atencao', titulo: 'Metas de Cobertura', descricao: 'UBS Oeste abaixo da meta de cobertura vacinal', acao: 'Ver Relatorio' },
+    { tipo: 'info', titulo: 'Orcamento', descricao: 'R$ 400.000 disponiveis para investimento', acao: 'Ver Detalhes' }
 ];
 
 // Monthly trend data
@@ -42,6 +47,8 @@ const alocacaoRecursos = [
     { categoria: 'Equipamentos', percentual: 8, valor: 200000 },
     { categoria: 'Outros', percentual: 7, valor: 175000 }
 ];
+
+const barColors = ['bg-primary', 'bg-secondary', 'bg-accent', 'bg-cyan-500', 'bg-gray-500'];
 
 export default function Dashboard() {
     const [periodoSelecionado, setPeriodoSelecionado] = useState('mes');
@@ -65,142 +72,117 @@ export default function Dashboard() {
     const maxAtendimentos = Math.max(...tendenciaMensal.map(t => t.atendimentos));
 
     return (
-        <div className="fade-in">
+        <div className="space-y-6">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 style={{ margin: 0 }}>
-                        <i className="fas fa-tachometer-alt" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
+                    <h1 className="text-2xl font-bold text-foreground">
+                        <Gauge className="mr-2 inline-block h-6 w-6 text-primary" />
                         Dashboard Gerencial
                     </h1>
-                    <p style={{ margin: '0.25rem 0 0', color: 'var(--sus-gray)' }}>Visão executiva de todas as unidades</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Visao executiva de todas as unidades</p>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="flex gap-2">
                     <select
-                        className="form-control"
-                        style={{ width: 'auto' }}
+                        className="h-10 w-auto rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         value={periodoSelecionado}
                         onChange={(e) => setPeriodoSelecionado(e.target.value)}
                     >
                         <option value="semana">Esta Semana</option>
-                        <option value="mes">Este Mês</option>
+                        <option value="mes">Este Mes</option>
                         <option value="trimestre">Trimestre</option>
                         <option value="ano">Este Ano</option>
                     </select>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-file-pdf"></i> Exportar
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                        <FileText className="h-4 w-4" /> Exportar
                     </button>
-                    <button className="btn btn-primary">
-                        <i className="fas fa-sync-alt"></i> Atualizar
+                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                        <RefreshCw className="h-4 w-4" /> Atualizar
                     </button>
                 </div>
             </div>
 
             {/* Executive KPI Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card">
-                    <div className="card-body">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div>
-                                <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Execução Orçamentária</p>
-                                <h2 style={{ margin: '0.5rem 0', color: 'var(--sus-blue)' }}>
-                                    {kpisExecutivos.orcamentoExecutado.valor}{kpisExecutivos.orcamentoExecutado.unidade}
-                                </h2>
-                                <small>Meta: {kpisExecutivos.orcamentoExecutado.meta}%</small>
-                            </div>
-                            <div style={{
-                                width: '60px',
-                                height: '60px',
-                                borderRadius: '50%',
-                                background: `conic-gradient(var(--sus-blue) ${kpisExecutivos.orcamentoExecutado.valor * 3.6}deg, #e9ecef 0deg)`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <div style={{ width: '45px', height: '45px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <i className="fas fa-coins" style={{ color: 'var(--sus-blue)' }}></i>
-                                </div>
+            <div className="grid grid-cols-4 gap-4">
+                {/* Execucao Orcamentaria */}
+                <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground">Execucao Orcamentaria</p>
+                            <h2 className="my-2 text-2xl font-bold text-primary">
+                                {kpisExecutivos.orcamentoExecutado.valor}{kpisExecutivos.orcamentoExecutado.unidade}
+                            </h2>
+                            <small className="text-muted-foreground">Meta: {kpisExecutivos.orcamentoExecutado.meta}%</small>
+                        </div>
+                        <div
+                            className="flex h-[60px] w-[60px] items-center justify-center rounded-full"
+                            style={{ background: `conic-gradient(var(--color-primary) ${kpisExecutivos.orcamentoExecutado.valor * 3.6}deg, #e5e7eb 0deg)` }}
+                        >
+                            <div className="flex h-[45px] w-[45px] items-center justify-center rounded-full bg-white">
+                                <Coins className="h-4 w-4 text-primary" />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="card">
-                    <div className="card-body">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div>
-                                <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Satisfação do Usuário</p>
-                                <h2 style={{ margin: '0.5rem 0', color: 'var(--sus-green)' }}>
-                                    {kpisExecutivos.satisfacaoUsuario.valor}{kpisExecutivos.satisfacaoUsuario.unidade}
-                                </h2>
-                                <small>Meta: {kpisExecutivos.satisfacaoUsuario.meta}/5.0</small>
-                            </div>
-                            <div style={{
-                                width: '60px',
-                                height: '60px',
-                                borderRadius: '50%',
-                                background: `conic-gradient(var(--sus-green) ${(kpisExecutivos.satisfacaoUsuario.valor / 5) * 360}deg, #e9ecef 0deg)`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <div style={{ width: '45px', height: '45px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <i className="fas fa-smile" style={{ color: 'var(--sus-green)' }}></i>
-                                </div>
+                {/* Satisfacao do Usuario */}
+                <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground">Satisfacao do Usuario</p>
+                            <h2 className="my-2 text-2xl font-bold text-secondary">
+                                {kpisExecutivos.satisfacaoUsuario.valor}{kpisExecutivos.satisfacaoUsuario.unidade}
+                            </h2>
+                            <small className="text-muted-foreground">Meta: {kpisExecutivos.satisfacaoUsuario.meta}/5.0</small>
+                        </div>
+                        <div
+                            className="flex h-[60px] w-[60px] items-center justify-center rounded-full"
+                            style={{ background: `conic-gradient(var(--color-secondary) ${(kpisExecutivos.satisfacaoUsuario.valor / 5) * 360}deg, #e5e7eb 0deg)` }}
+                        >
+                            <div className="flex h-[45px] w-[45px] items-center justify-center rounded-full bg-white">
+                                <Smile className="h-4 w-4 text-secondary" />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="card">
-                    <div className="card-body">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div>
-                                <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Cobertura Vacinal</p>
-                                <h2 style={{ margin: '0.5rem 0', color: 'var(--sus-yellow)' }}>
-                                    {kpisExecutivos.coberturaVacinal.valor}{kpisExecutivos.coberturaVacinal.unidade}
-                                </h2>
-                                <small>Meta: {kpisExecutivos.coberturaVacinal.meta}%</small>
-                            </div>
-                            <div style={{
-                                width: '60px',
-                                height: '60px',
-                                borderRadius: '50%',
-                                background: `conic-gradient(var(--sus-yellow) ${kpisExecutivos.coberturaVacinal.valor * 3.6}deg, #e9ecef 0deg)`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <div style={{ width: '45px', height: '45px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <i className="fas fa-syringe" style={{ color: 'var(--sus-yellow)' }}></i>
-                                </div>
+                {/* Cobertura Vacinal */}
+                <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground">Cobertura Vacinal</p>
+                            <h2 className="my-2 text-2xl font-bold text-accent">
+                                {kpisExecutivos.coberturaVacinal.valor}{kpisExecutivos.coberturaVacinal.unidade}
+                            </h2>
+                            <small className="text-muted-foreground">Meta: {kpisExecutivos.coberturaVacinal.meta}%</small>
+                        </div>
+                        <div
+                            className="flex h-[60px] w-[60px] items-center justify-center rounded-full"
+                            style={{ background: `conic-gradient(var(--color-accent) ${kpisExecutivos.coberturaVacinal.valor * 3.6}deg, #e5e7eb 0deg)` }}
+                        >
+                            <div className="flex h-[45px] w-[45px] items-center justify-center rounded-full bg-white">
+                                <Syringe className="h-4 w-4 text-accent" />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="card">
-                    <div className="card-body">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div>
-                                <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Tempo Médio de Espera</p>
-                                <h2 style={{ margin: '0.5rem 0', color: '#dc3545' }}>
-                                    {kpisExecutivos.tempoMedioEspera.valor}{kpisExecutivos.tempoMedioEspera.unidade}
-                                </h2>
-                                <small>Meta: {kpisExecutivos.tempoMedioEspera.meta} min</small>
-                            </div>
-                            <div style={{
-                                width: '60px',
-                                height: '60px',
-                                borderRadius: '50%',
-                                background: `conic-gradient(#dc3545 ${Math.min(100, (kpisExecutivos.tempoMedioEspera.valor / 30) * 100) * 3.6}deg, #e9ecef 0deg)`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <div style={{ width: '45px', height: '45px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <i className="fas fa-clock" style={{ color: '#dc3545' }}></i>
-                                </div>
+                {/* Tempo Medio de Espera */}
+                <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground">Tempo Medio de Espera</p>
+                            <h2 className="my-2 text-2xl font-bold text-destructive">
+                                {kpisExecutivos.tempoMedioEspera.valor}{kpisExecutivos.tempoMedioEspera.unidade}
+                            </h2>
+                            <small className="text-muted-foreground">Meta: {kpisExecutivos.tempoMedioEspera.meta} min</small>
+                        </div>
+                        <div
+                            className="flex h-[60px] w-[60px] items-center justify-center rounded-full"
+                            style={{ background: `conic-gradient(var(--color-destructive) ${Math.min(100, (kpisExecutivos.tempoMedioEspera.valor / 30) * 100) * 3.6}deg, #e5e7eb 0deg)` }}
+                        >
+                            <div className="flex h-[45px] w-[45px] items-center justify-center rounded-full bg-white">
+                                <Clock className="h-4 w-4 text-destructive" />
                             </div>
                         </div>
                     </div>
@@ -208,36 +190,25 @@ export default function Dashboard() {
             </div>
 
             {/* Charts Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+            <div className="grid grid-cols-3 gap-6">
                 {/* Trend Chart */}
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <i className="fas fa-chart-line"></i> Tendência de Atendimentos
+                <div className="col-span-2 rounded-xl border border-border bg-card shadow-sm">
+                    <div className="border-b border-border bg-muted px-5 py-3 text-sm font-semibold">
+                        <TrendingUp className="mr-1.5 inline-block h-4 w-4" /> Tendencia de Atendimentos
                     </div>
-                    <div className="card-body">
-                        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: '200px', gap: '1rem' }}>
+                    <div className="p-5">
+                        <div className="flex h-[200px] items-end justify-around gap-4">
                             {tendenciaMensal.map((mes, i) => (
-                                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                                    <div style={{
-                                        width: '100%',
-                                        maxWidth: '60px',
-                                        height: `${(mes.atendimentos / maxAtendimentos) * 160}px`,
-                                        background: 'linear-gradient(180deg, var(--sus-blue), var(--sus-light-blue))',
-                                        borderRadius: '4px 4px 0 0',
-                                        position: 'relative'
-                                    }}>
-                                        <span style={{
-                                            position: 'absolute',
-                                            top: '-20px',
-                                            left: '50%',
-                                            transform: 'translateX(-50%)',
-                                            fontSize: '0.75rem',
-                                            fontWeight: '600'
-                                        }}>
+                                <div key={i} className="flex flex-1 flex-col items-center">
+                                    <div
+                                        className="relative w-full max-w-[60px] rounded-t bg-gradient-to-b from-primary to-primary-light"
+                                        style={{ height: `${(mes.atendimentos / maxAtendimentos) * 160}px` }}
+                                    >
+                                        <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-semibold">
                                             {(mes.atendimentos / 1000).toFixed(1)}k
                                         </span>
                                     </div>
-                                    <span style={{ marginTop: '0.5rem', fontWeight: '500', color: 'var(--sus-gray)' }}>{mes.mes}</span>
+                                    <span className="mt-2 font-medium text-muted-foreground">{mes.mes}</span>
                                 </div>
                             ))}
                         </div>
@@ -245,27 +216,22 @@ export default function Dashboard() {
                 </div>
 
                 {/* Resource Allocation */}
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <i className="fas fa-chart-pie"></i> Alocação de Recursos
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="border-b border-border bg-muted px-5 py-3 text-sm font-semibold">
+                        <PieChart className="mr-1.5 inline-block h-4 w-4" /> Alocacao de Recursos
                     </div>
-                    <div className="card-body">
+                    <div className="p-5">
                         {alocacaoRecursos.map((item, i) => (
-                            <div key={i} style={{ marginBottom: '0.75rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span style={{ fontSize: '0.85rem' }}>{item.categoria}</span>
-                                    <strong style={{ fontSize: '0.85rem' }}>{item.percentual}%</strong>
+                            <div key={i} className="mb-3">
+                                <div className="mb-1 flex justify-between">
+                                    <span className="text-sm">{item.categoria}</span>
+                                    <strong className="text-sm">{item.percentual}%</strong>
                                 </div>
-                                <div style={{ height: '8px', background: '#e9ecef', borderRadius: '4px' }}>
-                                    <div style={{
-                                        width: `${item.percentual}%`,
-                                        height: '100%',
-                                        background: i === 0 ? 'var(--sus-blue)' :
-                                            i === 1 ? 'var(--sus-green)' :
-                                                i === 2 ? 'var(--sus-yellow)' :
-                                                    i === 3 ? '#17a2b8' : '#6c757d',
-                                        borderRadius: '4px'
-                                    }}></div>
+                                <div className="h-2 rounded-full bg-gray-200">
+                                    <div
+                                        className={cn('h-full rounded-full', barColors[i] || 'bg-gray-500')}
+                                        style={{ width: `${item.percentual}%` }}
+                                    ></div>
                                 </div>
                             </div>
                         ))}
@@ -274,40 +240,45 @@ export default function Dashboard() {
             </div>
 
             {/* Bottom Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div className="grid grid-cols-2 gap-6">
                 {/* Units Performance */}
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <i className="fas fa-hospital"></i> Desempenho por Unidade
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="border-b border-border bg-muted px-5 py-3 text-sm font-semibold">
+                        <Hospital className="mr-1.5 inline-block h-4 w-4" /> Desempenho por Unidade
                     </div>
-                    <div className="card-body" style={{ padding: 0 }}>
-                        <table className="table" style={{ marginBottom: 0 }}>
-                            <thead>
+                    <div>
+                        <table className="w-full text-sm">
+                            <thead className="border-b border-border bg-muted/50">
                                 <tr>
-                                    <th>Unidade</th>
-                                    <th>Atend.</th>
-                                    <th>Meta</th>
-                                    <th>Satisf.</th>
-                                    <th>Cob.</th>
+                                    <th className="px-4 py-3 text-left font-medium">Unidade</th>
+                                    <th className="px-4 py-3 text-left font-medium">Atend.</th>
+                                    <th className="px-4 py-3 text-left font-medium">Meta</th>
+                                    <th className="px-4 py-3 text-left font-medium">Satisf.</th>
+                                    <th className="px-4 py-3 text-left font-medium">Cob.</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-border">
                                 {desempenhoUnidades.map((unidade, i) => (
-                                    <tr key={i}>
-                                        <td><strong>{unidade.nome}</strong></td>
-                                        <td>{unidade.atendimentos}</td>
-                                        <td>
-                                            <span className={`badge badge-${unidade.atendimentos >= unidade.meta ? 'success' : 'warning'}`}>
+                                    <tr key={i} className="hover:bg-muted/30">
+                                        <td className="px-4 py-3"><strong>{unidade.nome}</strong></td>
+                                        <td className="px-4 py-3">{unidade.atendimentos}</td>
+                                        <td className="px-4 py-3">
+                                            <span className={cn(
+                                                'rounded-md px-2 py-0.5 text-xs font-medium',
+                                                unidade.atendimentos >= unidade.meta
+                                                    ? 'bg-secondary/10 text-secondary'
+                                                    : 'bg-amber-50 text-amber-700'
+                                            )}>
                                                 {unidade.atendimentos >= unidade.meta ? '✓' : `${Math.round((unidade.atendimentos / unidade.meta) * 100)}%`}
                                             </span>
                                         </td>
-                                        <td>
-                                            <span style={{ color: unidade.satisfacao >= 4.5 ? 'var(--sus-green)' : 'var(--sus-yellow)' }}>
+                                        <td className="px-4 py-3">
+                                            <span className={cn(unidade.satisfacao >= 4.5 ? 'text-secondary' : 'text-accent')}>
                                                 ★ {unidade.satisfacao}
                                             </span>
                                         </td>
-                                        <td>
-                                            <span style={{ color: unidade.cobertura >= 90 ? 'var(--sus-green)' : '#dc3545' }}>
+                                        <td className="px-4 py-3">
+                                            <span className={cn(unidade.cobertura >= 90 ? 'text-secondary' : 'text-destructive')}>
                                                 {unidade.cobertura}%
                                             </span>
                                         </td>
@@ -319,42 +290,35 @@ export default function Dashboard() {
                 </div>
 
                 {/* Priority Alerts */}
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <i className="fas fa-bell"></i> Alertas Prioritários
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="border-b border-border bg-muted px-5 py-3 text-sm font-semibold">
+                        <Bell className="mr-1.5 inline-block h-4 w-4" /> Alertas Prioritarios
                     </div>
-                    <div className="card-body" style={{ padding: 0 }}>
+                    <div>
                         {alertasPrioritarios.map((alerta, i) => (
                             <div
                                 key={i}
-                                style={{
-                                    padding: '1rem',
-                                    borderBottom: i < alertasPrioritarios.length - 1 ? '1px solid #e9ecef' : 'none',
-                                    display: 'flex',
-                                    gap: '1rem',
-                                    alignItems: 'center'
-                                }}
+                                className={cn(
+                                    'flex items-center gap-4 p-4',
+                                    i < alertasPrioritarios.length - 1 && 'border-b border-border'
+                                )}
                             >
-                                <div style={{
-                                    width: '40px',
-                                    height: '40px',
-                                    borderRadius: '50%',
-                                    background: alerta.tipo === 'critico' ? '#dc3545' :
-                                        alerta.tipo === 'atencao' ? 'var(--sus-yellow)' : 'var(--sus-blue)',
-                                    color: 'white',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    flexShrink: 0
-                                }}>
-                                    <i className={`fas ${alerta.tipo === 'critico' ? 'fa-exclamation-triangle' :
-                                        alerta.tipo === 'atencao' ? 'fa-exclamation-circle' : 'fa-info-circle'}`}></i>
+                                <div className={cn(
+                                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white',
+                                    alerta.tipo === 'critico' ? 'bg-destructive' :
+                                        alerta.tipo === 'atencao' ? 'bg-accent' : 'bg-primary'
+                                )}>
+                                    {alerta.tipo === 'critico' ? <AlertTriangle className="h-4 w-4" /> :
+                                        alerta.tipo === 'atencao' ? <AlertCircle className="h-4 w-4" /> :
+                                            <Info className="h-4 w-4" />}
                                 </div>
-                                <div style={{ flex: 1 }}>
+                                <div className="flex-1">
                                     <strong>{alerta.titulo}</strong>
-                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--sus-gray)' }}>{alerta.descricao}</p>
+                                    <p className="text-sm text-muted-foreground">{alerta.descricao}</p>
                                 </div>
-                                <button className="btn btn-sm btn-outline-primary">{alerta.acao}</button>
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted">
+                                    {alerta.acao}
+                                </button>
                             </div>
                         ))}
                     </div>

@@ -1,4 +1,39 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/Card';
+import {
+    Users, CheckCircle, Umbrella, FileText, PieChart,
+    GraduationCap, IdCard, Eye, X, Pencil, CalendarDays, Search,
+    Hospital, Plus, User, ClipboardList
+} from 'lucide-react';
+
+/** Donut chart rendered via an inline <style> to avoid style={{}} props */
+function DonutChart({ gradient, total }) {
+    const id = 'donut-chart';
+    return (
+        <>
+            <style>{`#${id}{background:${gradient}}`}</style>
+            <div id={id} className="flex size-[200px] items-center justify-center rounded-full">
+                <div className="flex size-[120px] flex-col items-center justify-center rounded-full bg-white">
+                    <strong className="text-2xl">{total}</strong>
+                    <small className="text-muted-foreground">Total</small>
+                </div>
+            </div>
+        </>
+    );
+}
+
+/** Progress bar that sets width via an inline <style> tag to avoid style={{}} */
+function ProgressBar({ id, percent }) {
+    return (
+        <>
+            <style>{`#${id}{width:${percent}%}`}</style>
+            <div className="h-2 w-full rounded-full bg-muted">
+                <div id={id} className="h-full rounded-full bg-primary transition-all" />
+            </div>
+        </>
+    );
+}
 
 // Staff data
 const funcionariosData = [
@@ -28,13 +63,22 @@ const estatisticas = {
 
 // Categories for the pie chart
 const distribuicaoCargos = [
-    { cargo: 'Médicos', quantidade: 24, cor: 'var(--sus-blue)' },
-    { cargo: 'Enfermeiros', quantidade: 18, cor: 'var(--sus-green)' },
-    { cargo: 'Téc. Enfermagem', quantidade: 45, cor: 'var(--sus-yellow)' },
-    { cargo: 'ACS', quantidade: 52, cor: '#17a2b8' },
-    { cargo: 'Administrativo', quantidade: 12, cor: '#6c757d' },
-    { cargo: 'Outros', quantidade: 5, cor: '#e83e8c' }
+    { cargo: 'Médicos', quantidade: 24, cor: 'bg-primary' },
+    { cargo: 'Enfermeiros', quantidade: 18, cor: 'bg-secondary' },
+    { cargo: 'Téc. Enfermagem', quantidade: 45, cor: 'bg-accent' },
+    { cargo: 'ACS', quantidade: 52, cor: 'bg-cyan-500' },
+    { cargo: 'Administrativo', quantidade: 12, cor: 'bg-gray-500' },
+    { cargo: 'Outros', quantidade: 5, cor: 'bg-pink-500' }
 ];
+
+// Conic gradient colors for the donut chart (raw hex values needed for conic-gradient)
+const conicColors = ['#0054A6', '#00A651', '#f59e0b', '#06b6d4', '#6b7280', '#ec4899'];
+
+// Distribution by unit (stable random data, moved outside component)
+const unidadesData = ['UBS Centro', 'UBS Norte', 'UBS Sul', 'UBS Leste', 'NASF'].map((unidade, i) => ({
+    nome: unidade,
+    quantidade: [38, 31, 27, 44, 29][i]
+}));
 
 // Training data
 const capacitacoes = [
@@ -61,13 +105,13 @@ export default function RecursosHumanos() {
 
     const getStatusBadge = (status) => {
         const config = {
-            ativo: { color: 'success', label: 'Ativo' },
-            ferias: { color: 'info', label: 'Férias' },
-            licenca: { color: 'warning', label: 'Licença' },
-            afastado: { color: 'danger', label: 'Afastado' }
+            ativo: { classes: 'bg-secondary/10 text-secondary', label: 'Ativo' },
+            ferias: { classes: 'bg-cyan-100 text-cyan-700', label: 'Férias' },
+            licenca: { classes: 'bg-accent/10 text-accent', label: 'Licença' },
+            afastado: { classes: 'bg-destructive/10 text-destructive', label: 'Afastado' }
         };
         const s = config[status] || config.ativo;
-        return <span className={`badge badge-${s.color}`}>{s.label}</span>;
+        return <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium', s.classes)}>{s.label}</span>;
     };
 
     const formatDate = (dateStr) => {
@@ -76,164 +120,205 @@ export default function RecursosHumanos() {
 
     const totalFuncionarios = distribuicaoCargos.reduce((acc, c) => acc + c.quantidade, 0);
 
+    // Build conic gradient string for the donut chart
+    const conicGradient = (() => {
+        let currentDeg = 0;
+        const segments = distribuicaoCargos.map((c, i) => {
+            const startDeg = currentDeg;
+            const endDeg = currentDeg + (c.quantidade / totalFuncionarios) * 360;
+            currentDeg = endDeg;
+            return `${conicColors[i]} ${startDeg}deg ${endDeg}deg`;
+        });
+        return `conic-gradient(${segments.join(', ')})`;
+    })();
+
     return (
-        <div className="fade-in">
+        <div className="animate-fade-in">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <h1 style={{ margin: 0 }}>
-                        <i className="fas fa-users" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
+                    <h1 className="m-0 flex items-center gap-2 text-2xl font-bold">
+                        <Users className="size-7 text-primary" />
                         Recursos Humanos
                     </h1>
-                    <p style={{ margin: '0.25rem 0 0', color: 'var(--sus-gray)' }}>Gestão de pessoal e capacitação</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Gestão de pessoal e capacitação</p>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-file-excel"></i> Exportar
+                <div className="flex gap-2">
+                    <button className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5">
+                        <FileText className="size-4" /> Exportar
                     </button>
-                    <button className="btn btn-primary">
-                        <i className="fas fa-plus"></i> Novo Funcionário
+                    <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-dark">
+                        <Plus className="size-4" /> Novo Funcionário
                     </button>
                 </div>
             </div>
 
             {/* Summary Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card" style={{ background: 'linear-gradient(135deg, var(--sus-blue), var(--sus-light-blue))', color: 'white' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <i className="fas fa-users fa-2x" style={{ marginBottom: '0.5rem', opacity: 0.8 }}></i>
-                        <h2 style={{ margin: '0.25rem 0' }}>{estatisticas.totalFuncionarios}</h2>
-                        <small>Total de Funcionários</small>
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-xl bg-gradient-to-br from-primary to-primary-light p-5 text-white shadow-sm">
+                    <div className="flex flex-col items-center text-center">
+                        <Users className="mb-2 size-8 opacity-80" />
+                        <h2 className="my-1 text-3xl font-bold">{estatisticas.totalFuncionarios}</h2>
+                        <small className="text-sm opacity-90">Total de Funcionários</small>
                     </div>
                 </div>
-                <div className="card" style={{ background: 'linear-gradient(135deg, var(--sus-green), #20c997)', color: 'white' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <i className="fas fa-check-circle fa-2x" style={{ marginBottom: '0.5rem', opacity: 0.8 }}></i>
-                        <h2 style={{ margin: '0.25rem 0' }}>{estatisticas.ativos}</h2>
-                        <small>Ativos</small>
+                <div className="rounded-xl bg-gradient-to-br from-secondary to-emerald-400 p-5 text-white shadow-sm">
+                    <div className="flex flex-col items-center text-center">
+                        <CheckCircle className="mb-2 size-8 opacity-80" />
+                        <h2 className="my-1 text-3xl font-bold">{estatisticas.ativos}</h2>
+                        <small className="text-sm opacity-90">Ativos</small>
                     </div>
                 </div>
-                <div className="card" style={{ background: 'linear-gradient(135deg, #17a2b8, #6610f2)', color: 'white' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <i className="fas fa-umbrella-beach fa-2x" style={{ marginBottom: '0.5rem', opacity: 0.8 }}></i>
-                        <h2 style={{ margin: '0.25rem 0' }}>{estatisticas.ferias}</h2>
-                        <small>Em Férias</small>
+                <div className="rounded-xl bg-gradient-to-br from-cyan-500 to-violet-600 p-5 text-white shadow-sm">
+                    <div className="flex flex-col items-center text-center">
+                        <Umbrella className="mb-2 size-8 opacity-80" />
+                        <h2 className="my-1 text-3xl font-bold">{estatisticas.ferias}</h2>
+                        <small className="text-sm opacity-90">Em Férias</small>
                     </div>
                 </div>
-                <div className="card" style={{ background: 'linear-gradient(135deg, var(--sus-yellow), #fd7e14)', color: 'white' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <i className="fas fa-file-medical fa-2x" style={{ marginBottom: '0.5rem', opacity: 0.8 }}></i>
-                        <h2 style={{ margin: '0.25rem 0' }}>{estatisticas.licenca}</h2>
-                        <small>Em Licença</small>
+                <div className="rounded-xl bg-gradient-to-br from-accent to-orange-500 p-5 text-white shadow-sm">
+                    <div className="flex flex-col items-center text-center">
+                        <ClipboardList className="mb-2 size-8 opacity-80" />
+                        <h2 className="my-1 text-3xl font-bold">{estatisticas.licenca}</h2>
+                        <small className="text-sm opacity-90">Em Licença</small>
                     </div>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-body" style={{ padding: '0.5rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button
-                            className={`btn ${abaAtiva === 'funcionarios' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            onClick={() => setAbaAtiva('funcionarios')}
-                        >
-                            <i className="fas fa-id-card"></i> Funcionários
-                        </button>
-                        <button
-                            className={`btn ${abaAtiva === 'distribuicao' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            onClick={() => setAbaAtiva('distribuicao')}
-                        >
-                            <i className="fas fa-chart-pie"></i> Distribuição
-                        </button>
-                        <button
-                            className={`btn ${abaAtiva === 'capacitacao' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            onClick={() => setAbaAtiva('capacitacao')}
-                        >
-                            <i className="fas fa-graduation-cap"></i> Capacitação
-                        </button>
-                    </div>
+            <Card className="mb-6">
+                <div className="flex gap-2">
+                    <button
+                        className={cn(
+                            'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                            abaAtiva === 'funcionarios'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'border border-border text-foreground hover:bg-muted'
+                        )}
+                        onClick={() => setAbaAtiva('funcionarios')}
+                    >
+                        <IdCard className="size-4" /> Funcionários
+                    </button>
+                    <button
+                        className={cn(
+                            'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                            abaAtiva === 'distribuicao'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'border border-border text-foreground hover:bg-muted'
+                        )}
+                        onClick={() => setAbaAtiva('distribuicao')}
+                    >
+                        <PieChart className="size-4" /> Distribuição
+                    </button>
+                    <button
+                        className={cn(
+                            'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                            abaAtiva === 'capacitacao'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'border border-border text-foreground hover:bg-muted'
+                        )}
+                        onClick={() => setAbaAtiva('capacitacao')}
+                    >
+                        <GraduationCap className="size-4" /> Capacitação
+                    </button>
                 </div>
-            </div>
+            </Card>
 
             {/* Funcionários Tab */}
             {abaAtiva === 'funcionarios' && (
                 <>
                     {/* Filters */}
-                    <div className="card" style={{ marginBottom: '1rem' }}>
-                        <div className="card-body">
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '1rem' }}>
-                                <div>
-                                    <label className="form-label">Status</label>
-                                    <select className="form-control" value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}>
-                                        <option value="">Todos</option>
-                                        <option value="ativo">Ativo</option>
-                                        <option value="ferias">Férias</option>
-                                        <option value="licenca">Licença</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="form-label">Unidade</label>
-                                    <select className="form-control" value={filtroUnidade} onChange={(e) => setFiltroUnidade(e.target.value)}>
-                                        <option value="">Todas</option>
-                                        <option value="UBS Centro">UBS Centro</option>
-                                        <option value="UBS Norte">UBS Norte</option>
-                                        <option value="UBS Sul">UBS Sul</option>
-                                        <option value="NASF">NASF</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="form-label">Pesquisar</label>
-                                    <input type="text" className="form-control" placeholder="Nome ou cargo..." value={pesquisa} onChange={(e) => setPesquisa(e.target.value)} />
+                    <Card className="mb-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-foreground">Status</label>
+                                <select
+                                    className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                    value={filtroStatus}
+                                    onChange={(e) => setFiltroStatus(e.target.value)}
+                                >
+                                    <option value="">Todos</option>
+                                    <option value="ativo">Ativo</option>
+                                    <option value="ferias">Férias</option>
+                                    <option value="licenca">Licença</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-foreground">Unidade</label>
+                                <select
+                                    className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                    value={filtroUnidade}
+                                    onChange={(e) => setFiltroUnidade(e.target.value)}
+                                >
+                                    <option value="">Todas</option>
+                                    <option value="UBS Centro">UBS Centro</option>
+                                    <option value="UBS Norte">UBS Norte</option>
+                                    <option value="UBS Sul">UBS Sul</option>
+                                    <option value="NASF">NASF</option>
+                                </select>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="mb-1 block text-sm font-medium text-foreground">Pesquisar</label>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                    <input
+                                        type="text"
+                                        className="w-full rounded-lg border border-input bg-card py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                        placeholder="Nome ou cargo..."
+                                        value={pesquisa}
+                                        onChange={(e) => setPesquisa(e.target.value)}
+                                    />
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </Card>
 
                     {/* Staff Table */}
-                    <div className="card">
-                        <div className="card-body" style={{ padding: 0 }}>
-                            <table className="table" style={{ marginBottom: 0 }}>
+                    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
                                 <thead>
-                                    <tr>
-                                        <th>Funcionário</th>
-                                        <th>Cargo</th>
-                                        <th>Unidade</th>
-                                        <th>CH</th>
-                                        <th>Vínculo</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
+                                    <tr className="border-b border-border bg-muted/50">
+                                        <th className="px-4 py-3 text-left font-semibold text-foreground">Funcionário</th>
+                                        <th className="px-4 py-3 text-left font-semibold text-foreground">Cargo</th>
+                                        <th className="px-4 py-3 text-left font-semibold text-foreground">Unidade</th>
+                                        <th className="px-4 py-3 text-left font-semibold text-foreground">CH</th>
+                                        <th className="px-4 py-3 text-left font-semibold text-foreground">Vínculo</th>
+                                        <th className="px-4 py-3 text-left font-semibold text-foreground">Status</th>
+                                        <th className="px-4 py-3 text-left font-semibold text-foreground">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {funcionariosFiltrados.map(f => (
-                                        <tr key={f.id}>
-                                            <td>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    <div style={{
-                                                        width: '36px',
-                                                        height: '36px',
-                                                        borderRadius: '50%',
-                                                        background: 'var(--sus-blue)',
-                                                        color: 'white',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        fontWeight: '600',
-                                                        fontSize: '0.85rem'
-                                                    }}>
+                                        <tr key={f.id} className="border-b border-border transition-colors hover:bg-muted/30">
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex size-9 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
                                                         {f.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}
                                                     </div>
-                                                    <strong>{f.nome}</strong>
+                                                    <strong className="text-foreground">{f.nome}</strong>
                                                 </div>
                                             </td>
-                                            <td>{f.cargo}</td>
-                                            <td>{f.unidade}</td>
-                                            <td>{f.cargaHoraria}h</td>
-                                            <td><span className={`badge badge-${f.vinculo === 'Efetivo' ? 'primary' : 'secondary'}`}>{f.vinculo}</span></td>
-                                            <td>{getStatusBadge(f.status)}</td>
-                                            <td>
-                                                <button className="btn btn-sm btn-outline-primary" onClick={() => setFuncionarioSelecionado(f)}>
-                                                    <i className="fas fa-eye"></i>
+                                            <td className="px-4 py-3 text-foreground">{f.cargo}</td>
+                                            <td className="px-4 py-3 text-foreground">{f.unidade}</td>
+                                            <td className="px-4 py-3 text-foreground">{f.cargaHoraria}h</td>
+                                            <td className="px-4 py-3">
+                                                <span className={cn(
+                                                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                                    f.vinculo === 'Efetivo'
+                                                        ? 'bg-primary/10 text-primary'
+                                                        : 'bg-muted text-muted-foreground'
+                                                )}>
+                                                    {f.vinculo}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3">{getStatusBadge(f.status)}</td>
+                                            <td className="px-4 py-3">
+                                                <button
+                                                    className="inline-flex items-center justify-center rounded-lg border border-primary/30 p-2 text-primary transition-colors hover:bg-primary/5"
+                                                    onClick={() => setFuncionarioSelecionado(f)}
+                                                >
+                                                    <Eye className="size-4" />
                                                 </button>
                                             </td>
                                         </tr>
@@ -247,102 +332,92 @@ export default function RecursosHumanos() {
 
             {/* Distribuição Tab */}
             {abaAtiva === 'distribuicao' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                    <div className="card">
-                        <div className="card-header" style={{ background: '#f8f9fa' }}>
-                            <i className="fas fa-chart-pie"></i> Distribuição por Cargo
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <Card
+                        header={
+                            <span className="flex items-center gap-2">
+                                <PieChart className="size-4" /> Distribuição por Cargo
+                            </span>
+                        }
+                        headerClassName="bg-muted/50"
+                    >
+                        <div className="mb-6 flex justify-center">
+                            <DonutChart gradient={conicGradient} total={totalFuncionarios} />
                         </div>
-                        <div className="card-body">
-                            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-                                <div style={{
-                                    width: '200px',
-                                    height: '200px',
-                                    borderRadius: '50%',
-                                    background: `conic-gradient(
-                                        var(--sus-blue) 0deg ${(24 / 156) * 360}deg,
-                                        var(--sus-green) ${(24 / 156) * 360}deg ${((24 + 18) / 156) * 360}deg,
-                                        var(--sus-yellow) ${((24 + 18) / 156) * 360}deg ${((24 + 18 + 45) / 156) * 360}deg,
-                                        #17a2b8 ${((24 + 18 + 45) / 156) * 360}deg ${((24 + 18 + 45 + 52) / 156) * 360}deg,
-                                        #6c757d ${((24 + 18 + 45 + 52) / 156) * 360}deg ${((24 + 18 + 45 + 52 + 12) / 156) * 360}deg,
-                                        #e83e8c ${((24 + 18 + 45 + 52 + 12) / 156) * 360}deg 360deg
-                                    )`,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                                        <strong style={{ fontSize: '1.5rem' }}>{totalFuncionarios}</strong>
-                                        <small>Total</small>
-                                    </div>
+                        {distribuicaoCargos.map((c, i) => (
+                            <div key={i} className="mb-2 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className={cn('size-3 rounded-sm', c.cor)} />
+                                    <span className="text-sm text-foreground">{c.cargo}</span>
                                 </div>
+                                <strong className="text-sm">{c.quantidade} ({((c.quantidade / totalFuncionarios) * 100).toFixed(0)}%)</strong>
                             </div>
-                            {distribuicaoCargos.map((c, i) => (
-                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <div style={{ width: '12px', height: '12px', background: c.cor, borderRadius: '2px' }}></div>
-                                        <span>{c.cargo}</span>
-                                    </div>
-                                    <strong>{c.quantidade} ({((c.quantidade / totalFuncionarios) * 100).toFixed(0)}%)</strong>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                        ))}
+                    </Card>
 
-                    <div className="card">
-                        <div className="card-header" style={{ background: '#f8f9fa' }}>
-                            <i className="fas fa-hospital"></i> Distribuição por Unidade
-                        </div>
-                        <div className="card-body">
-                            {['UBS Centro', 'UBS Norte', 'UBS Sul', 'UBS Leste', 'NASF'].map((unidade, i) => {
-                                const quantidade = Math.floor(Math.random() * 20) + 25;
-                                return (
-                                    <div key={i} style={{ marginBottom: '1rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                            <span>{unidade}</span>
-                                            <strong>{quantidade}</strong>
-                                        </div>
-                                        <div style={{ height: '8px', background: '#e9ecef', borderRadius: '4px' }}>
-                                            <div style={{ width: `${(quantidade / 50) * 100}%`, height: '100%', background: 'var(--sus-blue)', borderRadius: '4px' }}></div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+                    <Card
+                        header={
+                            <span className="flex items-center gap-2">
+                                <Hospital className="size-4" /> Distribuição por Unidade
+                            </span>
+                        }
+                        headerClassName="bg-muted/50"
+                    >
+                        {unidadesData.map((u, i) => (
+                            <div key={i} className="mb-4">
+                                <div className="mb-1 flex justify-between">
+                                    <span className="text-sm text-foreground">{u.nome}</span>
+                                    <strong className="text-sm">{u.quantidade}</strong>
+                                </div>
+                                <ProgressBar id={`bar-unidade-${i}`} percent={(u.quantidade / 50) * 100} />
+                            </div>
+                        ))}
+                    </Card>
                 </div>
             )}
 
             {/* Capacitação Tab */}
             {abaAtiva === 'capacitacao' && (
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span><i className="fas fa-graduation-cap"></i> Capacitações</span>
-                        <button className="btn btn-sm btn-primary"><i className="fas fa-plus"></i> Nova Capacitação</button>
+                <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                    <div className="flex items-center justify-between border-b border-border bg-muted/50 px-5 py-3">
+                        <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                            <GraduationCap className="size-4" /> Capacitações
+                        </span>
+                        <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary-dark">
+                            <Plus className="size-3.5" /> Nova Capacitação
+                        </button>
                     </div>
-                    <div className="card-body" style={{ padding: 0 }}>
-                        <table className="table" style={{ marginBottom: 0 }}>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
                             <thead>
-                                <tr>
-                                    <th>Capacitação</th>
-                                    <th>Data</th>
-                                    <th>Participantes</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
+                                <tr className="border-b border-border bg-muted/30">
+                                    <th className="px-5 py-3 text-left font-semibold text-foreground">Capacitação</th>
+                                    <th className="px-5 py-3 text-left font-semibold text-foreground">Data</th>
+                                    <th className="px-5 py-3 text-left font-semibold text-foreground">Participantes</th>
+                                    <th className="px-5 py-3 text-left font-semibold text-foreground">Status</th>
+                                    <th className="px-5 py-3 text-left font-semibold text-foreground">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {capacitacoes.map((c, i) => (
-                                    <tr key={i}>
-                                        <td><strong>{c.nome}</strong></td>
-                                        <td>{formatDate(c.data)}</td>
-                                        <td>{c.participantes || '-'}</td>
-                                        <td>
-                                            <span className={`badge badge-${c.status === 'concluida' ? 'success' : c.status === 'agendada' ? 'info' : 'secondary'}`}>
+                                    <tr key={i} className="border-b border-border transition-colors hover:bg-muted/30">
+                                        <td className="px-5 py-3"><strong>{c.nome}</strong></td>
+                                        <td className="px-5 py-3">{formatDate(c.data)}</td>
+                                        <td className="px-5 py-3">{c.participantes || '-'}</td>
+                                        <td className="px-5 py-3">
+                                            <span className={cn(
+                                                'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                                c.status === 'concluida' ? 'bg-secondary/10 text-secondary' :
+                                                c.status === 'agendada' ? 'bg-cyan-100 text-cyan-700' :
+                                                'bg-muted text-muted-foreground'
+                                            )}>
                                                 {c.status === 'concluida' ? 'Concluída' : c.status === 'agendada' ? 'Agendada' : 'Planejada'}
                                             </span>
                                         </td>
-                                        <td>
-                                            <button className="btn btn-sm btn-outline-primary"><i className="fas fa-eye"></i></button>
+                                        <td className="px-5 py-3">
+                                            <button className="inline-flex items-center justify-center rounded-lg border border-primary/30 p-2 text-primary transition-colors hover:bg-primary/5">
+                                                <Eye className="size-4" />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -355,45 +430,61 @@ export default function RecursosHumanos() {
             {/* Detail Modal */}
             {funcionarioSelecionado && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
                     onClick={() => setFuncionarioSelecionado(null)}
                 >
-                    <div className="card" style={{ width: '500px', maxWidth: '90%' }} onClick={(e) => e.stopPropagation()}>
-                        <div className="card-header" style={{ background: 'var(--sus-blue)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-user"></i> Dados do Funcionário</span>
-                                <button className="btn btn-sm btn-light" onClick={() => setFuncionarioSelecionado(null)}><i className="fas fa-times"></i></button>
-                            </div>
+                    <div
+                        className="w-full max-w-lg rounded-xl border border-border bg-card shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-primary-foreground">
+                            <span className="flex items-center gap-2 text-sm font-semibold">
+                                <User className="size-4" /> Dados do Funcionário
+                            </span>
+                            <button
+                                className="rounded-md bg-white/20 p-1 transition-colors hover:bg-white/30"
+                                onClick={() => setFuncionarioSelecionado(null)}
+                            >
+                                <X className="size-4" />
+                            </button>
                         </div>
-                        <div className="card-body">
-                            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                                <div style={{
-                                    width: '80px', height: '80px', borderRadius: '50%', background: 'var(--sus-blue)', color: 'white',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: '600', margin: '0 auto 0.5rem'
-                                }}>
+                        <div className="p-5">
+                            <div className="mb-6 text-center">
+                                <div className="mx-auto mb-2 flex size-20 items-center justify-center rounded-full bg-primary text-2xl font-semibold text-white">
                                     {funcionarioSelecionado.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}
                                 </div>
-                                <h5 style={{ margin: 0 }}>{funcionarioSelecionado.nome}</h5>
-                                <p style={{ color: 'var(--sus-gray)', margin: 0 }}>{funcionarioSelecionado.cargo}</p>
+                                <h5 className="text-lg font-semibold text-foreground">{funcionarioSelecionado.nome}</h5>
+                                <p className="text-sm text-muted-foreground">{funcionarioSelecionado.cargo}</p>
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <div><small style={{ color: 'var(--sus-gray)' }}>Unidade</small><p style={{ margin: 0 }}><strong>{funcionarioSelecionado.unidade}</strong></p></div>
-                                <div><small style={{ color: 'var(--sus-gray)' }}>Status</small><p style={{ margin: 0 }}>{getStatusBadge(funcionarioSelecionado.status)}</p></div>
-                                <div><small style={{ color: 'var(--sus-gray)' }}>Carga Horária</small><p style={{ margin: 0 }}><strong>{funcionarioSelecionado.cargaHoraria}h/semana</strong></p></div>
-                                <div><small style={{ color: 'var(--sus-gray)' }}>Vínculo</small><p style={{ margin: 0 }}><strong>{funcionarioSelecionado.vinculo}</strong></p></div>
-                                <div style={{ gridColumn: 'span 2' }}><small style={{ color: 'var(--sus-gray)' }}>Admissão</small><p style={{ margin: 0 }}><strong>{formatDate(funcionarioSelecionado.admissao)}</strong></p></div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <small className="text-xs text-muted-foreground">Unidade</small>
+                                    <p className="mt-0.5 font-semibold text-foreground">{funcionarioSelecionado.unidade}</p>
+                                </div>
+                                <div>
+                                    <small className="text-xs text-muted-foreground">Status</small>
+                                    <p className="mt-0.5">{getStatusBadge(funcionarioSelecionado.status)}</p>
+                                </div>
+                                <div>
+                                    <small className="text-xs text-muted-foreground">Carga Horária</small>
+                                    <p className="mt-0.5 font-semibold text-foreground">{funcionarioSelecionado.cargaHoraria}h/semana</p>
+                                </div>
+                                <div>
+                                    <small className="text-xs text-muted-foreground">Vínculo</small>
+                                    <p className="mt-0.5 font-semibold text-foreground">{funcionarioSelecionado.vinculo}</p>
+                                </div>
+                                <div className="col-span-2">
+                                    <small className="text-xs text-muted-foreground">Admissão</small>
+                                    <p className="mt-0.5 font-semibold text-foreground">{formatDate(funcionarioSelecionado.admissao)}</p>
+                                </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                                <button className="btn btn-outline-secondary"><i className="fas fa-edit"></i> Editar</button>
-                                <button className="btn btn-primary"><i className="fas fa-calendar-alt"></i> Escala</button>
+                            <div className="mt-6 flex justify-end gap-2">
+                                <button className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted">
+                                    <Pencil className="size-4" /> Editar
+                                </button>
+                                <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-dark">
+                                    <CalendarDays className="size-4" /> Escala
+                                </button>
                             </div>
                         </div>
                     </div>

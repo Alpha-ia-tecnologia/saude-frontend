@@ -11,7 +11,27 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
-import { Card } from '../../components/ui';
+import {
+    TrendingUp,
+    Bot,
+    PlusCircle,
+    RefreshCw,
+    Lightbulb,
+    AlertTriangle,
+    PieChart,
+    Download,
+    Search,
+    RotateCcw,
+    Filter,
+    FileSpreadsheet,
+    Eye,
+    Pencil,
+    History,
+    ArrowUp,
+    ArrowDown,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/Card';
 
 // Register Chart.js components
 ChartJS.register(
@@ -37,14 +57,34 @@ const susColors = {
 
 // Sample data for indicators
 const indicatorsData = [
-    { id: 1, name: 'Cobertura Vacinal', category: 'Assistencial', value: '85%', goal: '80%', trend: '+5%', trendUp: true, status: 'Acima da Meta', statusClass: 'badge-success' },
-    { id: 2, name: 'Consultas Pré-natal', category: 'Assistencial', value: '92%', goal: '80%', trend: '+12%', trendUp: true, status: 'Acima da Meta', statusClass: 'badge-success' },
-    { id: 3, name: 'Controle de Hipertensão', category: 'Assistencial', value: '68%', goal: '70%', trend: '-2%', trendUp: false, status: 'Abaixo da Meta', statusClass: 'badge-warning' },
-    { id: 4, name: 'Rastreamento de Câncer', category: 'Assistencial', value: '45%', goal: '60%', trend: '-15%', trendUp: false, status: 'Crítico', statusClass: 'badge-danger' },
-    { id: 5, name: 'Taxa de Internação por Condições Sensíveis', category: 'Epidemiológico', value: '12%', goal: '15%', trend: '-3%', trendUp: true, status: 'Acima da Meta', statusClass: 'badge-success' },
-    { id: 6, name: 'Tempo Médio de Espera', category: 'Operacional', value: '35 min', goal: '30 min', trend: '+5 min', trendUp: false, status: 'Abaixo da Meta', statusClass: 'badge-warning' },
-    { id: 7, name: 'Satisfação do Usuário', category: 'Qualidade', value: '88%', goal: '85%', trend: '+3%', trendUp: true, status: 'Acima da Meta', statusClass: 'badge-success' },
+    { id: 1, name: 'Cobertura Vacinal', category: 'Assistencial', value: 85, goal: 80, unit: '%', trend: '+5%', trendUp: true, status: 'Acima da Meta' },
+    { id: 2, name: 'Consultas Pré-natal', category: 'Assistencial', value: 92, goal: 80, unit: '%', trend: '+12%', trendUp: true, status: 'Acima da Meta' },
+    { id: 3, name: 'Controle de Hipertensão', category: 'Assistencial', value: 68, goal: 70, unit: '%', trend: '-2%', trendUp: false, status: 'Abaixo da Meta' },
+    { id: 4, name: 'Rastreamento de Câncer', category: 'Assistencial', value: 45, goal: 60, unit: '%', trend: '-15%', trendUp: false, status: 'Crítico' },
+    { id: 5, name: 'Taxa de Internação por Condições Sensíveis', category: 'Epidemiológico', value: 12, goal: 15, unit: '%', trend: '-3%', trendUp: true, status: 'Acima da Meta' },
+    { id: 6, name: 'Tempo Médio de Espera', category: 'Operacional', value: 35, goal: 30, unit: ' min', trend: '+5 min', trendUp: false, status: 'Abaixo da Meta' },
+    { id: 7, name: 'Satisfação do Usuário', category: 'Qualidade', value: 88, goal: 85, unit: '%', trend: '+3%', trendUp: true, status: 'Acima da Meta' },
 ];
+
+const statusConfig = {
+    'Acima da Meta': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500' },
+    'Abaixo da Meta': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500' },
+    'Crítico': { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', dot: 'bg-red-500' },
+};
+
+const categoryConfig = {
+    'Assistencial': 'bg-blue-50 text-blue-700',
+    'Epidemiológico': 'bg-purple-50 text-purple-700',
+    'Operacional': 'bg-orange-50 text-orange-700',
+    'Qualidade': 'bg-teal-50 text-teal-700',
+};
+
+function getProgressColor(value, goal, unit) {
+    const ratio = unit === ' min' ? goal / value : value / goal;
+    if (ratio >= 1) return 'bg-emerald-500';
+    if (ratio >= 0.85) return 'bg-amber-500';
+    return 'bg-red-500';
+}
 
 // Chart data for evolution
 const evolutionChartData = {
@@ -119,25 +159,25 @@ export default function Indicadores() {
     };
 
     return (
-        <div className="fade-in">
+        <div className="animate-fade-in">
             {/* Page Header */}
-            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <nav style={{ fontSize: '0.875rem', marginBottom: 'var(--spacing-sm)' }}>
-                    <span style={{ color: 'var(--sus-gray)' }}>Início / Análise de Dados / </span>
-                    <span style={{ color: 'var(--sus-blue)' }}>Indicadores</span>
+            <div className="mb-6">
+                <nav className="text-sm mb-2">
+                    <span className="text-muted-foreground">Início / Análise de Dados / </span>
+                    <span className="text-primary">Indicadores</span>
                 </nav>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--spacing-md)' }}>
-                    <h1 style={{ fontSize: '1.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-                        <i className="fas fa-chart-line" style={{ color: 'var(--sus-blue)' }}></i>
+                <div className="flex justify-between items-center flex-wrap gap-4">
+                    <h1 className="text-[1.75rem] font-semibold flex items-center gap-2">
+                        <TrendingUp className="size-7 text-primary" />
                         Indicadores
                     </h1>
-                    <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-                        <button className="btn btn-outline-primary">
-                            <i className="fas fa-robot" style={{ marginRight: '0.5rem' }}></i>
+                    <div className="flex gap-2">
+                        <button className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5">
+                            <Bot className="size-4" />
                             Análise IA
                         </button>
-                        <button className="btn btn-primary">
-                            <i className="fas fa-plus-circle" style={{ marginRight: '0.5rem' }}></i>
+                        <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90">
+                            <PlusCircle className="size-4" />
                             Novo Indicador
                         </button>
                     </div>
@@ -145,113 +185,127 @@ export default function Indicadores() {
             </div>
 
             {/* AI Insights */}
-            <Card style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-                        <i className="fas fa-robot" style={{ color: 'var(--sus-blue)' }}></i>
+            <Card className="mb-6">
+                <div className="flex justify-between items-center border-b border-border px-5 py-3">
+                    <h4 className="m-0 flex items-center gap-2 font-semibold">
+                        <Bot className="size-5 text-primary" />
                         Insights de IA - Indicadores
                     </h4>
-                    <button className="btn btn-outline-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}>
-                        <i className="fas fa-sync-alt" style={{ marginRight: '0.25rem' }}></i>
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-input px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                        <RefreshCw className="size-3.5" />
                         Atualizar
                     </button>
                 </div>
-                <div className="card-body">
-                    <div className="alert alert-info" style={{ marginBottom: 'var(--spacing-md)' }}>
-                        <h5 style={{ marginBottom: 'var(--spacing-xs)' }}>
-                            <i className="fas fa-lightbulb" style={{ marginRight: '0.5rem' }}></i>
+                <div className="p-5">
+                    <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                        <h5 className="mb-1 flex items-center gap-2 text-sm font-semibold text-primary">
+                            <Lightbulb className="size-4" />
                             Análise de Tendências
                         </h5>
-                        <p style={{ margin: 0 }}>A IA detectou uma tendência de melhoria nos indicadores de cobertura vacinal e consultas pré-natal nos últimos 3 meses. Recomenda-se compartilhar as estratégias bem-sucedidas com outras unidades de saúde.</p>
+                        <p className="m-0 text-sm text-foreground/80">A IA detectou uma tendência de melhoria nos indicadores de cobertura vacinal e consultas pré-natal nos últimos 3 meses. Recomenda-se compartilhar as estratégias bem-sucedidas com outras unidades de saúde.</p>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-md)' }}>
-                        <div className="alert alert-warning">
-                            <h5 style={{ marginBottom: 'var(--spacing-xs)' }}>
-                                <i className="fas fa-exclamation-triangle" style={{ marginRight: '0.5rem' }}></i>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                            <h5 className="mb-1 flex items-center gap-2 text-sm font-semibold text-amber-800">
+                                <AlertTriangle className="size-4" />
                                 Indicadores Críticos
                             </h5>
-                            <p style={{ margin: 0, fontSize: '0.9rem' }}>A IA identificou 3 indicadores abaixo da meta por mais de 6 meses consecutivos.</p>
+                            <p className="m-0 text-sm text-amber-700">A IA identificou 3 indicadores abaixo da meta por mais de 6 meses consecutivos.</p>
                         </div>
-                        <div className="alert alert-success">
-                            <h5 style={{ marginBottom: 'var(--spacing-xs)' }}>
-                                <i className="fas fa-chart-pie" style={{ marginRight: '0.5rem' }}></i>
+                        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+                            <h5 className="mb-1 flex items-center gap-2 text-sm font-semibold text-emerald-800">
+                                <PieChart className="size-4" />
                                 Novos Indicadores Sugeridos
                             </h5>
-                            <p style={{ margin: 0, fontSize: '0.9rem' }}>A IA sugere 4 novos indicadores para insights valiosos sobre qualidade.</p>
+                            <p className="m-0 text-sm text-emerald-700">A IA sugere 4 novos indicadores para insights valiosos sobre qualidade.</p>
                         </div>
                     </div>
                 </div>
             </Card>
 
             {/* KPI Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
-                <Card style={{ borderLeft: `4px solid ${susColors.blue}` }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 700, color: susColors.blue }}>85%</div>
-                        <h5 style={{ margin: 'var(--spacing-sm) 0' }}>Cobertura Vacinal</h5>
-                        <span style={{ color: susColors.green }}><i className="fas fa-arrow-up"></i> 5% acima da meta</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <Card className="border-l-4 border-l-primary">
+                    <div className="text-center">
+                        <div className="text-[2.5rem] font-bold text-primary">85%</div>
+                        <h5 className="my-2">Cobertura Vacinal</h5>
+                        <span className="text-secondary">
+                            <ArrowUp className="size-4 inline" /> 5% acima da meta
+                        </span>
                     </div>
                 </Card>
-                <Card style={{ borderLeft: `4px solid ${susColors.green}` }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 700, color: susColors.green }}>92%</div>
-                        <h5 style={{ margin: 'var(--spacing-sm) 0' }}>Consultas Pré-natal</h5>
-                        <span style={{ color: susColors.green }}><i className="fas fa-arrow-up"></i> 12% acima da meta</span>
+                <Card className="border-l-4 border-l-secondary">
+                    <div className="text-center">
+                        <div className="text-[2.5rem] font-bold text-secondary">92%</div>
+                        <h5 className="my-2">Consultas Pré-natal</h5>
+                        <span className="text-secondary">
+                            <ArrowUp className="size-4 inline" /> 12% acima da meta
+                        </span>
                     </div>
                 </Card>
-                <Card style={{ borderLeft: `4px solid ${susColors.yellow}` }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#d4a500' }}>68%</div>
-                        <h5 style={{ margin: 'var(--spacing-sm) 0' }}>Controle Hipertensão</h5>
-                        <span style={{ color: susColors.red }}><i className="fas fa-arrow-down"></i> 2% abaixo da meta</span>
+                <Card className="border-l-4 border-l-accent">
+                    <div className="text-center">
+                        <div className="text-[2.5rem] font-bold text-amber-600">68%</div>
+                        <h5 className="my-2">Controle Hipertensão</h5>
+                        <span className="text-destructive">
+                            <ArrowDown className="size-4 inline" /> 2% abaixo da meta
+                        </span>
                     </div>
                 </Card>
-                <Card style={{ borderLeft: `4px solid ${susColors.red}` }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 700, color: susColors.red }}>45%</div>
-                        <h5 style={{ margin: 'var(--spacing-sm) 0' }}>Rastreamento Câncer</h5>
-                        <span style={{ color: susColors.red }}><i className="fas fa-arrow-down"></i> 15% abaixo da meta</span>
+                <Card className="border-l-4 border-l-destructive">
+                    <div className="text-center">
+                        <div className="text-[2.5rem] font-bold text-destructive">45%</div>
+                        <h5 className="my-2">Rastreamento Câncer</h5>
+                        <span className="text-destructive">
+                            <ArrowDown className="size-4 inline" /> 15% abaixo da meta
+                        </span>
                     </div>
                 </Card>
             </div>
 
             {/* Charts */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-lg)' }}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <Card>
-                    <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h5 style={{ margin: 0 }}>Evolução dos Indicadores</h5>
-                        <button className="btn btn-outline-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}>
-                            <i className="fas fa-download" style={{ marginRight: '0.25rem' }}></i>
+                    <div className="flex justify-between items-center border-b border-border px-5 py-3">
+                        <h5 className="m-0 font-semibold">Evolução dos Indicadores</h5>
+                        <button className="inline-flex items-center gap-1.5 rounded-lg border border-input px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                            <Download className="size-3.5" />
                             Exportar
                         </button>
                     </div>
-                    <div className="card-body" style={{ height: '300px' }}>
+                    <div className="h-[300px]">
                         <Line data={evolutionChartData} options={chartOptions} />
                     </div>
                 </Card>
                 <Card>
-                    <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h5 style={{ margin: 0 }}>Comparativo com Metas</h5>
-                        <button className="btn btn-outline-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}>
-                            <i className="fas fa-download" style={{ marginRight: '0.25rem' }}></i>
+                    <div className="flex justify-between items-center border-b border-border px-5 py-3">
+                        <h5 className="m-0 font-semibold">Comparativo com Metas</h5>
+                        <button className="inline-flex items-center gap-1.5 rounded-lg border border-input px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                            <Download className="size-3.5" />
                             Exportar
                         </button>
                     </div>
-                    <div className="card-body" style={{ height: '300px' }}>
+                    <div className="h-[300px]">
                         <Bar data={goalsChartData} options={chartOptions} />
                     </div>
                 </Card>
             </div>
 
             {/* Filters */}
-            <Card style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <div className="card-body">
-                    <h5 style={{ marginBottom: 'var(--spacing-md)' }}>Filtros</h5>
+            <Card className="mb-6">
+                <div>
+                    <h5 className="mb-4 flex items-center gap-2 font-semibold text-foreground">
+                        <Filter className="size-4 text-primary" />
+                        Filtros
+                    </h5>
                     <form onSubmit={handleFilterSubmit}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--spacing-md)' }}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
-                                <label className="form-label">Categoria</label>
-                                <select className="form-select" name="categoria" value={filters.categoria} onChange={handleFilterChange}>
+                                <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Categoria</label>
+                                <select
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    name="categoria" value={filters.categoria} onChange={handleFilterChange}
+                                >
                                     <option value="">Todas</option>
                                     <option value="assistenciais">Assistenciais</option>
                                     <option value="epidemiologicos">Epidemiológicos</option>
@@ -261,8 +315,11 @@ export default function Indicadores() {
                                 </select>
                             </div>
                             <div>
-                                <label className="form-label">Período</label>
-                                <select className="form-select" name="periodo" value={filters.periodo} onChange={handleFilterChange}>
+                                <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Período</label>
+                                <select
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    name="periodo" value={filters.periodo} onChange={handleFilterChange}
+                                >
                                     <option value="mes_atual">Mês Atual</option>
                                     <option value="trimestre">Último Trimestre</option>
                                     <option value="semestre">Último Semestre</option>
@@ -271,8 +328,11 @@ export default function Indicadores() {
                                 </select>
                             </div>
                             <div>
-                                <label className="form-label">Status</label>
-                                <select className="form-select" name="status" value={filters.status} onChange={handleFilterChange}>
+                                <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Status</label>
+                                <select
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    name="status" value={filters.status} onChange={handleFilterChange}
+                                >
                                     <option value="">Todos</option>
                                     <option value="acima_meta">Acima da Meta</option>
                                     <option value="na_meta">Na Meta</option>
@@ -281,29 +341,34 @@ export default function Indicadores() {
                                 </select>
                             </div>
                             <div>
-                                <label className="form-label">Buscar</label>
-                                <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                                <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Buscar</label>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className="h-10 w-full rounded-lg border border-input bg-white pl-10 pr-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                         name="search"
-                                        placeholder="Nome do indicador"
+                                        placeholder="Nome do indicador..."
                                         value={filters.search}
                                         onChange={handleFilterChange}
                                     />
-                                    <button type="submit" className="btn btn-primary">
-                                        <i className="fas fa-search"></i>
-                                    </button>
                                 </div>
                             </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-sm)', marginTop: 'var(--spacing-md)' }}>
-                            <button type="button" className="btn btn-outline-primary" onClick={handleFilterReset}>
-                                <i className="fas fa-undo" style={{ marginRight: '0.25rem' }}></i>
+                        <div className="flex justify-end gap-2 mt-4">
+                            <button
+                                type="button"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-input px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                onClick={handleFilterReset}
+                            >
+                                <RotateCcw className="size-3.5" />
                                 Limpar
                             </button>
-                            <button type="submit" className="btn btn-primary">
-                                <i className="fas fa-filter" style={{ marginRight: '0.25rem' }}></i>
+                            <button
+                                type="submit"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+                            >
+                                <Filter className="size-3.5" />
                                 Aplicar Filtros
                             </button>
                         </div>
@@ -312,69 +377,141 @@ export default function Indicadores() {
             </Card>
 
             {/* Indicators Table */}
-            <Card>
-                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h5 style={{ margin: 0 }}>Indicadores</h5>
-                    <button className="btn btn-outline-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}>
-                        <i className="fas fa-file-excel" style={{ marginRight: '0.25rem' }}></i>
+            <Card className="overflow-hidden p-0">
+                <div className="flex justify-between items-center border-b border-border px-5 py-4">
+                    <div>
+                        <h5 className="m-0 font-semibold text-foreground">Painel de Indicadores</h5>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{indicatorsData.length} indicadores monitorados</p>
+                    </div>
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-input px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                        <FileSpreadsheet className="size-4" />
                         Exportar
                     </button>
                 </div>
-                <div className="card-body" style={{ padding: 0 }}>
-                    <div style={{ overflowX: 'auto' }}>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Nome do Indicador</th>
-                                    <th>Categoria</th>
-                                    <th>Valor Atual</th>
-                                    <th>Meta</th>
-                                    <th>Tendência</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {indicatorsData.map(indicator => (
-                                    <tr key={indicator.id}>
-                                        <td>{indicator.name}</td>
-                                        <td>{indicator.category}</td>
-                                        <td>{indicator.value}</td>
-                                        <td>{indicator.goal}</td>
-                                        <td>
-                                            <span style={{ color: indicator.trendUp ? susColors.green : susColors.red }}>
-                                                <i className={`fas fa-arrow-${indicator.trendUp ? 'up' : 'down'}`}></i> {indicator.trend}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-border bg-muted/40">
+                                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Indicador</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Categoria</th>
+                                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">Progresso</th>
+                                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tendência</th>
+                                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                            {indicatorsData.map(indicator => {
+                                const sc = statusConfig[indicator.status] || statusConfig['Abaixo da Meta'];
+                                const cc = categoryConfig[indicator.category] || 'bg-gray-50 text-gray-700';
+                                const progressPercent = indicator.unit === ' min'
+                                    ? Math.min(100, Math.round((indicator.goal / indicator.value) * 100))
+                                    : Math.min(100, Math.round((indicator.value / indicator.goal) * 100));
+
+                                return (
+                                    <tr key={indicator.id} className="transition-colors hover:bg-muted/30">
+                                        {/* Indicador */}
+                                        <td className="px-5 py-4">
+                                            <span className="font-medium text-foreground">{indicator.name}</span>
+                                        </td>
+
+                                        {/* Categoria */}
+                                        <td className="px-4 py-4">
+                                            <span className={cn('inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium', cc)}>
+                                                {indicator.category}
                                             </span>
                                         </td>
-                                        <td>
-                                            <span className={`badge ${indicator.statusClass}`}>{indicator.status}</span>
+
+                                        {/* Progresso: valor, barra, meta */}
+                                        <td className="px-4 py-4">
+                                            <div className="mx-auto w-36">
+                                                <div className="flex items-baseline justify-between mb-1">
+                                                    <span className="text-sm font-bold text-foreground">
+                                                        {indicator.value}{indicator.unit}
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        Meta: {indicator.goal}{indicator.unit}
+                                                    </span>
+                                                </div>
+                                                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                                                    <div
+                                                        className={cn('h-full rounded-full transition-all', getProgressColor(indicator.value, indicator.goal, indicator.unit))}
+                                                        style={{ width: `${progressPercent}%` }}
+                                                    />
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td>
-                                            <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
-                                                <button className="btn btn-primary" style={{ padding: '0.25rem 0.5rem' }} title="Visualizar">
-                                                    <i className="fas fa-eye"></i>
+
+                                        {/* Tendência */}
+                                        <td className="px-4 py-4 text-center">
+                                            <span className={cn(
+                                                'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold',
+                                                indicator.trendUp
+                                                    ? 'bg-emerald-50 text-emerald-700'
+                                                    : 'bg-red-50 text-red-700'
+                                            )}>
+                                                {indicator.trendUp
+                                                    ? <ArrowUp className="size-3" />
+                                                    : <ArrowDown className="size-3" />
+                                                }
+                                                {indicator.trend}
+                                            </span>
+                                        </td>
+
+                                        {/* Status */}
+                                        <td className="px-4 py-4 text-center">
+                                            <span className={cn(
+                                                'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium',
+                                                sc.bg, sc.text, sc.border
+                                            )}>
+                                                <span className={cn('size-1.5 rounded-full', sc.dot)} />
+                                                {indicator.status}
+                                            </span>
+                                        </td>
+
+                                        {/* Ações */}
+                                        <td className="px-4 py-4">
+                                            <div className="flex justify-end gap-1">
+                                                <button
+                                                    className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                                                    title="Visualizar"
+                                                >
+                                                    <Eye className="size-4" />
                                                 </button>
-                                                <button className="btn btn-outline-primary" style={{ padding: '0.25rem 0.5rem' }} title="Editar">
-                                                    <i className="fas fa-edit"></i>
+                                                <button
+                                                    className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                                                    title="Editar"
+                                                >
+                                                    <Pencil className="size-4" />
                                                 </button>
-                                                <button className="btn btn-outline-primary" style={{ padding: '0.25rem 0.5rem' }} title="Histórico">
-                                                    <i className="fas fa-history"></i>
+                                                <button
+                                                    className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                                                    title="Histórico"
+                                                >
+                                                    <History className="size-4" />
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </div>
-                <div className="card-footer" style={{ display: 'flex', justifyContent: 'center', padding: 'var(--spacing-md)' }}>
-                    <nav>
-                        <button className="btn btn-outline-primary" disabled style={{ marginRight: 'var(--spacing-xs)' }}>Anterior</button>
-                        <button className="btn btn-primary" style={{ marginRight: 'var(--spacing-xs)' }}>1</button>
-                        <button className="btn btn-outline-primary" style={{ marginRight: 'var(--spacing-xs)' }}>2</button>
-                        <button className="btn btn-outline-primary" style={{ marginRight: 'var(--spacing-xs)' }}>3</button>
-                        <button className="btn btn-outline-primary">Próximo</button>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between border-t border-border px-5 py-3">
+                    <p className="text-sm text-muted-foreground">Mostrando 1-7 de 7 indicadores</p>
+                    <nav className="flex items-center gap-1">
+                        <button className="rounded-lg border border-input px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40" disabled>
+                            Anterior
+                        </button>
+                        <button className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white">1</button>
+                        <button className="rounded-lg border border-input px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted">2</button>
+                        <button className="rounded-lg border border-input px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted">3</button>
+                        <button className="rounded-lg border border-input px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted">
+                            Próximo
+                        </button>
                     </nav>
                 </div>
             </Card>

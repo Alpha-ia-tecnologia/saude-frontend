@@ -1,4 +1,20 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+    ArrowLeftRight,
+    FileOutput,
+    Plus,
+    ArrowRight,
+    ArrowLeft,
+    Eye,
+    Pencil,
+    Printer,
+    X,
+    Check,
+    Send,
+    Building2,
+    XCircle,
+} from 'lucide-react';
 
 // Sample referrals data
 const encaminhamentosData = [
@@ -112,13 +128,13 @@ export default function Referencia() {
 
     const getTipoBadge = (tipo) => {
         const config = {
-            referencia: { color: 'primary', label: 'Referência', icon: 'fa-arrow-right' },
-            'contra-referencia': { color: 'info', label: 'Contra-Referência', icon: 'fa-arrow-left' }
+            referencia: { classes: 'bg-primary/10 text-primary', label: 'Referência', Icon: ArrowRight },
+            'contra-referencia': { classes: 'bg-sky-100 text-sky-800', label: 'Contra-Referência', Icon: ArrowLeft }
         };
         const t = config[tipo] || config.referencia;
         return (
-            <span className={`badge badge-${t.color}`}>
-                <i className={`fas ${t.icon}`} style={{ marginRight: '0.25rem' }}></i>
+            <span className={cn('inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium', t.classes)}>
+                <t.Icon className="h-3 w-3" />
                 {t.label}
             </span>
         );
@@ -126,33 +142,26 @@ export default function Referencia() {
 
     const getStatusBadge = (status) => {
         const config = {
-            aguardando: { color: 'warning', label: 'Aguardando' },
-            agendado: { color: 'info', label: 'Agendado' },
-            recebido: { color: 'primary', label: 'Recebido' },
-            concluido: { color: 'success', label: 'Concluído' },
-            negado: { color: 'danger', label: 'Negado' }
+            aguardando: { classes: 'bg-amber-100 text-amber-800', label: 'Aguardando' },
+            agendado: { classes: 'bg-sky-100 text-sky-800', label: 'Agendado' },
+            recebido: { classes: 'bg-primary/10 text-primary', label: 'Recebido' },
+            concluido: { classes: 'bg-emerald-100 text-emerald-800', label: 'Concluído' },
+            negado: { classes: 'bg-red-100 text-red-800', label: 'Negado' }
         };
         const s = config[status] || config.aguardando;
-        return <span className={`badge badge-${s.color}`}>{s.label}</span>;
+        return <span className={cn('rounded-md px-2 py-0.5 text-xs font-medium', s.classes)}>{s.label}</span>;
     };
 
     const getPrioridadeBadge = (prioridade) => {
         const config = {
-            alta: { color: '#dc3545', label: 'Alta' },
-            media: { color: 'var(--sus-yellow)', label: 'Média' },
-            baixa: { color: 'var(--sus-green)', label: 'Baixa' }
+            alta: 'bg-red-500 text-white',
+            media: 'bg-amber-400 text-white',
+            baixa: 'bg-emerald-500 text-white'
         };
-        const p = config[prioridade] || config.baixa;
+        const labels = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
         return (
-            <span style={{
-                padding: '0.25rem 0.5rem',
-                borderRadius: '4px',
-                background: p.color,
-                color: 'white',
-                fontSize: '0.75rem',
-                fontWeight: '600'
-            }}>
-                {p.label}
+            <span className={cn('rounded-md px-2 py-0.5 text-xs font-semibold', config[prioridade] || config.baixa)}>
+                {labels[prioridade] || 'Baixa'}
             </span>
         );
     };
@@ -164,66 +173,66 @@ export default function Referencia() {
     };
 
     return (
-        <div className="fade-in">
+        <div className="space-y-6">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1 style={{ margin: 0 }}>
-                    <i className="fas fa-exchange-alt" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                    <ArrowLeftRight className="h-6 w-6 text-primary" />
                     Referência e Contra-Referência
                 </h1>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-file-export"></i> Exportar
+                <div className="flex gap-2">
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                        <FileOutput className="h-4 w-4" /> Exportar
                     </button>
-                    <button className="btn btn-primary" onClick={() => setShowNovoModal(true)}>
-                        <i className="fas fa-plus"></i> Novo Encaminhamento
+                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark" onClick={() => setShowNovoModal(true)}>
+                        <Plus className="h-4 w-4" /> Novo Encaminhamento
                     </button>
                 </div>
             </div>
 
             {/* Dashboard Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-blue)' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: 'var(--sus-blue)', margin: 0 }}>{estatisticas.total}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Total</small>
+            <div className="grid grid-cols-5 gap-4">
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-primary">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-primary">{estatisticas.total}</h2>
+                        <small className="text-muted-foreground">Total</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-yellow)' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: 'var(--sus-yellow)', margin: 0 }}>{estatisticas.aguardando}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Aguardando</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-amber-400">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-amber-500">{estatisticas.aguardando}</h2>
+                        <small className="text-muted-foreground">Aguardando</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid #17a2b8' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: '#17a2b8', margin: 0 }}>{estatisticas.agendados}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Agendados</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-sky-500">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-sky-500">{estatisticas.agendados}</h2>
+                        <small className="text-muted-foreground">Agendados</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-green)' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: 'var(--sus-green)', margin: 0 }}>{estatisticas.concluidos}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Concluídos</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-secondary">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-secondary">{estatisticas.concluidos}</h2>
+                        <small className="text-muted-foreground">Concluídos</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid #dc3545' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: '#dc3545', margin: 0 }}>{estatisticas.negados}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Negados</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-red-500">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-red-500">{estatisticas.negados}</h2>
+                        <small className="text-muted-foreground">Negados</small>
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-body">
-                    <h5 style={{ marginBottom: '1rem' }}>Filtros</h5>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '1rem' }}>
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="p-5">
+                    <h5 className="mb-4 font-semibold">Filtros</h5>
+                    <div className="grid grid-cols-[1fr_1fr_2fr] gap-4">
                         <div>
-                            <label className="form-label">Tipo</label>
+                            <label className="mb-1 block text-sm font-medium text-foreground">Tipo</label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroTipo}
                                 onChange={(e) => setFiltroTipo(e.target.value)}
                             >
@@ -233,9 +242,9 @@ export default function Referencia() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Status</label>
+                            <label className="mb-1 block text-sm font-medium text-foreground">Status</label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroStatus}
                                 onChange={(e) => setFiltroStatus(e.target.value)}
                             >
@@ -248,10 +257,10 @@ export default function Referencia() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Pesquisar</label>
+                            <label className="mb-1 block text-sm font-medium text-foreground">Pesquisar</label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 placeholder="Paciente, número ou CNS..."
                                 value={pesquisa}
                                 onChange={(e) => setPesquisa(e.target.value)}
@@ -262,145 +271,131 @@ export default function Referencia() {
             </div>
 
             {/* Referrals Table */}
-            <div className="card">
-                <div className="card-body" style={{ padding: 0 }}>
-                    <div style={{ padding: '1rem 1rem 0.5rem' }}>
-                        <h5>Encaminhamentos ({encaminhamentosFiltrados.length})</h5>
-                    </div>
-                    <table className="table" style={{ marginBottom: 0 }}>
-                        <thead>
-                            <tr>
-                                <th>Nº / Tipo</th>
-                                <th>Paciente</th>
-                                <th>Origem → Destino</th>
-                                <th>Prioridade</th>
-                                <th>Data</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {encaminhamentosFiltrados.map(enc => (
-                                <tr key={enc.id}>
-                                    <td>
-                                        <code style={{ fontWeight: '600' }}>{enc.numero}</code>
-                                        <br />
-                                        {getTipoBadge(enc.tipo)}
-                                    </td>
-                                    <td>
-                                        <strong>{enc.paciente}</strong>
-                                        <br />
-                                        <small style={{ color: 'var(--sus-gray)' }}>CNS: {enc.cns}</small>
-                                    </td>
-                                    <td>
-                                        <div style={{ fontSize: '0.85rem' }}>
-                                            <div><i className="fas fa-hospital" style={{ color: 'var(--sus-blue)', marginRight: '0.25rem' }}></i> {enc.origem}</div>
-                                            <div style={{ color: 'var(--sus-gray)', margin: '0.25rem 0' }}>↓</div>
-                                            <div><i className="fas fa-hospital-alt" style={{ color: 'var(--sus-green)', marginRight: '0.25rem' }}></i> {enc.destino}</div>
-                                        </div>
-                                    </td>
-                                    <td>{getPrioridadeBadge(enc.prioridade)}</td>
-                                    <td>{formatDate(enc.dataEnvio)}</td>
-                                    <td>{getStatusBadge(enc.status)}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                            <button
-                                                className="btn btn-sm btn-outline-primary"
-                                                onClick={() => setEncaminhamentoSelecionado(enc)}
-                                                title="Detalhes"
-                                            >
-                                                <i className="fas fa-eye"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-outline-secondary" title="Editar">
-                                                <i className="fas fa-edit"></i>
-                                            </button>
-                                            <button className="btn btn-sm btn-outline-secondary" title="Imprimir">
-                                                <i className="fas fa-print"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="px-5 pt-4 pb-2">
+                    <h5 className="font-semibold">Encaminhamentos ({encaminhamentosFiltrados.length})</h5>
                 </div>
+                <table className="w-full text-sm">
+                    <thead className="border-b border-border bg-muted/50">
+                        <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Nº / Tipo</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Paciente</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Origem → Destino</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Prioridade</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Data</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Status</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                        {encaminhamentosFiltrados.map(enc => (
+                            <tr key={enc.id}>
+                                <td className="px-4 py-3">
+                                    <code className="font-semibold">{enc.numero}</code>
+                                    <br />
+                                    {getTipoBadge(enc.tipo)}
+                                </td>
+                                <td className="px-4 py-3">
+                                    <strong>{enc.paciente}</strong>
+                                    <br />
+                                    <small className="text-muted-foreground">CNS: {enc.cns}</small>
+                                </td>
+                                <td className="px-4 py-3">
+                                    <div className="text-[0.85rem]">
+                                        <div className="flex items-center gap-1"><Building2 className="h-3.5 w-3.5 text-primary" /> {enc.origem}</div>
+                                        <div className="my-1 text-muted-foreground">↓</div>
+                                        <div className="flex items-center gap-1"><Building2 className="h-3.5 w-3.5 text-secondary" /> {enc.destino}</div>
+                                    </div>
+                                </td>
+                                <td className="px-4 py-3">{getPrioridadeBadge(enc.prioridade)}</td>
+                                <td className="px-4 py-3">{formatDate(enc.dataEnvio)}</td>
+                                <td className="px-4 py-3">{getStatusBadge(enc.status)}</td>
+                                <td className="px-4 py-3">
+                                    <div className="flex gap-1">
+                                        <button
+                                            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted"
+                                            onClick={() => setEncaminhamentoSelecionado(enc)}
+                                            title="Detalhes"
+                                        >
+                                            <Eye className="h-3.5 w-3.5" />
+                                        </button>
+                                        <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted" title="Editar">
+                                            <Pencil className="h-3.5 w-3.5" />
+                                        </button>
+                                        <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted" title="Imprimir">
+                                            <Printer className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
 
             {/* Detail Modal */}
             {encaminhamentoSelecionado && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setEncaminhamentoSelecionado(null)}
                 >
                     <div
-                        className="card"
-                        style={{ width: '700px', maxWidth: '90%', maxHeight: '80vh', overflow: 'auto' }}
+                        className="rounded-xl border border-border bg-card shadow-sm w-[700px] max-w-[90%] max-h-[80vh] overflow-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="card-header" style={{ background: 'var(--sus-blue)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-exchange-alt"></i> {encaminhamentoSelecionado.numero}</span>
+                        <div className="border-b border-border bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <div className="flex items-center justify-between">
+                                <span className="flex items-center gap-2"><ArrowLeftRight className="h-4 w-4" /> {encaminhamentoSelecionado.numero}</span>
                                 <button
-                                    className="btn btn-sm btn-light"
+                                    className="rounded-lg bg-white/20 px-2 py-1 text-white hover:bg-white/30"
                                     onClick={() => setEncaminhamentoSelecionado(null)}
                                 >
-                                    <i className="fas fa-times"></i>
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
-                        <div className="card-body">
-                            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                        <div className="p-5">
+                            <div className="mb-4 flex gap-3">
                                 {getTipoBadge(encaminhamentoSelecionado.tipo)}
                                 {getStatusBadge(encaminhamentoSelecionado.status)}
                                 {getPrioridadeBadge(encaminhamentoSelecionado.prioridade)}
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                            <div className="mb-4 grid grid-cols-2 gap-4">
                                 <div>
-                                    <h6>Paciente</h6>
-                                    <p style={{ margin: '0.25rem 0' }}><strong>{encaminhamentoSelecionado.paciente}</strong></p>
-                                    <p style={{ margin: '0.25rem 0', color: 'var(--sus-gray)' }}>CNS: {encaminhamentoSelecionado.cns}</p>
+                                    <h6 className="mb-1 font-semibold">Paciente</h6>
+                                    <p className="my-1"><strong>{encaminhamentoSelecionado.paciente}</strong></p>
+                                    <p className="my-1 text-muted-foreground">CNS: {encaminhamentoSelecionado.cns}</p>
                                 </div>
                                 <div>
-                                    <h6>Solicitante</h6>
-                                    <p style={{ margin: '0.25rem 0' }}><strong>{encaminhamentoSelecionado.medicoSolicitante}</strong></p>
-                                    <p style={{ margin: '0.25rem 0', color: 'var(--sus-gray)' }}>{encaminhamentoSelecionado.origem}</p>
+                                    <h6 className="mb-1 font-semibold">Solicitante</h6>
+                                    <p className="my-1"><strong>{encaminhamentoSelecionado.medicoSolicitante}</strong></p>
+                                    <p className="my-1 text-muted-foreground">{encaminhamentoSelecionado.origem}</p>
                                 </div>
                             </div>
 
-                            <div style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{ flex: 1, textAlign: 'center' }}>
-                                        <i className="fas fa-hospital fa-2x" style={{ color: 'var(--sus-blue)' }}></i>
-                                        <p style={{ margin: '0.5rem 0 0' }}><strong>{encaminhamentoSelecionado.origem}</strong></p>
+                            <div className="mb-4 rounded-lg bg-muted p-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex-1 text-center">
+                                        <Building2 className="mx-auto h-8 w-8 text-primary" />
+                                        <p className="mt-2"><strong>{encaminhamentoSelecionado.origem}</strong></p>
                                     </div>
                                     <div>
-                                        <i className="fas fa-arrow-right fa-2x" style={{ color: 'var(--sus-gray)' }}></i>
+                                        <ArrowRight className="h-8 w-8 text-muted-foreground" />
                                     </div>
-                                    <div style={{ flex: 1, textAlign: 'center' }}>
-                                        <i className="fas fa-hospital-alt fa-2x" style={{ color: 'var(--sus-green)' }}></i>
-                                        <p style={{ margin: '0.5rem 0 0' }}><strong>{encaminhamentoSelecionado.destino}</strong></p>
+                                    <div className="flex-1 text-center">
+                                        <Building2 className="mx-auto h-8 w-8 text-secondary" />
+                                        <p className="mt-2"><strong>{encaminhamentoSelecionado.destino}</strong></p>
                                     </div>
                                 </div>
                             </div>
 
-                            <h6>Motivo do Encaminhamento</h6>
-                            <p style={{ background: '#fff3cd', padding: '0.75rem', borderRadius: '0.25rem' }}>
+                            <h6 className="mb-1 font-semibold">Motivo do Encaminhamento</h6>
+                            <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
                                 {encaminhamentoSelecionado.motivo}
                             </p>
 
-                            <p><strong>CID:</strong> {encaminhamentoSelecionado.cid}</p>
+                            <p className="mt-3"><strong>CID:</strong> {encaminhamentoSelecionado.cid}</p>
                             <p><strong>Data de Envio:</strong> {formatDate(encaminhamentoSelecionado.dataEnvio)}</p>
 
                             {encaminhamentoSelecionado.dataAgendada && (
@@ -408,19 +403,19 @@ export default function Referencia() {
                             )}
 
                             {encaminhamentoSelecionado.motivoNegacao && (
-                                <div className="alert alert-danger">
-                                    <strong><i className="fas fa-times-circle"></i> Motivo da Negativa:</strong><br />
+                                <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                                    <strong className="flex items-center gap-1"><XCircle className="h-4 w-4" /> Motivo da Negativa:</strong><br />
                                     {encaminhamentoSelecionado.motivoNegacao}
                                 </div>
                             )}
 
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                <button className="btn btn-outline-secondary">
-                                    <i className="fas fa-print"></i> Imprimir
+                            <div className="mt-4 flex justify-end gap-2">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                                    <Printer className="h-4 w-4" /> Imprimir
                                 </button>
                                 {encaminhamentoSelecionado.status === 'aguardando' && (
-                                    <button className="btn btn-success">
-                                        <i className="fas fa-check"></i> Confirmar Recebimento
+                                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+                                        <Check className="h-4 w-4" /> Confirmar Recebimento
                                     </button>
                                 )}
                             </div>
@@ -432,68 +427,56 @@ export default function Referencia() {
             {/* New Referral Modal */}
             {showNovoModal && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setShowNovoModal(false)}
                 >
                     <div
-                        className="card"
-                        style={{ width: '700px', maxWidth: '90%', maxHeight: '90vh', overflow: 'auto' }}
+                        className="rounded-xl border border-border bg-card shadow-sm w-[700px] max-w-[90%] max-h-[90vh] overflow-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="card-header" style={{ background: 'var(--sus-blue)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-plus"></i> Novo Encaminhamento</span>
+                        <div className="border-b border-border bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <div className="flex items-center justify-between">
+                                <span className="flex items-center gap-2"><Plus className="h-4 w-4" /> Novo Encaminhamento</span>
                                 <button
-                                    className="btn btn-sm btn-light"
+                                    className="rounded-lg bg-white/20 px-2 py-1 text-white hover:bg-white/30"
                                     onClick={() => setShowNovoModal(false)}
                                 >
-                                    <i className="fas fa-times"></i>
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
-                        <div className="card-body">
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <div style={{ gridColumn: 'span 2' }}>
-                                    <label className="form-label">Paciente *</label>
-                                    <input type="text" className="form-control" placeholder="Buscar paciente por nome ou CNS..." />
+                        <div className="p-5">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="col-span-2">
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Paciente *</label>
+                                    <input type="text" className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Buscar paciente por nome ou CNS..." />
                                 </div>
                                 <div>
-                                    <label className="form-label">Tipo *</label>
-                                    <select className="form-control">
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Tipo *</label>
+                                    <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                                         <option>Referência</option>
                                         <option>Contra-Referência</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="form-label">Prioridade *</label>
-                                    <select className="form-control">
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Prioridade *</label>
+                                    <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                                         <option>Baixa</option>
                                         <option>Média</option>
                                         <option>Alta</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="form-label">Unidade de Origem *</label>
-                                    <select className="form-control">
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Unidade de Origem *</label>
+                                    <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                                         <option>UBS Centro</option>
                                         <option>UBS Norte</option>
                                         <option>UBS Sul</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="form-label">Unidade de Destino *</label>
-                                    <select className="form-control">
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Unidade de Destino *</label>
+                                    <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                                         <option>Hospital Regional - Cardiologia</option>
                                         <option>Hospital Regional - Ortopedia</option>
                                         <option>Hospital Regional - Neurologia</option>
@@ -503,28 +486,28 @@ export default function Referencia() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="form-label">CID Principal</label>
-                                    <input type="text" className="form-control" placeholder="Ex: I10" />
+                                    <label className="mb-1 block text-sm font-medium text-foreground">CID Principal</label>
+                                    <input type="text" className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Ex: I10" />
                                 </div>
                                 <div>
-                                    <label className="form-label">Médico Solicitante</label>
-                                    <input type="text" className="form-control" defaultValue="Dr. Carlos Oliveira" />
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Médico Solicitante</label>
+                                    <input type="text" className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" defaultValue="Dr. Carlos Oliveira" />
                                 </div>
-                                <div style={{ gridColumn: 'span 2' }}>
-                                    <label className="form-label">Motivo do Encaminhamento *</label>
-                                    <textarea className="form-control" rows="3" placeholder="Descreva o motivo clínico do encaminhamento..."></textarea>
+                                <div className="col-span-2">
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Motivo do Encaminhamento *</label>
+                                    <textarea className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" rows="3" placeholder="Descreva o motivo clínico do encaminhamento..."></textarea>
                                 </div>
-                                <div style={{ gridColumn: 'span 2' }}>
-                                    <label className="form-label">Resumo Clínico</label>
-                                    <textarea className="form-control" rows="3" placeholder="Histórico relevante, exames realizados, tratamentos anteriores..."></textarea>
+                                <div className="col-span-2">
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Resumo Clínico</label>
+                                    <textarea className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" rows="3" placeholder="Histórico relevante, exames realizados, tratamentos anteriores..."></textarea>
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                                <button className="btn btn-outline-secondary" onClick={() => setShowNovoModal(false)}>
+                            <div className="mt-6 flex justify-end gap-2">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted" onClick={() => setShowNovoModal(false)}>
                                     Cancelar
                                 </button>
-                                <button className="btn btn-primary">
-                                    <i className="fas fa-paper-plane"></i> Enviar Encaminhamento
+                                <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                                    <Send className="h-4 w-4" /> Enviar Encaminhamento
                                 </button>
                             </div>
                         </div>

@@ -1,4 +1,21 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+    ClipboardList,
+    FileOutput,
+    Printer,
+    Plus,
+    AlertTriangle,
+    AlertCircle,
+    Eye,
+    X,
+    Check,
+    Clock,
+    MinusCircle,
+    CheckCircle,
+    XCircle,
+    HandHelping,
+} from 'lucide-react';
 
 // Sample prescriptions data
 const prescricoesData = [
@@ -109,15 +126,15 @@ export default function Prescricoes() {
 
     const getStatusBadge = (status) => {
         const config = {
-            pendente: { color: 'warning', label: 'Pendente', icon: 'fa-clock' },
-            parcial: { color: 'info', label: 'Parcial', icon: 'fa-minus-circle' },
-            dispensada: { color: 'success', label: 'Dispensada', icon: 'fa-check-circle' },
-            vencida: { color: 'danger', label: 'Vencida', icon: 'fa-times-circle' }
+            pendente: { classes: 'bg-amber-100 text-amber-800', label: 'Pendente', Icon: Clock },
+            parcial: { classes: 'bg-sky-100 text-sky-800', label: 'Parcial', Icon: MinusCircle },
+            dispensada: { classes: 'bg-emerald-100 text-emerald-800', label: 'Dispensada', Icon: CheckCircle },
+            vencida: { classes: 'bg-red-100 text-red-800', label: 'Vencida', Icon: XCircle }
         };
         const s = config[status] || config.pendente;
         return (
-            <span className={`badge badge-${s.color}`}>
-                <i className={`fas ${s.icon}`} style={{ marginRight: '0.25rem' }}></i>
+            <span className={cn('inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium', s.classes)}>
+                <s.Icon className="h-3 w-3" />
                 {s.label}
             </span>
         );
@@ -136,77 +153,77 @@ export default function Prescricoes() {
     };
 
     return (
-        <div className="fade-in">
+        <div className="space-y-6">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1 style={{ margin: 0 }}>
-                    <i className="fas fa-prescription" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                    <ClipboardList className="h-6 w-6 text-primary" />
                     Prescrições
                 </h1>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-file-export"></i> Exportar
+                <div className="flex gap-2">
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                        <FileOutput className="h-4 w-4" /> Exportar
                     </button>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-print"></i> Imprimir
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                        <Printer className="h-4 w-4" /> Imprimir
                     </button>
-                    <button className="btn btn-primary">
-                        <i className="fas fa-plus"></i> Nova Prescrição
+                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                        <Plus className="h-4 w-4" /> Nova Prescrição
                     </button>
                 </div>
             </div>
 
             {/* Dashboard Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-blue)' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: 'var(--sus-blue)', margin: 0 }}>{estatisticas.total}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Total</small>
+            <div className="grid grid-cols-5 gap-4">
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-primary">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-primary">{estatisticas.total}</h2>
+                        <small className="text-muted-foreground">Total</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-yellow)' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: 'var(--sus-yellow)', margin: 0 }}>{estatisticas.pendentes}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Pendentes</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-amber-400">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-amber-500">{estatisticas.pendentes}</h2>
+                        <small className="text-muted-foreground">Pendentes</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid #17a2b8' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: '#17a2b8', margin: 0 }}>{estatisticas.parciais}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Parciais</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-sky-500">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-sky-500">{estatisticas.parciais}</h2>
+                        <small className="text-muted-foreground">Parciais</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-green)' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: 'var(--sus-green)', margin: 0 }}>{estatisticas.dispensadas}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Dispensadas</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-secondary">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-secondary">{estatisticas.dispensadas}</h2>
+                        <small className="text-muted-foreground">Dispensadas</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid #dc3545' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: '#dc3545', margin: 0 }}>{estatisticas.vencidas}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Vencidas</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-red-500">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-red-500">{estatisticas.vencidas}</h2>
+                        <small className="text-muted-foreground">Vencidas</small>
                     </div>
                 </div>
             </div>
 
             {/* Alert */}
-            <div className="alert alert-warning" style={{ marginBottom: '1.5rem' }}>
-                <strong><i className="fas fa-exclamation-triangle"></i> Atenção:</strong> {estatisticas.pendentes} prescrições aguardando dispensação.
-                <button className="btn btn-sm btn-warning" style={{ marginLeft: '1rem' }}>
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <strong className="inline-flex items-center gap-1"><AlertTriangle className="h-4 w-4" /> Atenção:</strong> {estatisticas.pendentes} prescrições aguardando dispensação.
+                <button className="ml-4 inline-flex items-center rounded-lg bg-amber-200 px-3 py-1 text-xs font-medium text-amber-900 hover:bg-amber-300">
                     Ver Pendentes
                 </button>
             </div>
 
             {/* Filters */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-body">
-                    <h5 style={{ marginBottom: '1rem' }}>Filtros</h5>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '1rem' }}>
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="p-5">
+                    <h5 className="mb-4 font-semibold">Filtros</h5>
+                    <div className="grid grid-cols-[1fr_1fr_2fr] gap-4">
                         <div>
-                            <label className="form-label">Status</label>
+                            <label className="mb-1 block text-sm font-medium text-foreground">Status</label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroStatus}
                                 onChange={(e) => setFiltroStatus(e.target.value)}
                             >
@@ -218,8 +235,8 @@ export default function Prescricoes() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Período</label>
-                            <select className="form-control">
+                            <label className="mb-1 block text-sm font-medium text-foreground">Período</label>
+                            <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                                 <option>Últimos 7 dias</option>
                                 <option>Últimos 30 dias</option>
                                 <option>Últimos 3 meses</option>
@@ -227,10 +244,10 @@ export default function Prescricoes() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Pesquisar</label>
+                            <label className="mb-1 block text-sm font-medium text-foreground">Pesquisar</label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 placeholder="Paciente, número da prescrição ou CNS..."
                                 value={pesquisa}
                                 onChange={(e) => setPesquisa(e.target.value)}
@@ -241,165 +258,151 @@ export default function Prescricoes() {
             </div>
 
             {/* Prescriptions Table */}
-            <div className="card">
-                <div className="card-body" style={{ padding: 0 }}>
-                    <div style={{ padding: '1rem 1rem 0.5rem' }}>
-                        <h5>Prescrições ({prescricoesFiltradas.length})</h5>
-                    </div>
-                    <table className="table" style={{ marginBottom: 0 }}>
-                        <thead>
-                            <tr>
-                                <th>Nº Prescrição</th>
-                                <th>Paciente</th>
-                                <th>Prescritor</th>
-                                <th>Data</th>
-                                <th>Validade</th>
-                                <th>Itens</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {prescricoesFiltradas.map(rx => (
-                                <tr key={rx.id}>
-                                    <td>
-                                        <code style={{ fontWeight: '600' }}>{rx.numero}</code>
-                                    </td>
-                                    <td>
-                                        <strong>{rx.paciente}</strong>
-                                        <br />
-                                        <small style={{ color: 'var(--sus-gray)' }}>CNS: {rx.cns}</small>
-                                    </td>
-                                    <td>
-                                        {rx.medico}
-                                        <br />
-                                        <small style={{ color: 'var(--sus-gray)' }}>{rx.crm}</small>
-                                    </td>
-                                    <td>{formatDate(rx.data)}</td>
-                                    <td style={{ color: isExpired(rx.validade) ? '#dc3545' : 'inherit' }}>
-                                        {isExpired(rx.validade) && <i className="fas fa-exclamation-circle" style={{ marginRight: '0.25rem' }}></i>}
-                                        {formatDate(rx.validade)}
-                                    </td>
-                                    <td>
-                                        <span className="badge badge-secondary">{rx.medicamentos.length} item(s)</span>
-                                    </td>
-                                    <td>{getStatusBadge(rx.status)}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                            <button
-                                                className="btn btn-sm btn-outline-primary"
-                                                onClick={() => setPrescricaoSelecionada(rx)}
-                                                title="Detalhes"
-                                            >
-                                                <i className="fas fa-eye"></i>
-                                            </button>
-                                            {(rx.status === 'pendente' || rx.status === 'parcial') && (
-                                                <button
-                                                    className="btn btn-sm btn-success"
-                                                    onClick={() => {
-                                                        setPrescricaoSelecionada(rx);
-                                                        setShowDispensarModal(true);
-                                                    }}
-                                                    title="Dispensar"
-                                                >
-                                                    <i className="fas fa-hand-holding-medical"></i>
-                                                </button>
-                                            )}
-                                            <button className="btn btn-sm btn-outline-secondary" title="Imprimir">
-                                                <i className="fas fa-print"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="px-5 pt-4 pb-2">
+                    <h5 className="font-semibold">Prescrições ({prescricoesFiltradas.length})</h5>
                 </div>
+                <table className="w-full text-sm">
+                    <thead className="border-b border-border bg-muted/50">
+                        <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Nº Prescrição</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Paciente</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Prescritor</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Data</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Validade</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Itens</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Status</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                        {prescricoesFiltradas.map(rx => (
+                            <tr key={rx.id}>
+                                <td className="px-4 py-3">
+                                    <code className="font-semibold">{rx.numero}</code>
+                                </td>
+                                <td className="px-4 py-3">
+                                    <strong>{rx.paciente}</strong>
+                                    <br />
+                                    <small className="text-muted-foreground">CNS: {rx.cns}</small>
+                                </td>
+                                <td className="px-4 py-3">
+                                    {rx.medico}
+                                    <br />
+                                    <small className="text-muted-foreground">{rx.crm}</small>
+                                </td>
+                                <td className="px-4 py-3">{formatDate(rx.data)}</td>
+                                <td className={cn('px-4 py-3', isExpired(rx.validade) && 'text-red-500')}>
+                                    {isExpired(rx.validade) && <AlertCircle className="mr-1 inline h-4 w-4" />}
+                                    {formatDate(rx.validade)}
+                                </td>
+                                <td className="px-4 py-3">
+                                    <span className="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{rx.medicamentos.length} item(s)</span>
+                                </td>
+                                <td className="px-4 py-3">{getStatusBadge(rx.status)}</td>
+                                <td className="px-4 py-3">
+                                    <div className="flex gap-1">
+                                        <button
+                                            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted"
+                                            onClick={() => setPrescricaoSelecionada(rx)}
+                                            title="Detalhes"
+                                        >
+                                            <Eye className="h-3.5 w-3.5" />
+                                        </button>
+                                        {(rx.status === 'pendente' || rx.status === 'parcial') && (
+                                            <button
+                                                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-2 py-1.5 text-xs text-white hover:bg-emerald-700"
+                                                onClick={() => {
+                                                    setPrescricaoSelecionada(rx);
+                                                    setShowDispensarModal(true);
+                                                }}
+                                                title="Dispensar"
+                                            >
+                                                <HandHelping className="h-3.5 w-3.5" />
+                                            </button>
+                                        )}
+                                        <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted" title="Imprimir">
+                                            <Printer className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
 
             {/* Detail Modal */}
             {prescricaoSelecionada && !showDispensarModal && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setPrescricaoSelecionada(null)}
                 >
                     <div
-                        className="card"
-                        style={{ width: '700px', maxWidth: '90%', maxHeight: '80vh', overflow: 'auto' }}
+                        className="rounded-xl border border-border bg-card shadow-sm w-[700px] max-w-[90%] max-h-[80vh] overflow-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="card-header" style={{ background: 'var(--sus-blue)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-prescription"></i> Prescrição {prescricaoSelecionada.numero}</span>
+                        <div className="border-b border-border bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <div className="flex items-center justify-between">
+                                <span className="flex items-center gap-2"><ClipboardList className="h-4 w-4" /> Prescrição {prescricaoSelecionada.numero}</span>
                                 <button
-                                    className="btn btn-sm btn-light"
+                                    className="rounded-lg bg-white/20 px-2 py-1 text-white hover:bg-white/30"
                                     onClick={() => setPrescricaoSelecionada(null)}
                                 >
-                                    <i className="fas fa-times"></i>
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
-                        <div className="card-body">
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                        <div className="p-5">
+                            <div className="mb-4 grid grid-cols-2 gap-4">
                                 <div>
-                                    <h6>Paciente</h6>
-                                    <p style={{ margin: '0.25rem 0' }}><strong>{prescricaoSelecionada.paciente}</strong></p>
-                                    <p style={{ margin: '0.25rem 0', color: 'var(--sus-gray)' }}>CPF: {prescricaoSelecionada.cpf}</p>
-                                    <p style={{ margin: '0.25rem 0', color: 'var(--sus-gray)' }}>CNS: {prescricaoSelecionada.cns}</p>
+                                    <h6 className="mb-1 font-semibold">Paciente</h6>
+                                    <p className="my-1"><strong>{prescricaoSelecionada.paciente}</strong></p>
+                                    <p className="my-1 text-muted-foreground">CPF: {prescricaoSelecionada.cpf}</p>
+                                    <p className="my-1 text-muted-foreground">CNS: {prescricaoSelecionada.cns}</p>
                                 </div>
                                 <div>
-                                    <h6>Prescritor</h6>
-                                    <p style={{ margin: '0.25rem 0' }}><strong>{prescricaoSelecionada.medico}</strong></p>
-                                    <p style={{ margin: '0.25rem 0', color: 'var(--sus-gray)' }}>{prescricaoSelecionada.crm}</p>
-                                </div>
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                                <div>
-                                    <p style={{ margin: 0 }}><strong>Data:</strong> {formatDate(prescricaoSelecionada.data)}</p>
-                                </div>
-                                <div>
-                                    <p style={{ margin: 0 }}><strong>Validade:</strong> {formatDate(prescricaoSelecionada.validade)}</p>
-                                </div>
-                                <div>
-                                    <p style={{ margin: 0 }}><strong>Status:</strong> {getStatusBadge(prescricaoSelecionada.status)}</p>
+                                    <h6 className="mb-1 font-semibold">Prescritor</h6>
+                                    <p className="my-1"><strong>{prescricaoSelecionada.medico}</strong></p>
+                                    <p className="my-1 text-muted-foreground">{prescricaoSelecionada.crm}</p>
                                 </div>
                             </div>
 
-                            <hr />
+                            <div className="mb-4 grid grid-cols-3 gap-4">
+                                <div>
+                                    <p><strong>Data:</strong> {formatDate(prescricaoSelecionada.data)}</p>
+                                </div>
+                                <div>
+                                    <p><strong>Validade:</strong> {formatDate(prescricaoSelecionada.validade)}</p>
+                                </div>
+                                <div>
+                                    <p><strong>Status:</strong> {getStatusBadge(prescricaoSelecionada.status)}</p>
+                                </div>
+                            </div>
 
-                            <h6>Medicamentos Prescritos</h6>
-                            <table className="table">
-                                <thead>
+                            <hr className="my-4 border-border" />
+
+                            <h6 className="mb-2 font-semibold">Medicamentos Prescritos</h6>
+                            <table className="w-full text-sm">
+                                <thead className="border-b border-border bg-muted/50">
                                     <tr>
-                                        <th>Medicamento</th>
-                                        <th>Quantidade</th>
-                                        <th>Posologia</th>
-                                        <th>Dispensado</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Medicamento</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Quantidade</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Posologia</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Dispensado</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-border">
                                     {prescricaoSelecionada.medicamentos.map((med, idx) => (
                                         <tr key={idx}>
-                                            <td><strong>{med.nome}</strong></td>
-                                            <td>{med.quantidade} un.</td>
-                                            <td>{med.posologia}</td>
-                                            <td>
+                                            <td className="px-4 py-2"><strong>{med.nome}</strong></td>
+                                            <td className="px-4 py-2">{med.quantidade} un.</td>
+                                            <td className="px-4 py-2">{med.posologia}</td>
+                                            <td className="px-4 py-2">
                                                 {med.dispensado ? (
-                                                    <span className="badge badge-success">{med.dispensado} un.</span>
+                                                    <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">{med.dispensado} un.</span>
                                                 ) : (
-                                                    <span className="badge badge-warning">Pendente</span>
+                                                    <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Pendente</span>
                                                 )}
                                             </td>
                                         </tr>
@@ -407,16 +410,16 @@ export default function Prescricoes() {
                                 </tbody>
                             </table>
 
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                <button className="btn btn-outline-secondary">
-                                    <i className="fas fa-print"></i> Imprimir
+                            <div className="mt-4 flex justify-end gap-2">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                                    <Printer className="h-4 w-4" /> Imprimir
                                 </button>
                                 {(prescricaoSelecionada.status === 'pendente' || prescricaoSelecionada.status === 'parcial') && (
                                     <button
-                                        className="btn btn-success"
+                                        className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
                                         onClick={() => setShowDispensarModal(true)}
                                     >
-                                        <i className="fas fa-hand-holding-medical"></i> Dispensar
+                                        <HandHelping className="h-4 w-4" /> Dispensar
                                     </button>
                                 )}
                             </div>
@@ -428,81 +431,70 @@ export default function Prescricoes() {
             {/* Dispensar Modal */}
             {prescricaoSelecionada && showDispensarModal && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => {
                         setShowDispensarModal(false);
                         setPrescricaoSelecionada(null);
                     }}
                 >
                     <div
-                        className="card"
-                        style={{ width: '700px', maxWidth: '90%' }}
+                        className="rounded-xl border border-border bg-card shadow-sm w-[700px] max-w-[90%]"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="card-header" style={{ background: 'var(--sus-green)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-hand-holding-medical"></i> Dispensar Medicamentos</span>
+                        <div className="border-b border-border bg-secondary px-5 py-3 text-sm font-semibold text-white">
+                            <div className="flex items-center justify-between">
+                                <span className="flex items-center gap-2"><HandHelping className="h-4 w-4" /> Dispensar Medicamentos</span>
                                 <button
-                                    className="btn btn-sm btn-light"
+                                    className="rounded-lg bg-white/20 px-2 py-1 text-white hover:bg-white/30"
                                     onClick={() => {
                                         setShowDispensarModal(false);
                                         setPrescricaoSelecionada(null);
                                     }}
                                 >
-                                    <i className="fas fa-times"></i>
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
-                        <div className="card-body">
-                            <div className="alert alert-info">
-                                <strong>Prescrição:</strong> {prescricaoSelecionada.numero}
-                                <br />
-                                <strong>Paciente:</strong> {prescricaoSelecionada.paciente}
+                        <div className="p-5">
+                            <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm mb-4">
+                                <div>
+                                    <strong>Prescrição:</strong> {prescricaoSelecionada.numero}
+                                    <br />
+                                    <strong>Paciente:</strong> {prescricaoSelecionada.paciente}
+                                </div>
                             </div>
 
-                            <h6>Selecione os medicamentos a dispensar:</h6>
-                            <table className="table">
-                                <thead>
+                            <h6 className="mb-2 font-semibold">Selecione os medicamentos a dispensar:</h6>
+                            <table className="w-full text-sm">
+                                <thead className="border-b border-border bg-muted/50">
                                     <tr>
-                                        <th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">
                                             <input type="checkbox" defaultChecked />
                                         </th>
-                                        <th>Medicamento</th>
-                                        <th>Prescrito</th>
-                                        <th>Dispensar</th>
-                                        <th>Lote</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Medicamento</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Prescrito</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Dispensar</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Lote</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-border">
                                     {prescricaoSelecionada.medicamentos.map((med, idx) => (
                                         <tr key={idx}>
-                                            <td>
+                                            <td className="px-4 py-2">
                                                 <input type="checkbox" defaultChecked={!med.dispensado} disabled={med.dispensado} />
                                             </td>
-                                            <td><strong>{med.nome}</strong></td>
-                                            <td>{med.quantidade} un.</td>
-                                            <td>
+                                            <td className="px-4 py-2"><strong>{med.nome}</strong></td>
+                                            <td className="px-4 py-2">{med.quantidade} un.</td>
+                                            <td className="px-4 py-2">
                                                 <input
                                                     type="number"
-                                                    className="form-control form-control-sm"
-                                                    style={{ width: '80px' }}
+                                                    className="h-8 w-20 rounded-lg border border-input bg-white px-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                                     defaultValue={med.dispensado ? 0 : med.quantidade}
                                                     disabled={med.dispensado}
                                                 />
                                             </td>
-                                            <td>
-                                                <select className="form-control form-control-sm" style={{ width: '120px' }} disabled={med.dispensado}>
+                                            <td className="px-4 py-2">
+                                                <select className="h-8 w-[120px] rounded-lg border border-input bg-white px-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" disabled={med.dispensado}>
                                                     <option>LOT2025001</option>
                                                     <option>LOT2025002</option>
                                                 </select>
@@ -512,14 +504,14 @@ export default function Prescricoes() {
                                 </tbody>
                             </table>
 
-                            <div style={{ marginTop: '1rem' }}>
-                                <label className="form-label">Observações</label>
-                                <textarea className="form-control" rows="2" placeholder="Observações sobre a dispensação..."></textarea>
+                            <div className="mt-4">
+                                <label className="mb-1 block text-sm font-medium text-foreground">Observações</label>
+                                <textarea className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" rows="2" placeholder="Observações sobre a dispensação..."></textarea>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+                            <div className="mt-6 flex justify-end gap-2">
                                 <button
-                                    className="btn btn-outline-secondary"
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
                                     onClick={() => {
                                         setShowDispensarModal(false);
                                         setPrescricaoSelecionada(null);
@@ -527,8 +519,8 @@ export default function Prescricoes() {
                                 >
                                     Cancelar
                                 </button>
-                                <button className="btn btn-success">
-                                    <i className="fas fa-check"></i> Confirmar Dispensação
+                                <button className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+                                    <Check className="h-4 w-4" /> Confirmar Dispensação
                                 </button>
                             </div>
                         </div>

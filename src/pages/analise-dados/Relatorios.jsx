@@ -1,31 +1,41 @@
 import { useState } from 'react';
-import { Card } from '../../components/ui';
-
-// SUS Colors
-const susColors = {
-    blue: '#0054A6',
-    green: '#00A651',
-    yellow: '#FFF200',
-    red: '#ED1C24',
-};
+import {
+    FileText,
+    Bot,
+    PlusCircle,
+    RefreshCw,
+    Stethoscope,
+    HeartPulse,
+    Pill,
+    DollarSign,
+    Search,
+    RotateCcw,
+    Filter,
+    Play,
+    Pencil,
+    History,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/Card';
+import { Alert } from '@/components/ui/Alert';
 
 // Sample reports data
 const reportsData = [
-    { id: 1, name: 'Produção Médica por Profissional', category: 'Atendimentos', lastRun: '10/04/2025', formats: ['PDF', 'Excel'], frequency: 'Diário', status: 'Ativo', statusClass: 'badge-success' },
-    { id: 2, name: 'Indicadores de Saúde', category: 'Epidemiológicos', lastRun: '09/04/2025', formats: ['PDF', 'Excel', 'CSV'], frequency: 'Mensal', status: 'Ativo', statusClass: 'badge-success' },
-    { id: 3, name: 'Consumo de Medicamentos', category: 'Farmácia', lastRun: '08/04/2025', formats: ['PDF', 'Excel'], frequency: 'Semanal', status: 'Ativo', statusClass: 'badge-success' },
-    { id: 4, name: 'Faturamento SUS', category: 'Financeiros', lastRun: '05/04/2025', formats: ['PDF', 'Excel'], frequency: 'Mensal', status: 'Ativo', statusClass: 'badge-success' },
-    { id: 5, name: 'Atendimentos por Especialidade', category: 'Atendimentos', lastRun: '01/04/2025', formats: ['PDF', 'Excel'], frequency: 'Semanal', status: 'Ativo', statusClass: 'badge-success' },
-    { id: 6, name: 'Absenteísmo de Pacientes', category: 'Gestão', lastRun: '31/03/2025', formats: ['PDF', 'Excel'], frequency: 'Mensal', status: 'Em revisão', statusClass: 'badge-warning' },
-    { id: 7, name: 'Produtividade por Equipe', category: 'Recursos Humanos', lastRun: '25/03/2025', formats: ['PDF', 'Excel'], frequency: 'Mensal', status: 'Inativo', statusClass: 'badge-secondary' },
+    { id: 1, name: 'Producao Medica por Profissional', category: 'Atendimentos', lastRun: '10/04/2025', formats: ['PDF', 'Excel'], frequency: 'Diario', status: 'Ativo', statusClass: 'bg-secondary/10 text-secondary-dark' },
+    { id: 2, name: 'Indicadores de Saude', category: 'Epidemiologicos', lastRun: '09/04/2025', formats: ['PDF', 'Excel', 'CSV'], frequency: 'Mensal', status: 'Ativo', statusClass: 'bg-secondary/10 text-secondary-dark' },
+    { id: 3, name: 'Consumo de Medicamentos', category: 'Farmacia', lastRun: '08/04/2025', formats: ['PDF', 'Excel'], frequency: 'Semanal', status: 'Ativo', statusClass: 'bg-secondary/10 text-secondary-dark' },
+    { id: 4, name: 'Faturamento SUS', category: 'Financeiros', lastRun: '05/04/2025', formats: ['PDF', 'Excel'], frequency: 'Mensal', status: 'Ativo', statusClass: 'bg-secondary/10 text-secondary-dark' },
+    { id: 5, name: 'Atendimentos por Especialidade', category: 'Atendimentos', lastRun: '01/04/2025', formats: ['PDF', 'Excel'], frequency: 'Semanal', status: 'Ativo', statusClass: 'bg-secondary/10 text-secondary-dark' },
+    { id: 6, name: 'Absenteismo de Pacientes', category: 'Gestao', lastRun: '31/03/2025', formats: ['PDF', 'Excel'], frequency: 'Mensal', status: 'Em revisao', statusClass: 'bg-amber-50 text-amber-800' },
+    { id: 7, name: 'Produtividade por Equipe', category: 'Recursos Humanos', lastRun: '25/03/2025', formats: ['PDF', 'Excel'], frequency: 'Mensal', status: 'Inativo', statusClass: 'bg-muted text-muted-foreground' },
 ];
 
 // Report categories
 const categories = [
-    { id: 1, name: 'Atendimentos', icon: 'fa-user-md', color: susColors.blue, description: 'Relatórios sobre consultas, procedimentos e atendimentos realizados.' },
-    { id: 2, name: 'Epidemiológicos', icon: 'fa-heartbeat', color: susColors.red, description: 'Relatórios sobre doenças, condições de saúde e vigilância epidemiológica.' },
-    { id: 3, name: 'Farmácia', icon: 'fa-pills', color: susColors.green, description: 'Relatórios sobre dispensação, estoque e consumo de medicamentos.' },
-    { id: 4, name: 'Financeiros', icon: 'fa-dollar-sign', color: '#d4a500', description: 'Relatórios sobre custos, faturamento e produção para o SUS.' },
+    { id: 1, name: 'Atendimentos', icon: Stethoscope, colorClass: 'text-primary', description: 'Relatorios sobre consultas, procedimentos e atendimentos realizados.' },
+    { id: 2, name: 'Epidemiologicos', icon: HeartPulse, colorClass: 'text-destructive', description: 'Relatorios sobre doencas, condicoes de saude e vigilancia epidemiologica.' },
+    { id: 3, name: 'Farmacia', icon: Pill, colorClass: 'text-secondary', description: 'Relatorios sobre dispensacao, estoque e consumo de medicamentos.' },
+    { id: 4, name: 'Financeiros', icon: DollarSign, colorClass: 'text-amber-500', description: 'Relatorios sobre custos, faturamento e producao para o SUS.' },
 ];
 
 export default function Relatorios() {
@@ -50,126 +60,132 @@ export default function Relatorios() {
     };
 
     return (
-        <div className="fade-in">
+        <div className="animate-fade-in">
             {/* Page Header */}
-            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <nav style={{ fontSize: '0.875rem', marginBottom: 'var(--spacing-sm)' }}>
-                    <span style={{ color: 'var(--sus-gray)' }}>Início / Análise de Dados / </span>
-                    <span style={{ color: 'var(--sus-blue)' }}>Relatórios</span>
+            <div className="mb-6">
+                <nav className="mb-2 text-sm">
+                    <span className="text-muted-foreground">Inicio / Analise de Dados / </span>
+                    <span className="text-primary">Relatorios</span>
                 </nav>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--spacing-md)' }}>
-                    <h1 style={{ fontSize: '1.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-                        <i className="fas fa-file-alt" style={{ color: 'var(--sus-blue)' }}></i>
-                        Relatórios
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <h1 className="flex items-center gap-2 text-2xl font-semibold">
+                        <FileText className="size-7 text-primary" />
+                        Relatorios
                     </h1>
-                    <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-                        <button className="btn btn-outline-primary">
-                            <i className="fas fa-robot" style={{ marginRight: '0.5rem' }}></i>
-                            Análise IA
+                    <div className="flex gap-2">
+                        <button className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5">
+                            <Bot className="size-4" />
+                            Analise IA
                         </button>
-                        <button className="btn btn-primary">
-                            <i className="fas fa-plus-circle" style={{ marginRight: '0.5rem' }}></i>
-                            Novo Relatório
+                        <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-dark">
+                            <PlusCircle className="size-4" />
+                            Novo Relatorio
                         </button>
                     </div>
                 </div>
             </div>
 
             {/* AI Insights */}
-            <Card style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-                        <i className="fas fa-robot" style={{ color: 'var(--sus-blue)' }}></i>
-                        Insights de IA - Relatórios
+            <Card className="mb-6">
+                <div className="flex items-center justify-between border-b border-border px-5 py-3">
+                    <h4 className="flex items-center gap-2 text-base font-semibold">
+                        <Bot className="size-5 text-primary" />
+                        Insights de IA - Relatorios
                     </h4>
-                    <button className="btn btn-outline-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}>
-                        <i className="fas fa-sync-alt" style={{ marginRight: '0.25rem' }}></i>
+                    <button className="inline-flex items-center gap-1 rounded-md border border-primary px-3 py-1 text-sm text-primary hover:bg-primary/5">
+                        <RefreshCw className="size-3.5" />
                         Atualizar
                     </button>
                 </div>
-                <div className="card-body">
-                    <div className="alert alert-info" style={{ marginBottom: 'var(--spacing-md)' }}>
-                        <h5 style={{ marginBottom: 'var(--spacing-xs)' }}>
-                            <i className="fas fa-lightbulb" style={{ marginRight: '0.5rem' }}></i>
-                            Análise de Relatórios
-                        </h5>
-                        <p style={{ margin: 0 }}>A IA analisou os relatórios mais acessados e identificou que os relatórios de produtividade médica e indicadores de saúde são os mais utilizados pelos gestores. Recomenda-se destacar esses relatórios na interface e otimizar seu tempo de geração.</p>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-md)' }}>
-                        <div className="alert alert-success">
-                            <h5 style={{ marginBottom: 'var(--spacing-xs)' }}>
-                                <i className="fas fa-chart-pie" style={{ marginRight: '0.5rem' }}></i>
-                                Sugestão de Novos Relatórios
-                            </h5>
-                            <p style={{ margin: 0, fontSize: '0.9rem' }}>A IA sugere 3 novos relatórios para insights sobre eficiência operacional.</p>
-                        </div>
-                        <div className="alert alert-warning">
-                            <h5 style={{ marginBottom: 'var(--spacing-xs)' }}>
-                                <i className="fas fa-exclamation-triangle" style={{ marginRight: '0.5rem' }}></i>
-                                Relatórios Subutilizados
-                            </h5>
-                            <p style={{ margin: 0, fontSize: '0.9rem' }}>5 relatórios foram gerados menos de 3 vezes nos últimos 6 meses.</p>
-                        </div>
+                <div className="p-5">
+                    <Alert type="info" title="Analise de Relatorios" className="mb-4">
+                        <p>A IA analisou os relatorios mais acessados e identificou que os relatorios de produtividade medica e indicadores de saude sao os mais utilizados pelos gestores. Recomenda-se destacar esses relatorios na interface e otimizar seu tempo de geracao.</p>
+                    </Alert>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <Alert type="success" title="Sugestao de Novos Relatorios">
+                            <p className="text-sm">A IA sugere 3 novos relatorios para insights sobre eficiencia operacional.</p>
+                        </Alert>
+                        <Alert type="warning" title="Relatorios Subutilizados">
+                            <p className="text-sm">5 relatorios foram gerados menos de 3 vezes nos ultimos 6 meses.</p>
+                        </Alert>
                     </div>
                 </div>
             </Card>
 
             {/* Report Categories */}
-            <Card style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <div className="card-header">
-                    <h5 style={{ margin: 0 }}>Categorias de Relatórios</h5>
+            <Card className="mb-6">
+                <div className="border-b border-border px-5 py-3">
+                    <h5 className="text-sm font-semibold">Categorias de Relatorios</h5>
                 </div>
-                <div className="card-body">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--spacing-md)' }}>
-                        {categories.map(cat => (
-                            <Card key={cat.id} style={{ textAlign: 'center', cursor: 'pointer' }}>
-                                <div className="card-body">
-                                    <div style={{ marginBottom: 'var(--spacing-md)' }}>
-                                        <i className={`fas ${cat.icon}`} style={{ fontSize: '2.5rem', color: cat.color }}></i>
+                <div className="p-5">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        {categories.map(cat => {
+                            const Icon = cat.icon;
+                            return (
+                                <Card key={cat.id} className="cursor-pointer text-center transition-shadow hover:shadow-md">
+                                    <div className="mb-4">
+                                        <Icon className={cn('mx-auto size-10', cat.colorClass)} />
                                     </div>
-                                    <h5 style={{ marginBottom: 'var(--spacing-sm)' }}>{cat.name}</h5>
-                                    <p style={{ fontSize: '0.875rem', color: 'var(--sus-gray)', marginBottom: 'var(--spacing-md)' }}>{cat.description}</p>
-                                    <button className="btn btn-outline-primary" style={{ fontSize: '0.875rem' }}>Ver Relatórios</button>
-                                </div>
-                            </Card>
-                        ))}
+                                    <h5 className="mb-2 font-semibold">{cat.name}</h5>
+                                    <p className="mb-4 text-sm text-muted-foreground">{cat.description}</p>
+                                    <button className="rounded-md border border-primary px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5">
+                                        Ver Relatorios
+                                    </button>
+                                </Card>
+                            );
+                        })}
                     </div>
                 </div>
             </Card>
 
             {/* Filters */}
-            <Card style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <div className="card-body">
-                    <h5 style={{ marginBottom: 'var(--spacing-md)' }}>Filtros</h5>
+            <Card className="mb-6">
+                <div className="p-5">
+                    <h5 className="mb-4 font-semibold">Filtros</h5>
                     <form onSubmit={handleFilterSubmit}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--spacing-md)' }}>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <div>
-                                <label className="form-label">Categoria</label>
-                                <select className="form-select" name="categoria" value={filters.categoria} onChange={handleFilterChange}>
+                                <label className="mb-1 block text-sm font-medium text-foreground">Categoria</label>
+                                <select
+                                    className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                    name="categoria"
+                                    value={filters.categoria}
+                                    onChange={handleFilterChange}
+                                >
                                     <option value="">Todas</option>
                                     <option value="atendimentos">Atendimentos</option>
-                                    <option value="epidemiologicos">Epidemiológicos</option>
-                                    <option value="farmacia">Farmácia</option>
+                                    <option value="epidemiologicos">Epidemiologicos</option>
+                                    <option value="farmacia">Farmacia</option>
                                     <option value="financeiros">Financeiros</option>
-                                    <option value="gestao">Gestão</option>
+                                    <option value="gestao">Gestao</option>
                                     <option value="rh">Recursos Humanos</option>
                                 </select>
                             </div>
                             <div>
-                                <label className="form-label">Período</label>
-                                <select className="form-select" name="periodo" value={filters.periodo} onChange={handleFilterChange}>
+                                <label className="mb-1 block text-sm font-medium text-foreground">Periodo</label>
+                                <select
+                                    className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                    name="periodo"
+                                    value={filters.periodo}
+                                    onChange={handleFilterChange}
+                                >
                                     <option value="hoje">Hoje</option>
                                     <option value="ontem">Ontem</option>
-                                    <option value="semana">Últimos 7 dias</option>
-                                    <option value="mes">Último mês</option>
-                                    <option value="trimestre">Último trimestre</option>
-                                    <option value="ano">Último ano</option>
+                                    <option value="semana">Ultimos 7 dias</option>
+                                    <option value="mes">Ultimo mes</option>
+                                    <option value="trimestre">Ultimo trimestre</option>
+                                    <option value="ano">Ultimo ano</option>
                                     <option value="personalizado">Personalizado</option>
                                 </select>
                             </div>
                             <div>
-                                <label className="form-label">Formato</label>
-                                <select className="form-select" name="formato" value={filters.formato} onChange={handleFilterChange}>
+                                <label className="mb-1 block text-sm font-medium text-foreground">Formato</label>
+                                <select
+                                    className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                    name="formato"
+                                    value={filters.formato}
+                                    onChange={handleFilterChange}
+                                >
                                     <option value="">Todos</option>
                                     <option value="pdf">PDF</option>
                                     <option value="excel">Excel</option>
@@ -178,29 +194,29 @@ export default function Relatorios() {
                                 </select>
                             </div>
                             <div>
-                                <label className="form-label">Buscar</label>
-                                <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                                <label className="mb-1 block text-sm font-medium text-foreground">Buscar</label>
+                                <div className="flex gap-1">
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                                         name="search"
-                                        placeholder="Nome do relatório"
+                                        placeholder="Nome do relatorio"
                                         value={filters.search}
                                         onChange={handleFilterChange}
                                     />
-                                    <button type="submit" className="btn btn-primary">
-                                        <i className="fas fa-search"></i>
+                                    <button type="submit" className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-primary-foreground hover:bg-primary-dark">
+                                        <Search className="size-4" />
                                     </button>
                                 </div>
                             </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-sm)', marginTop: 'var(--spacing-md)' }}>
-                            <button type="button" className="btn btn-outline-primary" onClick={handleFilterReset}>
-                                <i className="fas fa-undo" style={{ marginRight: '0.25rem' }}></i>
+                        <div className="mt-4 flex justify-end gap-2">
+                            <button type="button" className="inline-flex items-center gap-1 rounded-md border border-primary px-3 py-2 text-sm font-medium text-primary hover:bg-primary/5" onClick={handleFilterReset}>
+                                <RotateCcw className="size-3.5" />
                                 Limpar
                             </button>
-                            <button type="submit" className="btn btn-primary">
-                                <i className="fas fa-filter" style={{ marginRight: '0.25rem' }}></i>
+                            <button type="submit" className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-dark">
+                                <Filter className="size-3.5" />
                                 Aplicar Filtros
                             </button>
                         </div>
@@ -210,64 +226,64 @@ export default function Relatorios() {
 
             {/* Reports Table */}
             <Card>
-                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h5 style={{ margin: 0 }}>Relatórios Disponíveis</h5>
+                <div className="flex items-center justify-between border-b border-border px-5 py-3">
+                    <h5 className="text-sm font-semibold">Relatorios Disponiveis</h5>
                 </div>
-                <div className="card-body" style={{ padding: 0 }}>
-                    <div style={{ overflowX: 'auto' }}>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Nome do Relatório</th>
-                                    <th>Categoria</th>
-                                    <th>Última Execução</th>
-                                    <th>Formatos</th>
-                                    <th>Frequência</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {reportsData.map(report => (
-                                    <tr key={report.id}>
-                                        <td>{report.name}</td>
-                                        <td>{report.category}</td>
-                                        <td>{report.lastRun}</td>
-                                        <td>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                        <thead className="border-b border-border bg-muted/50">
+                            <tr>
+                                <th className="px-4 py-3 font-medium text-muted-foreground">Nome do Relatorio</th>
+                                <th className="px-4 py-3 font-medium text-muted-foreground">Categoria</th>
+                                <th className="px-4 py-3 font-medium text-muted-foreground">Ultima Execucao</th>
+                                <th className="px-4 py-3 font-medium text-muted-foreground">Formatos</th>
+                                <th className="px-4 py-3 font-medium text-muted-foreground">Frequencia</th>
+                                <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
+                                <th className="px-4 py-3 font-medium text-muted-foreground">Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                            {reportsData.map(report => (
+                                <tr key={report.id} className="hover:bg-muted/30">
+                                    <td className="px-4 py-3 font-medium">{report.name}</td>
+                                    <td className="px-4 py-3">{report.category}</td>
+                                    <td className="px-4 py-3">{report.lastRun}</td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex flex-wrap gap-1">
                                             {report.formats.map((format, idx) => (
-                                                <span key={idx} className="badge badge-secondary" style={{ marginRight: '0.25rem', background: 'var(--sus-gray)', color: 'white' }}>{format}</span>
+                                                <span key={idx} className="rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">{format}</span>
                                             ))}
-                                        </td>
-                                        <td>{report.frequency}</td>
-                                        <td>
-                                            <span className={`badge ${report.statusClass}`}>{report.status}</span>
-                                        </td>
-                                        <td>
-                                            <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
-                                                <button className="btn btn-primary" style={{ padding: '0.25rem 0.5rem' }} title="Gerar">
-                                                    <i className="fas fa-play"></i>
-                                                </button>
-                                                <button className="btn btn-outline-primary" style={{ padding: '0.25rem 0.5rem' }} title="Editar">
-                                                    <i className="fas fa-edit"></i>
-                                                </button>
-                                                <button className="btn btn-outline-primary" style={{ padding: '0.25rem 0.5rem' }} title="Histórico">
-                                                    <i className="fas fa-history"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3">{report.frequency}</td>
+                                    <td className="px-4 py-3">
+                                        <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-medium', report.statusClass)}>{report.status}</span>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex gap-1">
+                                            <button className="rounded-md bg-primary p-1.5 text-primary-foreground hover:bg-primary-dark" title="Gerar">
+                                                <Play className="size-3.5" />
+                                            </button>
+                                            <button className="rounded-md border border-primary p-1.5 text-primary hover:bg-primary/5" title="Editar">
+                                                <Pencil className="size-3.5" />
+                                            </button>
+                                            <button className="rounded-md border border-primary p-1.5 text-primary hover:bg-primary/5" title="Historico">
+                                                <History className="size-3.5" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-                <div className="card-footer" style={{ display: 'flex', justifyContent: 'center', padding: 'var(--spacing-md)' }}>
-                    <nav>
-                        <button className="btn btn-outline-primary" disabled style={{ marginRight: 'var(--spacing-xs)' }}>Anterior</button>
-                        <button className="btn btn-primary" style={{ marginRight: 'var(--spacing-xs)' }}>1</button>
-                        <button className="btn btn-outline-primary" style={{ marginRight: 'var(--spacing-xs)' }}>2</button>
-                        <button className="btn btn-outline-primary" style={{ marginRight: 'var(--spacing-xs)' }}>3</button>
-                        <button className="btn btn-outline-primary">Próximo</button>
+                <div className="flex justify-center border-t border-border px-5 py-4">
+                    <nav className="flex gap-1">
+                        <button className="rounded-md border border-primary px-3 py-1.5 text-sm text-primary opacity-50" disabled>Anterior</button>
+                        <button className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground">1</button>
+                        <button className="rounded-md border border-primary px-3 py-1.5 text-sm text-primary hover:bg-primary/5">2</button>
+                        <button className="rounded-md border border-primary px-3 py-1.5 text-sm text-primary hover:bg-primary/5">3</button>
+                        <button className="rounded-md border border-primary px-3 py-1.5 text-sm text-primary hover:bg-primary/5">Proximo</button>
                     </nav>
                 </div>
             </Card>

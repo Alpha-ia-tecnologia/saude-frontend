@@ -1,4 +1,19 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+    Pill,
+    FileOutput,
+    Truck,
+    Plus,
+    AlertTriangle,
+    CalendarDays,
+    AlertCircle,
+    Eye,
+    Pencil,
+    X,
+    Save,
+    Minus,
+} from 'lucide-react';
 
 // Sample medications data
 const medicamentosData = [
@@ -146,20 +161,20 @@ export default function Medicamentos() {
 
     const getStatusBadge = (status) => {
         const config = {
-            disponivel: { color: 'success', label: 'Disponível' },
-            baixo: { color: 'warning', label: 'Estoque Baixo' },
-            vencendo: { color: 'info', label: 'Vencendo' },
-            esgotado: { color: 'danger', label: 'Esgotado' }
+            disponivel: { classes: 'bg-emerald-100 text-emerald-800', label: 'Disponível' },
+            baixo: { classes: 'bg-amber-100 text-amber-800', label: 'Estoque Baixo' },
+            vencendo: { classes: 'bg-sky-100 text-sky-800', label: 'Vencendo' },
+            esgotado: { classes: 'bg-red-100 text-red-800', label: 'Esgotado' }
         };
         const s = config[status] || config.disponivel;
-        return <span className={`badge badge-${s.color}`}>{s.label}</span>;
+        return <span className={cn('rounded-md px-2 py-0.5 text-xs font-medium', s.classes)}>{s.label}</span>;
     };
 
-    const getEstoqueColor = (estoque, minimo) => {
+    const getEstoqueClasses = (estoque, minimo) => {
         const ratio = estoque / minimo;
-        if (ratio <= 0) return '#dc3545';
-        if (ratio < 1.2) return 'var(--sus-yellow)';
-        return 'var(--sus-green)';
+        if (ratio <= 0) return { bar: 'bg-red-500', text: 'text-red-500' };
+        if (ratio < 1.2) return { bar: 'bg-amber-400', text: 'text-amber-500' };
+        return { bar: 'bg-emerald-500', text: 'text-emerald-500' };
     };
 
     const formatDate = (dateStr) => {
@@ -177,81 +192,81 @@ export default function Medicamentos() {
     };
 
     return (
-        <div className="fade-in">
+        <div className="space-y-6">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1 style={{ margin: 0 }}>
-                    <i className="fas fa-capsules" style={{ color: 'var(--sus-green)', marginRight: '0.5rem' }}></i>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                    <Pill className="h-6 w-6 text-secondary" />
                     Gestão de Medicamentos
                 </h1>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-file-export"></i> Exportar
+                <div className="flex gap-2">
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                        <FileOutput className="h-4 w-4" /> Exportar
                     </button>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-truck"></i> Entrada
+                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                        <Truck className="h-4 w-4" /> Entrada
                     </button>
-                    <button className="btn btn-primary" onClick={() => setShowNovoModal(true)}>
-                        <i className="fas fa-plus"></i> Novo Medicamento
+                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark" onClick={() => setShowNovoModal(true)}>
+                        <Plus className="h-4 w-4" /> Novo Medicamento
                     </button>
                 </div>
             </div>
 
             {/* Dashboard Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-blue)' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: 'var(--sus-blue)', margin: 0 }}>{estatisticas.totalItens}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Total de Itens</small>
+            <div className="grid grid-cols-5 gap-4">
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-primary">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-primary">{estatisticas.totalItens}</h2>
+                        <small className="text-muted-foreground">Total de Itens</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-green)' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: 'var(--sus-green)', margin: 0 }}>{estatisticas.disponiveis}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Disponíveis</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-secondary">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-secondary">{estatisticas.disponiveis}</h2>
+                        <small className="text-muted-foreground">Disponíveis</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid var(--sus-yellow)' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: 'var(--sus-yellow)', margin: 0 }}>{estatisticas.estoqueBaixo}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Estoque Baixo</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-amber-400">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-amber-500">{estatisticas.estoqueBaixo}</h2>
+                        <small className="text-muted-foreground">Estoque Baixo</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid #17a2b8' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: '#17a2b8', margin: 0 }}>{estatisticas.vencendo}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Vencendo</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-sky-500">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-sky-500">{estatisticas.vencendo}</h2>
+                        <small className="text-muted-foreground">Vencendo</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderLeft: '4px solid #dc3545' }}>
-                    <div className="card-body" style={{ textAlign: 'center', padding: '1rem' }}>
-                        <h2 style={{ color: '#dc3545', margin: 0 }}>{estatisticas.esgotados}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>Esgotados</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-l-4 border-l-red-500">
+                    <div className="p-4 text-center">
+                        <h2 className="text-2xl font-bold text-red-500">{estatisticas.esgotados}</h2>
+                        <small className="text-muted-foreground">Esgotados</small>
                     </div>
                 </div>
             </div>
 
             {/* Alerts */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="alert alert-warning" style={{ margin: 0 }}>
-                    <strong><i className="fas fa-exclamation-triangle"></i> Estoque Crítico:</strong> {estatisticas.estoqueBaixo} medicamentos abaixo do estoque mínimo.
-                    <a href="#" style={{ marginLeft: '0.5rem' }}>Ver lista</a>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                    <strong className="inline-flex items-center gap-1"><AlertTriangle className="h-4 w-4" /> Estoque Crítico:</strong> {estatisticas.estoqueBaixo} medicamentos abaixo do estoque mínimo.
+                    <a href="#" className="ml-2 underline">Ver lista</a>
                 </div>
-                <div className="alert alert-info" style={{ margin: 0 }}>
-                    <strong><i className="fas fa-calendar-alt"></i> Vencimento Próximo:</strong> {estatisticas.vencendo} lotes vencem nos próximos 3 meses.
-                    <a href="#" style={{ marginLeft: '0.5rem' }}>Ver lista</a>
+                <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+                    <strong className="inline-flex items-center gap-1"><CalendarDays className="h-4 w-4" /> Vencimento Próximo:</strong> {estatisticas.vencendo} lotes vencem nos próximos 3 meses.
+                    <a href="#" className="ml-2 underline">Ver lista</a>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-body">
-                    <h5 style={{ marginBottom: '1rem' }}>Filtros</h5>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="p-5">
+                    <h5 className="mb-4 font-semibold">Filtros</h5>
+                    <div className="grid grid-cols-4 gap-4">
                         <div>
-                            <label className="form-label">Categoria</label>
+                            <label className="mb-1 block text-sm font-medium text-foreground">Categoria</label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroCategoria}
                                 onChange={(e) => setFiltroCategoria(e.target.value)}
                             >
@@ -261,9 +276,9 @@ export default function Medicamentos() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Status</label>
+                            <label className="mb-1 block text-sm font-medium text-foreground">Status</label>
                             <select
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 value={filtroStatus}
                                 onChange={(e) => setFiltroStatus(e.target.value)}
                             >
@@ -274,11 +289,11 @@ export default function Medicamentos() {
                                 <option value="esgotado">Esgotado</option>
                             </select>
                         </div>
-                        <div style={{ gridColumn: 'span 2' }}>
-                            <label className="form-label">Pesquisar</label>
+                        <div className="col-span-2">
+                            <label className="mb-1 block text-sm font-medium text-foreground">Pesquisar</label>
                             <input
                                 type="text"
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 placeholder="Nome do medicamento ou lote..."
                                 value={pesquisa}
                                 onChange={(e) => setPesquisa(e.target.value)}
@@ -289,126 +304,104 @@ export default function Medicamentos() {
             </div>
 
             {/* Medications Table */}
-            <div className="card">
-                <div className="card-body" style={{ padding: 0 }}>
-                    <div style={{ padding: '1rem 1rem 0.5rem' }}>
-                        <h5>Medicamentos ({medicamentosFiltrados.length})</h5>
-                    </div>
-                    <table className="table" style={{ marginBottom: 0 }}>
-                        <thead>
-                            <tr>
-                                <th>Medicamento</th>
-                                <th>Categoria</th>
-                                <th>Estoque</th>
-                                <th>Lote</th>
-                                <th>Validade</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {medicamentosFiltrados.map(med => (
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="px-5 pt-4 pb-2">
+                    <h5 className="font-semibold">Medicamentos ({medicamentosFiltrados.length})</h5>
+                </div>
+                <table className="w-full text-sm">
+                    <thead className="border-b border-border bg-muted/50">
+                        <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Medicamento</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Categoria</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Estoque</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Lote</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Validade</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Status</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                        {medicamentosFiltrados.map(med => {
+                            const estoqueStyle = getEstoqueClasses(med.estoque, med.estoqueMinimo);
+                            return (
                                 <tr key={med.id}>
-                                    <td>
+                                    <td className="px-4 py-3">
                                         <strong>{med.nome}</strong>
                                         <br />
-                                        <small style={{ color: 'var(--sus-gray)' }}>
+                                        <small className="text-muted-foreground">
                                             {med.concentracao} - {med.formaFarmaceutica}
                                         </small>
                                     </td>
-                                    <td>
-                                        <span className="badge badge-secondary">{med.categoria}</span>
+                                    <td className="px-4 py-3">
+                                        <span className="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{med.categoria}</span>
                                     </td>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <div style={{
-                                                width: '60px',
-                                                height: '8px',
-                                                background: '#e9ecef',
-                                                borderRadius: '4px',
-                                                overflow: 'hidden'
-                                            }}>
-                                                <div style={{
-                                                    width: `${Math.min(100, (med.estoque / (med.estoqueMinimo * 2)) * 100)}%`,
-                                                    height: '100%',
-                                                    background: getEstoqueColor(med.estoque, med.estoqueMinimo),
-                                                    borderRadius: '4px'
-                                                }}></div>
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-[60px] overflow-hidden rounded-full bg-gray-200">
+                                                <div
+                                                    className={cn('h-full rounded-full', estoqueStyle.bar)}
+                                                    style={{ width: `${Math.min(100, (med.estoque / (med.estoqueMinimo * 2)) * 100)}%` }}
+                                                />
                                             </div>
-                                            <span style={{
-                                                fontWeight: '600',
-                                                color: getEstoqueColor(med.estoque, med.estoqueMinimo)
-                                            }}>
+                                            <span className={cn('font-semibold', estoqueStyle.text)}>
                                                 {med.estoque}
                                             </span>
                                         </div>
-                                        <small style={{ color: 'var(--sus-gray)' }}>Mín: {med.estoqueMinimo}</small>
+                                        <small className="text-muted-foreground">Mín: {med.estoqueMinimo}</small>
                                     </td>
-                                    <td><code>{med.lote}</code></td>
-                                    <td style={{ color: isExpiringSoon(med.validade) ? '#dc3545' : 'inherit' }}>
-                                        {isExpiringSoon(med.validade) && <i className="fas fa-exclamation-circle" style={{ marginRight: '0.25rem' }}></i>}
+                                    <td className="px-4 py-3"><code className="text-sm">{med.lote}</code></td>
+                                    <td className={cn('px-4 py-3', isExpiringSoon(med.validade) && 'text-red-500')}>
+                                        {isExpiringSoon(med.validade) && <AlertCircle className="mr-1 inline h-4 w-4" />}
                                         {formatDate(med.validade)}
                                     </td>
-                                    <td>{getStatusBadge(med.status)}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                    <td className="px-4 py-3">{getStatusBadge(med.status)}</td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex gap-1">
                                             <button
-                                                className="btn btn-sm btn-outline-primary"
+                                                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted"
                                                 onClick={() => setMedicamentoSelecionado(med)}
                                                 title="Detalhes"
                                             >
-                                                <i className="fas fa-eye"></i>
+                                                <Eye className="h-3.5 w-3.5" />
                                             </button>
-                                            <button className="btn btn-sm btn-outline-success" title="Entrada">
-                                                <i className="fas fa-plus"></i>
+                                            <button className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 px-2 py-1.5 text-xs text-emerald-600 hover:bg-emerald-50" title="Entrada">
+                                                <Plus className="h-3.5 w-3.5" />
                                             </button>
-                                            <button className="btn btn-sm btn-outline-secondary" title="Editar">
-                                                <i className="fas fa-edit"></i>
+                                            <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted" title="Editar">
+                                                <Pencil className="h-3.5 w-3.5" />
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
 
             {/* Detail Modal */}
             {medicamentoSelecionado && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setMedicamentoSelecionado(null)}
                 >
                     <div
-                        className="card"
-                        style={{ width: '600px', maxWidth: '90%', maxHeight: '80vh', overflow: 'auto' }}
+                        className="rounded-xl border border-border bg-card shadow-sm w-[600px] max-w-[90%] max-h-[80vh] overflow-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="card-header" style={{ background: 'var(--sus-green)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-pills"></i> {medicamentoSelecionado.nome}</span>
+                        <div className="border-b border-border bg-secondary px-5 py-3 text-sm font-semibold text-white">
+                            <div className="flex items-center justify-between">
+                                <span className="flex items-center gap-2"><Pill className="h-4 w-4" /> {medicamentoSelecionado.nome}</span>
                                 <button
-                                    className="btn btn-sm btn-light"
+                                    className="rounded-lg bg-white/20 px-2 py-1 text-white hover:bg-white/30"
                                     onClick={() => setMedicamentoSelecionado(null)}
                                 >
-                                    <i className="fas fa-times"></i>
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
-                        <div className="card-body">
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                        <div className="p-5">
+                            <div className="mb-4 grid grid-cols-2 gap-4">
                                 <div>
                                     <p><strong>Concentração:</strong> {medicamentoSelecionado.concentracao}</p>
                                     <p><strong>Forma:</strong> {medicamentoSelecionado.formaFarmaceutica}</p>
@@ -423,44 +416,44 @@ export default function Medicamentos() {
                                 </div>
                             </div>
 
-                            <h6>Movimentação Recente</h6>
-                            <table className="table table-sm">
-                                <thead>
+                            <h6 className="mb-2 font-semibold">Movimentação Recente</h6>
+                            <table className="w-full text-sm">
+                                <thead className="border-b border-border bg-muted/50">
                                     <tr>
-                                        <th>Data</th>
-                                        <th>Tipo</th>
-                                        <th>Qtd</th>
-                                        <th>Responsável</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Data</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Tipo</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Qtd</th>
+                                        <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">Responsável</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-border">
                                     <tr>
-                                        <td>25/01/2025</td>
-                                        <td><span className="badge badge-danger">Saída</span></td>
-                                        <td>-30</td>
-                                        <td>Dr. Carlos</td>
+                                        <td className="px-4 py-2">25/01/2025</td>
+                                        <td className="px-4 py-2"><span className="rounded-md bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">Saída</span></td>
+                                        <td className="px-4 py-2">-30</td>
+                                        <td className="px-4 py-2">Dr. Carlos</td>
                                     </tr>
                                     <tr>
-                                        <td>20/01/2025</td>
-                                        <td><span className="badge badge-success">Entrada</span></td>
-                                        <td>+500</td>
-                                        <td>Farmácia Central</td>
+                                        <td className="px-4 py-2">20/01/2025</td>
+                                        <td className="px-4 py-2"><span className="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Entrada</span></td>
+                                        <td className="px-4 py-2">+500</td>
+                                        <td className="px-4 py-2">Farmácia Central</td>
                                     </tr>
                                     <tr>
-                                        <td>15/01/2025</td>
-                                        <td><span className="badge badge-danger">Saída</span></td>
-                                        <td>-45</td>
-                                        <td>Dra. Ana</td>
+                                        <td className="px-4 py-2">15/01/2025</td>
+                                        <td className="px-4 py-2"><span className="rounded-md bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">Saída</span></td>
+                                        <td className="px-4 py-2">-45</td>
+                                        <td className="px-4 py-2">Dra. Ana</td>
                                     </tr>
                                 </tbody>
                             </table>
 
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                <button className="btn btn-outline-danger">
-                                    <i className="fas fa-minus"></i> Registrar Saída
+                            <div className="mt-4 flex justify-end gap-2">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    <Minus className="h-4 w-4" /> Registrar Saída
                                 </button>
-                                <button className="btn btn-success">
-                                    <i className="fas fa-plus"></i> Registrar Entrada
+                                <button className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+                                    <Plus className="h-4 w-4" /> Registrar Entrada
                                 </button>
                             </div>
                         </div>
@@ -471,49 +464,37 @@ export default function Medicamentos() {
             {/* New Medication Modal */}
             {showNovoModal && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setShowNovoModal(false)}
                 >
                     <div
-                        className="card"
-                        style={{ width: '600px', maxWidth: '90%' }}
+                        className="rounded-xl border border-border bg-card shadow-sm w-[600px] max-w-[90%]"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="card-header" style={{ background: 'var(--sus-blue)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-plus"></i> Novo Medicamento</span>
+                        <div className="border-b border-border bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <div className="flex items-center justify-between">
+                                <span className="flex items-center gap-2"><Plus className="h-4 w-4" /> Novo Medicamento</span>
                                 <button
-                                    className="btn btn-sm btn-light"
+                                    className="rounded-lg bg-white/20 px-2 py-1 text-white hover:bg-white/30"
                                     onClick={() => setShowNovoModal(false)}
                                 >
-                                    <i className="fas fa-times"></i>
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
-                        <div className="card-body">
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="p-5">
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="form-label">Nome do Medicamento *</label>
-                                    <input type="text" className="form-control" placeholder="Ex: Losartana Potássica" />
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Nome do Medicamento *</label>
+                                    <input type="text" className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Ex: Losartana Potássica" />
                                 </div>
                                 <div>
-                                    <label className="form-label">Concentração *</label>
-                                    <input type="text" className="form-control" placeholder="Ex: 50mg" />
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Concentração *</label>
+                                    <input type="text" className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Ex: 50mg" />
                                 </div>
                                 <div>
-                                    <label className="form-label">Forma Farmacêutica</label>
-                                    <select className="form-control">
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Forma Farmacêutica</label>
+                                    <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                                         <option>Comprimido</option>
                                         <option>Cápsula</option>
                                         <option>Solução</option>
@@ -524,28 +505,28 @@ export default function Medicamentos() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="form-label">Categoria</label>
-                                    <select className="form-control">
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Categoria</label>
+                                    <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                                         {categorias.filter(c => c !== 'Todas').map(c => (
                                             <option key={c}>{c}</option>
                                         ))}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="form-label">Estoque Mínimo *</label>
-                                    <input type="number" className="form-control" placeholder="Ex: 500" />
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Estoque Mínimo *</label>
+                                    <input type="number" className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Ex: 500" />
                                 </div>
                                 <div>
-                                    <label className="form-label">Fabricante</label>
-                                    <input type="text" className="form-control" placeholder="Ex: EMS" />
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Fabricante</label>
+                                    <input type="text" className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Ex: EMS" />
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                                <button className="btn btn-outline-secondary" onClick={() => setShowNovoModal(false)}>
+                            <div className="mt-6 flex justify-end gap-2">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted" onClick={() => setShowNovoModal(false)}>
                                     Cancelar
                                 </button>
-                                <button className="btn btn-primary">
-                                    <i className="fas fa-save"></i> Salvar
+                                <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                                    <Save className="h-4 w-4" /> Salvar
                                 </button>
                             </div>
                         </div>

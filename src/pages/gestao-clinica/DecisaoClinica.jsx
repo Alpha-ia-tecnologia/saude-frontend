@@ -1,668 +1,510 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { clinicalDecisionService } from '../../services/clinical-decision.service';
+import {
+  Brain, FileOutput, Printer, User, Stethoscope, FlaskConical,
+  Pill, Loader2, Search, Info, CheckCircle, AlertTriangle,
+  Lightbulb, Star, TrendingUp, UserCog, Eye, ClipboardList
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// Sample patient data for demonstration
 const samplePatient = {
-    id: 1,
-    nome: 'Maria Silva Santos',
-    cpf: '123.456.789-00',
-    dataNascimento: '1958-05-15',
-    idade: 67,
-    sexo: 'Feminino',
-    cns: '898.0001.0002.0003',
-    conditions: ['Hipertensão', 'Diabetes Tipo 2', 'Artrite'],
-    allergies: ['Penicilina', 'Dipirona'],
-    medications: ['Losartana 50mg', 'Metformina 850mg', 'Meloxicam 15mg'],
-    ultimaConsulta: '28/03/2025',
-    medicoResponsavel: 'Dr. Carlos Oliveira'
+  id: 1, nome: 'Maria Silva Santos', cpf: '123.456.789-00',
+  dataNascimento: '1958-05-15', idade: 67, sexo: 'Feminino',
+  cns: '898.0001.0002.0003',
+  conditions: ['Hipertensão', 'Diabetes Tipo 2', 'Artrite'],
+  allergies: ['Penicilina', 'Dipirona'],
+  medications: ['Losartana 50mg', 'Metformina 850mg', 'Meloxicam 15mg'],
+  ultimaConsulta: '28/03/2025', medicoResponsavel: 'Dr. Carlos Oliveira'
 };
 
 const commonSymptoms = [
-    { id: 'febre', label: 'Febre' },
-    { id: 'tosse', label: 'Tosse' },
-    { id: 'dor_cabeca', label: 'Dor de cabeça' },
-    { id: 'dor_abdominal', label: 'Dor abdominal' },
-    { id: 'nausea', label: 'Náusea' },
-    { id: 'fadiga', label: 'Fadiga' },
-    { id: 'falta_ar', label: 'Falta de ar' },
-    { id: 'dor_peito', label: 'Dor no peito' },
-    { id: 'tontura', label: 'Tontura' },
-    { id: 'dor_muscular', label: 'Dor muscular' }
+  { id: 'febre', label: 'Febre' }, { id: 'tosse', label: 'Tosse' },
+  { id: 'dor_cabeca', label: 'Dor de cabeça' }, { id: 'dor_abdominal', label: 'Dor abdominal' },
+  { id: 'nausea', label: 'Náusea' }, { id: 'fadiga', label: 'Fadiga' },
+  { id: 'falta_ar', label: 'Falta de ar' }, { id: 'dor_peito', label: 'Dor no peito' },
+  { id: 'tontura', label: 'Tontura' }, { id: 'dor_muscular', label: 'Dor muscular' }
 ];
 
 const clinicalHistory = [
-    { data: '28/03/2025', tipo: 'Consulta', descricao: 'Hipertensão Arterial Sistêmica - Pressão arterial 160/95 mmHg. Ajuste na medicação.', medico: 'Dr. Carlos Oliveira' },
-    { data: '15/02/2025', tipo: 'Exame', descricao: 'Diabetes Mellitus Tipo 2 - Glicemia em jejum 180 mg/dL. Mantida medicação.', medico: 'Dra. Ana Santos' },
-    { data: '10/01/2025', tipo: 'Consulta', descricao: 'Artrite Reumatoide - Dor articular em mãos e joelhos. Iniciado anti-inflamatório.', medico: 'Dr. Paulo Lima' }
+  { data: '28/03/2025', tipo: 'Consulta', descricao: 'HAS - PA 160/95 mmHg. Ajuste na medicação.', medico: 'Dr. Carlos Oliveira' },
+  { data: '15/02/2025', tipo: 'Exame', descricao: 'DM2 - Glicemia jejum 180 mg/dL. Mantida medicação.', medico: 'Dra. Ana Santos' },
+  { data: '10/01/2025', tipo: 'Consulta', descricao: 'Artrite - Dor articular mãos/joelhos. Iniciado anti-inflamatório.', medico: 'Dr. Paulo Lima' }
+];
+
+const tabItems = [
+  { id: 'diagnostico', label: 'Diagnóstico', icon: Stethoscope },
+  { id: 'tratamento', label: 'Tratamento', icon: ClipboardList },
+  { id: 'exames', label: 'Exames', icon: FlaskConical },
+  { id: 'medicamentos', label: 'Medicamentos', icon: Pill },
 ];
 
 export default function DecisaoClinica() {
-    const [activeTab, setActiveTab] = useState('diagnostico');
-    const [selectedSymptoms, setSelectedSymptoms] = useState([]);
-    const [symptomText, setSymptomText] = useState('');
-    const [duration, setDuration] = useState('');
-    const [intensity, setIntensity] = useState('');
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [analysisResult, setAnalysisResult] = useState(null);
-    const [selectedDiagnosis, setSelectedDiagnosis] = useState(null);
-    const [recommendations, setRecommendations] = useState(null);
-    const [aiInsights, setAiInsights] = useState(null);
-    const [isLoadingInsights, setIsLoadingInsights] = useState(false);
+  const [activeTab, setActiveTab] = useState('diagnostico');
+  const [selectedSymptoms, setSelectedSymptoms] = useState([]);
+  const [symptomText, setSymptomText] = useState('');
+  const [duration, setDuration] = useState('');
+  const [intensity, setIntensity] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [selectedDiagnosis, setSelectedDiagnosis] = useState(null);
+  const [recommendations, setRecommendations] = useState(null);
+  const [aiInsights, setAiInsights] = useState(null);
+  const [isLoadingInsights, setIsLoadingInsights] = useState(false);
 
-    const tabs = [
-        { id: 'diagnostico', label: 'Diagnóstico', icon: 'fa-stethoscope' },
-        { id: 'tratamento', label: 'Tratamento', icon: 'fa-prescription-bottle-alt' },
-        { id: 'exames', label: 'Exames', icon: 'fa-flask' },
-        { id: 'medicamentos', label: 'Medicamentos', icon: 'fa-pills' }
-    ];
+  const toggleSymptom = (id) => {
+    setSelectedSymptoms(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+  };
 
-    const toggleSymptom = (symptomId) => {
-        setSelectedSymptoms(prev =>
-            prev.includes(symptomId)
-                ? prev.filter(s => s !== symptomId)
-                : [...prev, symptomId]
-        );
-    };
+  const analyzeSymptoms = async () => {
+    if (selectedSymptoms.length === 0 && !symptomText.trim()) {
+      alert('Por favor, selecione ou descreva ao menos um sintoma.');
+      return;
+    }
+    setIsAnalyzing(true);
+    setAnalysisResult(null);
+    setSelectedDiagnosis(null);
+    setRecommendations(null);
+    setAiInsights(null);
+    try {
+      const allSymptoms = [...selectedSymptoms];
+      if (symptomText.trim()) {
+        allSymptoms.push(...symptomText.toLowerCase().split(/[,;.\n]+/).map(s => s.trim()).filter(s => s.length > 2));
+      }
+      const result = await clinicalDecisionService.analyzeSymptoms(allSymptoms, {
+        age: samplePatient.idade, sex: samplePatient.sexo,
+        conditions: samplePatient.conditions, allergies: samplePatient.allergies,
+        medications: samplePatient.medications
+      });
+      setAnalysisResult(result);
+      if (result.possibleDiagnoses?.length > 0) loadAIInsights(allSymptoms, result.possibleDiagnoses);
+    } catch (error) {
+      alert(`Erro ao analisar sintomas: ${error.message}`);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
-    const analyzeSymptoms = async () => {
-        if (selectedSymptoms.length === 0 && !symptomText.trim()) {
-            alert('Por favor, selecione ou descreva ao menos um sintoma.');
-            return;
-        }
+  const loadAIInsights = async (symptoms, diagnoses) => {
+    setIsLoadingInsights(true);
+    try {
+      const insights = await clinicalDecisionService.getAIInsights(symptoms, {
+        age: samplePatient.idade, sex: samplePatient.sexo,
+        conditions: samplePatient.conditions, allergies: samplePatient.allergies,
+        medications: samplePatient.medications
+      }, diagnoses);
+      setAiInsights(insights);
+    } catch (error) {
+      setAiInsights({ insights: [], alerts: [`Erro: ${error.message}`], recommendations: [], aiEnhanced: false, aiError: error.message });
+    } finally {
+      setIsLoadingInsights(false);
+    }
+  };
 
-        setIsAnalyzing(true);
-        setAnalysisResult(null);
-        setSelectedDiagnosis(null);
-        setRecommendations(null);
-        setAiInsights(null);
+  const selectDiagnosis = async (diagnosis) => {
+    setSelectedDiagnosis(diagnosis);
+    try {
+      const recs = await clinicalDecisionService.getRecommendations(diagnosis.name);
+      setRecommendations(recs);
+    } catch (error) {
+      setRecommendations({ diagnosis: diagnosis.name, medications: [], exams: [], treatments: [], warnings: [`Erro: ${error.message}`], protocols: [] });
+    }
+  };
 
-        try {
-            // Combine selected symptoms with text symptoms
-            const allSymptoms = [...selectedSymptoms];
-            if (symptomText.trim()) {
-                // Extract potential symptoms from text
-                const textSymptoms = symptomText.toLowerCase()
-                    .split(/[,;.\n]+/)
-                    .map(s => s.trim())
-                    .filter(s => s.length > 2);
-                allSymptoms.push(...textSymptoms);
-            }
+  const inputClass = 'h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20';
 
-            console.log('Enviando sintomas para análise:', allSymptoms);
-
-            const result = await clinicalDecisionService.analyzeSymptoms(allSymptoms, {
-                age: samplePatient.idade,
-                sex: samplePatient.sexo,
-                conditions: samplePatient.conditions,
-                allergies: samplePatient.allergies,
-                medications: samplePatient.medications
-            });
-
-            console.log('Resultado da análise:', result);
-            setAnalysisResult(result);
-
-            // Auto-load AI insights if we have diagnoses
-            if (result.possibleDiagnoses?.length > 0) {
-                loadAIInsights(allSymptoms, result.possibleDiagnoses);
-            }
-        } catch (error) {
-            console.error('Erro na análise:', error);
-            alert(`Erro ao analisar sintomas: ${error.message}\n\nVerifique se o backend está rodando e a API DeepSeek está configurada.`);
-        } finally {
-            setIsAnalyzing(false);
-        }
-    };
-
-    const loadAIInsights = async (symptoms, diagnoses) => {
-        setIsLoadingInsights(true);
-        try {
-            console.log('Carregando insights de IA para:', { symptoms, diagnoses });
-            const insights = await clinicalDecisionService.getAIInsights(
-                symptoms,
-                {
-                    age: samplePatient.idade,
-                    sex: samplePatient.sexo,
-                    conditions: samplePatient.conditions,
-                    allergies: samplePatient.allergies,
-                    medications: samplePatient.medications
-                },
-                diagnoses
-            );
-            console.log('Insights recebidos:', insights);
-            setAiInsights(insights);
-        } catch (error) {
-            console.error('Erro ao carregar insights:', error);
-            setAiInsights({
-                insights: [],
-                alerts: [`Erro ao carregar insights de IA: ${error.message}`],
-                recommendations: [],
-                aiEnhanced: false,
-                aiError: error.message
-            });
-        } finally {
-            setIsLoadingInsights(false);
-        }
-    };
-
-    const selectDiagnosis = async (diagnosis) => {
-        setSelectedDiagnosis(diagnosis);
-        try {
-            console.log('Carregando recomendações para:', diagnosis.name);
-            const recs = await clinicalDecisionService.getRecommendations(diagnosis.name);
-            console.log('Recomendações recebidas:', recs);
-            setRecommendations(recs);
-        } catch (error) {
-            console.error('Erro ao carregar recomendações:', error);
-            setRecommendations({
-                diagnosis: diagnosis.name,
-                medications: [],
-                exams: [],
-                treatments: [],
-                warnings: [`Erro ao carregar recomendações: ${error.message}`],
-                protocols: []
-            });
-        }
-    };
-
-    return (
-        <div className="fade-in">
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1 style={{ margin: 0 }}>
-                    <i className="fas fa-brain" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
-                    Apoio à Decisão Clínica
-                </h1>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-file-export"></i> Exportar
-                    </button>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-print"></i> Imprimir
-                    </button>
-                </div>
-            </div>
-
-            {/* Patient Card */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-header" style={{ background: 'var(--sus-green)', color: 'white' }}>
-                    <i className="fas fa-user"></i> Paciente Selecionado
-                </div>
-                <div className="card-body">
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div>
-                            <h4 style={{ marginBottom: '0.5rem' }}>{samplePatient.nome}</h4>
-                            <p style={{ margin: '0.25rem 0', color: 'var(--sus-gray)' }}>
-                                <strong>Cartão SUS:</strong> {samplePatient.cns}
-                            </p>
-                            <p style={{ margin: '0.25rem 0', color: 'var(--sus-gray)' }}>
-                                <strong>Nascimento:</strong> {new Date(samplePatient.dataNascimento).toLocaleDateString('pt-BR')} ({samplePatient.idade} anos)
-                            </p>
-                            <p style={{ margin: '0.25rem 0', color: 'var(--sus-gray)' }}>
-                                <strong>Sexo:</strong> {samplePatient.sexo}
-                            </p>
-                        </div>
-                        <div>
-                            <p style={{ margin: '0.25rem 0' }}>
-                                <strong>Condições:</strong>
-                                <span style={{ marginLeft: '0.5rem' }}>
-                                    {samplePatient.conditions.map((c, i) => (
-                                        <span key={i} className="badge badge-primary" style={{ marginRight: '0.25rem' }}>{c}</span>
-                                    ))}
-                                </span>
-                            </p>
-                            <p style={{ margin: '0.25rem 0' }}>
-                                <strong>Alergias:</strong>
-                                <span style={{ marginLeft: '0.5rem' }}>
-                                    {samplePatient.allergies.map((a, i) => (
-                                        <span key={i} className="badge badge-danger" style={{ marginRight: '0.25rem' }}>{a}</span>
-                                    ))}
-                                </span>
-                            </p>
-                            <p style={{ margin: '0.25rem 0', color: 'var(--sus-gray)' }}>
-                                <strong>Última Consulta:</strong> {samplePatient.ultimaConsulta}
-                            </p>
-                            <p style={{ margin: '0.25rem 0', color: 'var(--sus-gray)' }}>
-                                <strong>Médico:</strong> {samplePatient.medicoResponsavel}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: '0', borderBottom: '2px solid var(--sus-light-gray)', marginBottom: '1.5rem' }}>
-                {tabs.map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        style={{
-                            padding: '0.75rem 1.5rem',
-                            border: 'none',
-                            borderBottom: activeTab === tab.id ? '3px solid var(--sus-blue)' : '3px solid transparent',
-                            background: 'transparent',
-                            color: activeTab === tab.id ? 'var(--sus-blue)' : 'var(--sus-gray)',
-                            fontWeight: activeTab === tab.id ? '600' : '400',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                        }}
-                    >
-                        <i className={`fas ${tab.icon}`} style={{ marginRight: '0.5rem' }}></i>
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* Tab Content */}
-            {activeTab === 'diagnostico' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                    {/* Symptoms Form */}
-                    <div className="card">
-                        <div className="card-header" style={{ background: '#f8f9fa' }}>
-                            <i className="fas fa-clipboard-list"></i> Sintomas Relatados
-                        </div>
-                        <div className="card-body">
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label className="form-label">Descreva os sintomas</label>
-                                <textarea
-                                    className="form-control"
-                                    rows="3"
-                                    placeholder="Digite os sintomas relatados pelo paciente..."
-                                    value={symptomText}
-                                    onChange={(e) => setSymptomText(e.target.value)}
-                                />
-                            </div>
-
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label className="form-label">Sintomas comuns</label>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                    {commonSymptoms.map(symptom => (
-                                        <button
-                                            key={symptom.id}
-                                            className={`btn btn-sm ${selectedSymptoms.includes(symptom.id) ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                            onClick={() => toggleSymptom(symptom.id)}
-                                        >
-                                            {symptom.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                                <div>
-                                    <label className="form-label">Duração</label>
-                                    <select
-                                        className="form-control"
-                                        value={duration}
-                                        onChange={(e) => setDuration(e.target.value)}
-                                    >
-                                        <option value="">Selecione...</option>
-                                        <option value="menos_24h">Menos de 24 horas</option>
-                                        <option value="1_3_dias">1-3 dias</option>
-                                        <option value="4_7_dias">4-7 dias</option>
-                                        <option value="1_2_semanas">1-2 semanas</option>
-                                        <option value="mais_2_semanas">Mais de 2 semanas</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="form-label">Intensidade</label>
-                                    <select
-                                        className="form-control"
-                                        value={intensity}
-                                        onChange={(e) => setIntensity(e.target.value)}
-                                    >
-                                        <option value="">Selecione...</option>
-                                        <option value="leve">Leve</option>
-                                        <option value="moderada">Moderada</option>
-                                        <option value="severa">Severa</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <button
-                                className="btn btn-primary"
-                                onClick={analyzeSymptoms}
-                                disabled={isAnalyzing}
-                                style={{ width: '100%' }}
-                            >
-                                {isAnalyzing ? (
-                                    <><i className="fas fa-spinner fa-spin"></i> Analisando...</>
-                                ) : (
-                                    <><i className="fas fa-search"></i> Analisar Sintomas</>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Diagnoses List */}
-                    <div className="card">
-                        <div className="card-header" style={{ background: 'var(--sus-light-blue)', color: 'white' }}>
-                            <i className="fas fa-stethoscope"></i> Diagnósticos Sugeridos
-                        </div>
-                        <div className="card-body">
-                            {!analysisResult ? (
-                                <div className="alert alert-info">
-                                    <i className="fas fa-info-circle"></i> Preencha os sintomas e clique em "Analisar" para obter sugestões.
-                                </div>
-                            ) : (
-                                <div>
-                                    {analysisResult.possibleDiagnoses.map((diagnosis, idx) => (
-                                        <div
-                                            key={idx}
-                                            onClick={() => selectDiagnosis(diagnosis)}
-                                            style={{
-                                                padding: '1rem',
-                                                marginBottom: '0.75rem',
-                                                border: selectedDiagnosis?.name === diagnosis.name
-                                                    ? '2px solid var(--sus-blue)'
-                                                    : '1px solid var(--sus-light-gray)',
-                                                borderRadius: '0.5rem',
-                                                cursor: 'pointer',
-                                                background: selectedDiagnosis?.name === diagnosis.name ? '#e3f2fd' : 'white',
-                                                transition: 'all 0.2s'
-                                            }}
-                                        >
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <h5 style={{ margin: 0 }}>{diagnosis.name}</h5>
-                                                <span
-                                                    className={`badge ${diagnosis.probability >= 70 ? 'badge-success' : diagnosis.probability >= 40 ? 'badge-warning' : 'badge-secondary'}`}
-                                                    style={{ fontSize: '1rem' }}
-                                                >
-                                                    {diagnosis.probability}%
-                                                </span>
-                                            </div>
-                                            <small style={{ color: 'var(--sus-gray)' }}>
-                                                Baseado em {diagnosis.matchingSymptoms} sintoma(s) correspondente(s)
-                                            </small>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'tratamento' && (
-                <div className="card">
-                    <div className="card-body">
-                        {!selectedDiagnosis ? (
-                            <div className="alert alert-info">
-                                <i className="fas fa-info-circle"></i> Selecione um diagnóstico na aba anterior para ver opções de tratamento.
-                            </div>
-                        ) : (
-                            <div>
-                                <h4 style={{ marginBottom: '1rem' }}>
-                                    Tratamento para: <span style={{ color: 'var(--sus-blue)' }}>{selectedDiagnosis.name}</span>
-                                </h4>
-                                {recommendations?.treatments?.length > 0 ? (
-                                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                                        {recommendations.treatments.map((t, i) => (
-                                            <li key={i} style={{ padding: '0.5rem 0', borderBottom: '1px solid #eee' }}>
-                                                <i className="fas fa-check-circle" style={{ color: 'var(--sus-green)', marginRight: '0.5rem' }}></i>
-                                                {t}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>Tratamento padrão conforme protocolo do SUS.</p>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'exames' && (
-                <div className="card">
-                    <div className="card-body">
-                        {!analysisResult ? (
-                            <div className="alert alert-info">
-                                <i className="fas fa-info-circle"></i> Analise os sintomas para ver exames recomendados.
-                            </div>
-                        ) : (
-                            <div>
-                                <h4 style={{ marginBottom: '1rem' }}>Exames Recomendados</h4>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
-                                    {analysisResult.recommendedExams.map((exam, i) => (
-                                        <div key={i} className="card" style={{ marginBottom: 0 }}>
-                                            <div className="card-body" style={{ padding: '1rem' }}>
-                                                <i className="fas fa-flask" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
-                                                {exam}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'medicamentos' && (
-                <div className="card">
-                    <div className="card-body">
-                        {!selectedDiagnosis ? (
-                            <div className="alert alert-info">
-                                <i className="fas fa-info-circle"></i> Selecione um diagnóstico para ver medicamentos recomendados.
-                            </div>
-                        ) : (
-                            <div>
-                                <h4 style={{ marginBottom: '1rem' }}>
-                                    Medicamentos para: <span style={{ color: 'var(--sus-blue)' }}>{selectedDiagnosis.name}</span>
-                                </h4>
-                                {recommendations?.warnings?.length > 0 && (
-                                    <div className="alert alert-warning" style={{ marginBottom: '1rem' }}>
-                                        <strong><i className="fas fa-exclamation-triangle"></i> Alertas:</strong>
-                                        <ul style={{ marginBottom: 0, marginTop: '0.5rem' }}>
-                                            {recommendations.warnings.map((w, i) => (
-                                                <li key={i}>{w}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                                {recommendations?.medications?.length > 0 ? (
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Medicamento</th>
-                                                <th>Ação</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {recommendations.medications.map((med, i) => (
-                                                <tr key={i}>
-                                                    <td>
-                                                        <i className="fas fa-pills" style={{ color: 'var(--sus-yellow)', marginRight: '0.5rem' }}></i>
-                                                        {med}
-                                                    </td>
-                                                    <td>
-                                                        <button className="btn btn-sm btn-outline-primary">
-                                                            <i className="fas fa-prescription"></i> Prescrever
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                ) : (
-                                    <p>Consulte protocolos para prescrição adequada.</p>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Clinical History */}
-            <div className="card" style={{ marginTop: '1.5rem' }}>
-                <div className="card-header" style={{ background: '#f8f9fa' }}>
-                    <i className="fas fa-history"></i> Histórico Clínico Relevante
-                </div>
-                <div className="card-body" style={{ padding: 0 }}>
-                    <table className="table" style={{ marginBottom: 0 }}>
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Tipo</th>
-                                <th>Descrição</th>
-                                <th>Médico</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {clinicalHistory.map((item, idx) => (
-                                <tr key={idx}>
-                                    <td>{item.data}</td>
-                                    <td>
-                                        <span className={`badge ${item.tipo === 'Consulta' ? 'badge-primary' : 'badge-info'}`}>
-                                            {item.tipo}
-                                        </span>
-                                    </td>
-                                    <td>{item.descricao}</td>
-                                    <td>{item.medico}</td>
-                                    <td>
-                                        <button className="btn btn-sm btn-outline-primary">
-                                            <i className="fas fa-eye"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* AI Insights */}
-            <div className="card" style={{ marginTop: '1.5rem' }}>
-                <div className="card-header" style={{ background: 'var(--sus-light-blue)', color: 'white' }}>
-                    <i className="fas fa-robot"></i> Insights de IA (DeepSeek)
-                    {aiInsights?.aiEnhanced && (
-                        <span className="badge badge-success" style={{ marginLeft: '0.5rem' }}>
-                            <i className="fas fa-check-circle"></i> IA Ativa
-                        </span>
-                    )}
-                    {aiInsights?.aiModel && (
-                        <span className="badge badge-info" style={{ marginLeft: '0.5rem' }}>
-                            {aiInsights.aiModel}
-                        </span>
-                    )}
-                </div>
-                <div className="card-body">
-                    {isLoadingInsights ? (
-                        <div style={{ textAlign: 'center', padding: '2rem' }}>
-                            <i className="fas fa-spinner fa-spin fa-2x" style={{ color: 'var(--sus-blue)' }}></i>
-                            <p style={{ marginTop: '1rem' }}>Gerando insights com DeepSeek...</p>
-                        </div>
-                    ) : aiInsights ? (
-                        <>
-                            {/* Standard Insights */}
-                            {aiInsights.insights?.map((insight, i) => (
-                                <div key={i} className="alert alert-info">
-                                    <i className="fas fa-lightbulb"></i> <strong>Análise:</strong> {insight}
-                                </div>
-                            ))}
-                            {aiInsights.alerts?.map((alert, i) => (
-                                <div key={i} className="alert alert-warning">
-                                    <i className="fas fa-exclamation-triangle"></i> <strong>Alerta:</strong> {alert}
-                                </div>
-                            ))}
-                            {aiInsights.recommendations?.map((rec, i) => (
-                                <div key={i} className="alert alert-success">
-                                    <i className="fas fa-check-circle"></i> <strong>Recomendação:</strong> {rec}
-                                </div>
-                            ))}
-
-                            {/* DeepSeek AI Advanced Insights */}
-                            {aiInsights.aiInsights && (
-                                <div className="card" style={{ marginTop: '1rem', border: '2px solid var(--sus-blue)' }}>
-                                    <div className="card-header" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-                                        <i className="fas fa-brain"></i> Análise Avançada DeepSeek
-                                    </div>
-                                    <div className="card-body">
-                                        {/* Análise Integrada */}
-                                        {aiInsights.aiInsights.analise_integrada && (
-                                            <div style={{ marginBottom: '1rem' }}>
-                                                <h6><i className="fas fa-search-plus"></i> Análise Integrada</h6>
-                                                <p style={{ background: '#f8f9fa', padding: '1rem', borderRadius: '0.5rem' }}>
-                                                    {aiInsights.aiInsights.analise_integrada}
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        {/* Riscos Identificados */}
-                                        {aiInsights.aiInsights.riscos_identificados?.length > 0 && (
-                                            <div style={{ marginBottom: '1rem' }}>
-                                                <h6><i className="fas fa-exclamation-circle" style={{ color: 'var(--sus-red)' }}></i> Riscos Identificados</h6>
-                                                <ul style={{ marginBottom: 0 }}>
-                                                    {aiInsights.aiInsights.riscos_identificados.map((risco, i) => (
-                                                        <li key={i} style={{ color: '#dc3545' }}>{risco}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-
-                                        {/* Interações Medicamentosas */}
-                                        {aiInsights.aiInsights.interacoes_medicamentosas?.length > 0 && (
-                                            <div style={{ marginBottom: '1rem' }}>
-                                                <h6><i className="fas fa-pills" style={{ color: 'var(--sus-yellow)' }}></i> Interações Medicamentosas</h6>
-                                                <ul style={{ marginBottom: 0 }}>
-                                                    {aiInsights.aiInsights.interacoes_medicamentosas.map((interacao, i) => (
-                                                        <li key={i} style={{ color: '#856404' }}>{interacao}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-
-                                        {/* Recomendações Personalizadas */}
-                                        {aiInsights.aiInsights.recomendacoes_personalizadas?.length > 0 && (
-                                            <div style={{ marginBottom: '1rem' }}>
-                                                <h6><i className="fas fa-star" style={{ color: 'var(--sus-green)' }}></i> Recomendações Personalizadas</h6>
-                                                <ul style={{ marginBottom: 0 }}>
-                                                    {aiInsights.aiInsights.recomendacoes_personalizadas.map((rec, i) => (
-                                                        <li key={i} style={{ color: '#155724' }}>{rec}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-
-                                        {/* Prognóstico e Encaminhamento */}
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                            {aiInsights.aiInsights.prognostico_estimado && (
-                                                <div style={{ background: '#e3f2fd', padding: '1rem', borderRadius: '0.5rem' }}>
-                                                    <h6><i className="fas fa-chart-line"></i> Prognóstico</h6>
-                                                    <p style={{ margin: 0 }}>{aiInsights.aiInsights.prognostico_estimado}</p>
-                                                </div>
-                                            )}
-                                            {aiInsights.aiInsights.necessidade_encaminhamento && (
-                                                <div style={{ background: '#fff3cd', padding: '1rem', borderRadius: '0.5rem' }}>
-                                                    <h6><i className="fas fa-user-md"></i> Encaminhamento</h6>
-                                                    <p style={{ margin: 0 }}>{aiInsights.aiInsights.necessidade_encaminhamento}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Legacy AI Analysis (texto livre) */}
-                            {aiInsights.aiAnalysis && !aiInsights.aiInsights && (
-                                <div className="card" style={{ marginTop: '1rem', background: '#f8f9fa' }}>
-                                    <div className="card-body">
-                                        <h6><i className="fas fa-brain"></i> Análise de IA</h6>
-                                        <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0 }}>
-                                            {aiInsights.aiAnalysis}
-                                        </pre>
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    ) : (
-                        <div className="alert alert-info">
-                            <i className="fas fa-info-circle"></i> Analise os sintomas para gerar insights de IA com DeepSeek.
-                        </div>
-                    )}
-                </div>
-            </div>
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
+          <Brain className="size-6 text-primary" />
+          Apoio à Decisão Clínica
+        </h1>
+        <div className="flex gap-2">
+          <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+            <FileOutput className="size-4" /> Exportar
+          </button>
+          <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+            <Printer className="size-4" /> Imprimir
+          </button>
         </div>
-    );
+      </div>
+
+      {/* Patient card */}
+      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="bg-secondary px-5 py-2.5 text-sm font-medium text-white flex items-center gap-2">
+          <User className="size-4" /> Paciente Selecionado
+        </div>
+        <div className="grid gap-4 p-5 sm:grid-cols-2">
+          <div>
+            <h3 className="text-lg font-bold text-foreground">{samplePatient.nome}</h3>
+            <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+              <p><span className="font-medium text-foreground">Cartão SUS:</span> {samplePatient.cns}</p>
+              <p><span className="font-medium text-foreground">Nascimento:</span> {new Date(samplePatient.dataNascimento).toLocaleDateString('pt-BR')} ({samplePatient.idade} anos)</p>
+              <p><span className="font-medium text-foreground">Sexo:</span> {samplePatient.sexo}</p>
+            </div>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div>
+              <span className="font-medium text-foreground">Condições:</span>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {samplePatient.conditions.map((c, i) => (
+                  <span key={i} className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{c}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <span className="font-medium text-foreground">Alergias:</span>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {samplePatient.allergies.map((a, i) => (
+                  <span key={i} className="rounded-md bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">{a}</span>
+                ))}
+              </div>
+            </div>
+            <p className="text-muted-foreground"><span className="font-medium text-foreground">Última Consulta:</span> {samplePatient.ultimaConsulta}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b border-border">
+        <nav className="flex gap-1">
+          {tabItems.map(tab => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
+                activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
+              )}>
+              <tab.icon className="size-4" /> {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Tab: Diagnóstico */}
+      {activeTab === 'diagnostico' && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Symptoms */}
+          <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+            <div className="border-b border-border bg-muted px-5 py-3 text-sm font-semibold text-foreground">
+              Sintomas Relatados
+            </div>
+            <div className="space-y-4 p-5">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Descreva os sintomas</label>
+                <textarea className={cn(inputClass, 'h-20 py-2')} rows="3" placeholder="Digite os sintomas..." value={symptomText} onChange={(e) => setSymptomText(e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Sintomas comuns</label>
+                <div className="flex flex-wrap gap-2">
+                  {commonSymptoms.map(s => (
+                    <button key={s.id} onClick={() => toggleSymptom(s.id)}
+                      className={cn('rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors',
+                        selectedSymptoms.includes(s.id) ? 'bg-primary text-white border-primary' : 'bg-white text-muted-foreground border-border hover:border-primary/40')}>
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">Duração</label>
+                  <select className={inputClass} value={duration} onChange={(e) => setDuration(e.target.value)}>
+                    <option value="">Selecione...</option>
+                    <option value="menos_24h">&lt; 24 horas</option>
+                    <option value="1_3_dias">1-3 dias</option>
+                    <option value="4_7_dias">4-7 dias</option>
+                    <option value="1_2_semanas">1-2 semanas</option>
+                    <option value="mais_2_semanas">&gt; 2 semanas</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">Intensidade</label>
+                  <select className={inputClass} value={intensity} onChange={(e) => setIntensity(e.target.value)}>
+                    <option value="">Selecione...</option>
+                    <option value="leve">Leve</option>
+                    <option value="moderada">Moderada</option>
+                    <option value="severa">Severa</option>
+                  </select>
+                </div>
+              </div>
+              <button onClick={analyzeSymptoms} disabled={isAnalyzing}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-60">
+                {isAnalyzing ? <><Loader2 className="size-4 animate-spin" /> Analisando...</> : <><Search className="size-4" /> Analisar Sintomas</>}
+              </button>
+            </div>
+          </div>
+
+          {/* Diagnoses */}
+          <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+            <div className="border-b border-border bg-primary-light px-5 py-3 text-sm font-semibold text-white flex items-center gap-2">
+              <Stethoscope className="size-4" /> Diagnósticos Sugeridos
+            </div>
+            <div className="p-5">
+              {!analysisResult ? (
+                <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+                  <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span>Preencha os sintomas e clique em &ldquo;Analisar&rdquo; para obter sugestões.</span>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {analysisResult.possibleDiagnoses.map((d, i) => (
+                    <button key={i} onClick={() => selectDiagnosis(d)} className={cn(
+                      'w-full rounded-lg border p-4 text-left transition-all',
+                      selectedDiagnosis?.name === d.name ? 'border-primary bg-primary/5 ring-1 ring-primary/30' : 'border-border hover:border-primary/40')}>
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-foreground">{d.name}</h4>
+                        <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                          d.probability >= 70 ? 'bg-secondary/10 text-secondary-dark' : d.probability >= 40 ? 'bg-amber-100 text-amber-700' : 'bg-muted text-muted-foreground')}>
+                          {d.probability}%
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{d.matchingSymptoms} sintoma(s) correspondente(s)</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Tratamento */}
+      {activeTab === 'tratamento' && (
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          {!selectedDiagnosis ? (
+            <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+              <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+              Selecione um diagnóstico na aba anterior para ver opções de tratamento.
+            </div>
+          ) : (
+            <div>
+              <h3 className="mb-4 text-lg font-semibold">Tratamento para: <span className="text-primary">{selectedDiagnosis.name}</span></h3>
+              {recommendations?.treatments?.length > 0 ? (
+                <ul className="space-y-2">
+                  {recommendations.treatments.map((t, i) => (
+                    <li key={i} className="flex items-start gap-2 rounded-lg border border-border p-3 text-sm">
+                      <CheckCircle className="mt-0.5 size-4 shrink-0 text-secondary" /> {t}
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="text-sm text-muted-foreground">Tratamento padrão conforme protocolo do SUS.</p>}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Exames */}
+      {activeTab === 'exames' && (
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          {!analysisResult ? (
+            <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+              <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+              Analise os sintomas para ver exames recomendados.
+            </div>
+          ) : (
+            <div>
+              <h3 className="mb-4 text-lg font-semibold">Exames Recomendados</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {analysisResult.recommendedExams.map((exam, i) => (
+                  <div key={i} className="flex items-center gap-2 rounded-lg border border-border p-3 text-sm">
+                    <FlaskConical className="size-4 text-primary" /> {exam}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Medicamentos */}
+      {activeTab === 'medicamentos' && (
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          {!selectedDiagnosis ? (
+            <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+              <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+              Selecione um diagnóstico para ver medicamentos recomendados.
+            </div>
+          ) : (
+            <div>
+              <h3 className="mb-4 text-lg font-semibold">Medicamentos para: <span className="text-primary">{selectedDiagnosis.name}</span></h3>
+              {recommendations?.warnings?.length > 0 && (
+                <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                  <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-700">
+                    <AlertTriangle className="size-4" /> Alertas
+                  </p>
+                  <ul className="list-inside list-disc space-y-1 text-sm text-amber-700">
+                    {recommendations.warnings.map((w, i) => <li key={i}>{w}</li>)}
+                  </ul>
+                </div>
+              )}
+              {recommendations?.medications?.length > 0 ? (
+                <div className="overflow-x-auto rounded-lg border border-border">
+                  <table className="w-full text-sm">
+                    <thead className="border-b border-border bg-muted">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-semibold text-foreground">Medicamento</th>
+                        <th className="px-4 py-3 text-left font-semibold text-foreground">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {recommendations.medications.map((med, i) => (
+                        <tr key={i} className="hover:bg-muted/50">
+                          <td className="flex items-center gap-2 px-4 py-3"><Pill className="size-4 text-accent" /> {med}</td>
+                          <td className="px-4 py-3">
+                            <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/5">
+                              <ClipboardList className="size-3" /> Prescrever
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : <p className="text-sm text-muted-foreground">Consulte protocolos para prescrição adequada.</p>}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Clinical History */}
+      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="border-b border-border bg-muted px-5 py-3 text-sm font-semibold text-foreground">
+          Histórico Clínico Relevante
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="border-b border-border bg-muted/50">
+              <tr>
+                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Data</th>
+                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Tipo</th>
+                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Descrição</th>
+                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Médico</th>
+                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {clinicalHistory.map((item, i) => (
+                <tr key={i} className="hover:bg-muted/30">
+                  <td className="px-4 py-3 whitespace-nowrap">{item.data}</td>
+                  <td className="px-4 py-3">
+                    <span className={cn('rounded-md px-2 py-0.5 text-xs font-medium',
+                      item.tipo === 'Consulta' ? 'bg-primary/10 text-primary' : 'bg-blue-100 text-blue-700')}>
+                      {item.tipo}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">{item.descricao}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{item.medico}</td>
+                  <td className="px-4 py-3">
+                    <button className="rounded-lg border border-border p-1.5 text-muted-foreground hover:bg-muted">
+                      <Eye className="size-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* AI Insights */}
+      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="flex items-center gap-2 border-b border-border bg-primary-light px-5 py-3 text-sm font-semibold text-white">
+          <Brain className="size-4" /> Insights de IA (DeepSeek)
+          {aiInsights?.aiEnhanced && (
+            <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-[10px]">IA Ativa</span>
+          )}
+        </div>
+        <div className="p-5">
+          {isLoadingInsights ? (
+            <div className="flex flex-col items-center py-8">
+              <Loader2 className="size-8 animate-spin text-primary" />
+              <p className="mt-3 text-sm text-muted-foreground">Gerando insights com DeepSeek...</p>
+            </div>
+          ) : aiInsights ? (
+            <div className="space-y-3">
+              {aiInsights.insights?.map((insight, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+                  <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span><span className="font-semibold">Análise:</span> {insight}</span>
+                </div>
+              ))}
+              {aiInsights.alerts?.map((alert, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                  <span><span className="font-semibold">Alerta:</span> {alert}</span>
+                </div>
+              ))}
+              {aiInsights.recommendations?.map((rec, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-lg border border-secondary/20 bg-secondary/5 p-4 text-sm text-secondary-dark">
+                  <CheckCircle className="mt-0.5 size-4 shrink-0" />
+                  <span><span className="font-semibold">Recomendação:</span> {rec}</span>
+                </div>
+              ))}
+
+              {aiInsights.aiInsights && (
+                <div className="mt-4 rounded-xl border-2 border-primary/30 overflow-hidden">
+                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-3 text-sm font-semibold text-white flex items-center gap-2">
+                    <Brain className="size-4" /> Análise Avançada DeepSeek
+                  </div>
+                  <div className="space-y-4 p-5">
+                    {aiInsights.aiInsights.analise_integrada && (
+                      <div>
+                        <h4 className="mb-2 text-sm font-semibold flex items-center gap-1.5"><Search className="size-3.5" /> Análise Integrada</h4>
+                        <p className="rounded-lg bg-muted p-3 text-sm">{aiInsights.aiInsights.analise_integrada}</p>
+                      </div>
+                    )}
+                    {aiInsights.aiInsights.riscos_identificados?.length > 0 && (
+                      <div>
+                        <h4 className="mb-2 text-sm font-semibold text-destructive flex items-center gap-1.5"><AlertTriangle className="size-3.5" /> Riscos Identificados</h4>
+                        <ul className="list-inside list-disc space-y-1 text-sm text-destructive">{aiInsights.aiInsights.riscos_identificados.map((r, i) => <li key={i}>{r}</li>)}</ul>
+                      </div>
+                    )}
+                    {aiInsights.aiInsights.interacoes_medicamentosas?.length > 0 && (
+                      <div>
+                        <h4 className="mb-2 text-sm font-semibold text-amber-700 flex items-center gap-1.5"><Pill className="size-3.5" /> Interações Medicamentosas</h4>
+                        <ul className="list-inside list-disc space-y-1 text-sm text-amber-700">{aiInsights.aiInsights.interacoes_medicamentosas.map((it, i) => <li key={i}>{it}</li>)}</ul>
+                      </div>
+                    )}
+                    {aiInsights.aiInsights.recomendacoes_personalizadas?.length > 0 && (
+                      <div>
+                        <h4 className="mb-2 text-sm font-semibold text-secondary-dark flex items-center gap-1.5"><Star className="size-3.5" /> Recomendações Personalizadas</h4>
+                        <ul className="list-inside list-disc space-y-1 text-sm text-secondary-dark">{aiInsights.aiInsights.recomendacoes_personalizadas.map((r, i) => <li key={i}>{r}</li>)}</ul>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {aiInsights.aiInsights.prognostico_estimado && (
+                        <div className="rounded-lg bg-primary/5 p-4">
+                          <h4 className="mb-1 text-sm font-semibold flex items-center gap-1.5"><TrendingUp className="size-3.5" /> Prognóstico</h4>
+                          <p className="text-sm">{aiInsights.aiInsights.prognostico_estimado}</p>
+                        </div>
+                      )}
+                      {aiInsights.aiInsights.necessidade_encaminhamento && (
+                        <div className="rounded-lg bg-amber-50 p-4">
+                          <h4 className="mb-1 text-sm font-semibold flex items-center gap-1.5"><UserCog className="size-3.5" /> Encaminhamento</h4>
+                          <p className="text-sm">{aiInsights.aiInsights.necessidade_encaminhamento}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {aiInsights.aiAnalysis && !aiInsights.aiInsights && (
+                <div className="mt-4 rounded-lg bg-muted p-4">
+                  <h4 className="mb-2 text-sm font-semibold flex items-center gap-1.5"><Brain className="size-3.5" /> Análise de IA</h4>
+                  <pre className="whitespace-pre-wrap font-sans text-sm">{aiInsights.aiAnalysis}</pre>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+              <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+              Analise os sintomas para gerar insights de IA com DeepSeek.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

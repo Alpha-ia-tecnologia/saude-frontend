@@ -3,7 +3,8 @@ import { clinicalDecisionService } from '../../services/clinical-decision.servic
 import {
   Brain, FileOutput, Printer, User, Stethoscope, FlaskConical,
   Pill, Loader2, Search, Info, CheckCircle, AlertTriangle,
-  Lightbulb, Star, TrendingUp, UserCog, Eye, ClipboardList
+  Lightbulb, Star, TrendingUp, UserCog, Eye, ClipboardList,
+  Plus, X, Gauge
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,12 +39,65 @@ const tabItems = [
   { id: 'medicamentos', label: 'Medicamentos', icon: Pill },
 ];
 
+const intensityLevels = [
+  { value: 1, label: '1', color: 'bg-green-400' },
+  { value: 2, label: '2', color: 'bg-green-500' },
+  { value: 3, label: '3', color: 'bg-lime-500' },
+  { value: 4, label: '4', color: 'bg-yellow-400' },
+  { value: 5, label: '5', color: 'bg-yellow-500' },
+  { value: 6, label: '6', color: 'bg-amber-500' },
+  { value: 7, label: '7', color: 'bg-orange-500' },
+  { value: 8, label: '8', color: 'bg-red-400' },
+  { value: 9, label: '9', color: 'bg-red-500' },
+  { value: 10, label: '10', color: 'bg-red-700' },
+];
+
+function getIntensityLabel(value) {
+  if (value <= 3) return 'Leve';
+  if (value <= 6) return 'Moderada';
+  return 'Severa';
+}
+
+function getIntensityColor(value) {
+  if (value <= 3) return 'text-green-600';
+  if (value <= 6) return 'text-amber-600';
+  return 'text-red-600';
+}
+
+function IntensityScale({ value, onChange }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <Gauge className="size-3.5 shrink-0 text-muted-foreground" />
+      <div className="flex gap-0.5">
+        {intensityLevels.map((level) => (
+          <button
+            key={level.value}
+            type="button"
+            onClick={() => onChange(level.value)}
+            className={cn(
+              'size-6 rounded text-[10px] font-bold transition-all',
+              value >= level.value
+                ? `${level.color} text-white shadow-sm`
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            )}
+          >
+            {level.label}
+          </button>
+        ))}
+      </div>
+      <span className={cn('ml-1 text-xs font-semibold', getIntensityColor(value))}>
+        {getIntensityLabel(value)}
+      </span>
+    </div>
+  );
+}
+
 export default function DecisaoClinica() {
   const [activeTab, setActiveTab] = useState('diagnostico');
-  const [selectedSymptoms, setSelectedSymptoms] = useState([]);
+  // selectedSymptoms: Map of id -> { id, label, intensity, duration, isCustom }
+  const [selectedSymptoms, setSelectedSymptoms] = useState({});
   const [symptomText, setSymptomText] = useState('');
-  const [duration, setDuration] = useState('');
-  const [intensity, setIntensity] = useState('');
+  const [newCustomSymptom, setNewCustomSymptom] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState(null);
@@ -51,12 +105,58 @@ export default function DecisaoClinica() {
   const [aiInsights, setAiInsights] = useState(null);
   const [isLoadingInsights, setIsLoadingInsights] = useState(false);
 
-  const toggleSymptom = (id) => {
-    setSelectedSymptoms(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+  const toggleSymptom = (id, label) => {
+    setSelectedSymptoms(prev => {
+      const next = { ...prev };
+      if (next[id]) {
+        delete next[id];
+      } else {
+        next[id] = { id, label, intensity: 5, duration: '', isCustom: false };
+      }
+      return next;
+    });
+  };
+
+  const updateSymptomIntensity = (id, intensity) => {
+    setSelectedSymptoms(prev => ({
+      ...prev,
+      [id]: { ...prev[id], intensity },
+    }));
+  };
+
+  const updateSymptomDuration = (id, duration) => {
+    setSelectedSymptoms(prev => ({
+      ...prev,
+      [id]: { ...prev[id], duration },
+    }));
+  };
+
+  const addCustomSymptom = () => {
+    const label = newCustomSymptom.trim();
+    if (!label) return;
+    const id = 'custom_' + label.toLowerCase().replace(/\s+/g, '_');
+    if (selectedSymptoms[id]) {
+      setNewCustomSymptom('');
+      return;
+    }
+    setSelectedSymptoms(prev => ({
+      ...prev,
+      [id]: { id, label, intensity: 5, duration: '', isCustom: true },
+    }));
+    setNewCustomSymptom('');
+  };
+
+  const removeSymptom = (id) => {
+    setSelectedSymptoms(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const analyzeSymptoms = async () => {
-    if (selectedSymptoms.length === 0 && !symptomText.trim()) {
+    const symptomEntries = Object.values(selectedSymptoms);
+    if (symptomEntries.length === 0 && !symptomText.trim()) {
       alert('Por favor, selecione ou descreva ao menos um sintoma.');
       return;
     }
@@ -66,14 +166,21 @@ export default function DecisaoClinica() {
     setRecommendations(null);
     setAiInsights(null);
     try {
-      const allSymptoms = [...selectedSymptoms];
+      // Send symptom IDs for the backend analysis
+      const allSymptoms = symptomEntries.map(s => s.id.replace('custom_', ''));
       if (symptomText.trim()) {
         allSymptoms.push(...symptomText.toLowerCase().split(/[,;.\n]+/).map(s => s.trim()).filter(s => s.length > 2));
       }
       const result = await clinicalDecisionService.analyzeSymptoms(allSymptoms, {
         age: samplePatient.idade, sex: samplePatient.sexo,
         conditions: samplePatient.conditions, allergies: samplePatient.allergies,
-        medications: samplePatient.medications
+        medications: samplePatient.medications,
+        symptomDetails: symptomEntries.map(s => ({
+          id: s.id, label: s.label,
+          intensity: s.intensity,
+          intensityLabel: getIntensityLabel(s.intensity),
+          duration: s.duration,
+        })),
       });
       setAnalysisResult(result);
       if (result.possibleDiagnoses?.length > 0) loadAIInsights(allSymptoms, result.possibleDiagnoses);
@@ -190,44 +297,86 @@ export default function DecisaoClinica() {
               Sintomas Relatados
             </div>
             <div className="space-y-4 p-5">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Descreva os sintomas</label>
-                <textarea className={cn(inputClass, 'h-20 py-2')} rows="3" placeholder="Digite os sintomas..." value={symptomText} onChange={(e) => setSymptomText(e.target.value)} />
-              </div>
+              {/* Common symptoms quick select */}
               <div>
                 <label className="mb-1.5 block text-sm font-medium">Sintomas comuns</label>
                 <div className="flex flex-wrap gap-2">
                   {commonSymptoms.map(s => (
-                    <button key={s.id} onClick={() => toggleSymptom(s.id)}
+                    <button key={s.id} onClick={() => toggleSymptom(s.id, s.label)}
                       className={cn('rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors',
-                        selectedSymptoms.includes(s.id) ? 'bg-primary text-white border-primary' : 'bg-white text-muted-foreground border-border hover:border-primary/40')}>
+                        selectedSymptoms[s.id] ? 'bg-primary text-white border-primary' : 'bg-white text-muted-foreground border-border hover:border-primary/40')}>
                       {s.label}
                     </button>
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium">Duração</label>
-                  <select className={inputClass} value={duration} onChange={(e) => setDuration(e.target.value)}>
-                    <option value="">Selecione...</option>
-                    <option value="menos_24h">&lt; 24 horas</option>
-                    <option value="1_3_dias">1-3 dias</option>
-                    <option value="4_7_dias">4-7 dias</option>
-                    <option value="1_2_semanas">1-2 semanas</option>
-                    <option value="mais_2_semanas">&gt; 2 semanas</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium">Intensidade</label>
-                  <select className={inputClass} value={intensity} onChange={(e) => setIntensity(e.target.value)}>
-                    <option value="">Selecione...</option>
-                    <option value="leve">Leve</option>
-                    <option value="moderada">Moderada</option>
-                    <option value="severa">Severa</option>
-                  </select>
+
+              {/* Add custom symptom */}
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Cadastrar outro sintoma</label>
+                <div className="flex gap-2">
+                  <input
+                    className={inputClass}
+                    placeholder="Ex: Dor lombar, Visão turva..."
+                    value={newCustomSymptom}
+                    onChange={(e) => setNewCustomSymptom(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && addCustomSymptom()}
+                  />
+                  <button onClick={addCustomSymptom} type="button"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-secondary px-3 py-2 text-sm font-medium text-white hover:bg-secondary-dark">
+                    <Plus className="size-4" /> Adicionar
+                  </button>
                 </div>
               </div>
+
+              {/* Selected symptoms with individual intensity */}
+              {Object.keys(selectedSymptoms).length > 0 && (
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">
+                    Sintomas selecionados — intensidade e duração
+                  </label>
+                  <div className="space-y-3">
+                    {Object.values(selectedSymptoms).map(s => (
+                      <div key={s.id} className="rounded-lg border border-border bg-muted/30 p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <button onClick={() => removeSymptom(s.id)} className="shrink-0 text-muted-foreground hover:text-destructive">
+                            <X className="size-4" />
+                          </button>
+                          <span className="text-sm font-semibold text-foreground">
+                            {s.label}
+                            {s.isCustom && <span className="ml-1 text-[10px] font-normal text-muted-foreground">(personalizado)</span>}
+                          </span>
+                        </div>
+                        <div className="ml-6 space-y-2">
+                          <IntensityScale value={s.intensity} onChange={(v) => updateSymptomIntensity(s.id, v)} />
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground shrink-0">Duração:</span>
+                            <select
+                              className="h-7 rounded border border-border bg-white px-2 text-xs focus:border-primary focus:outline-none"
+                              value={s.duration}
+                              onChange={(e) => updateSymptomDuration(s.id, e.target.value)}
+                            >
+                              <option value="">Selecione...</option>
+                              <option value="menos_24h">&lt; 24 horas</option>
+                              <option value="1_3_dias">1-3 dias</option>
+                              <option value="4_7_dias">4-7 dias</option>
+                              <option value="1_2_semanas">1-2 semanas</option>
+                              <option value="mais_2_semanas">&gt; 2 semanas</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Free text */}
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Observações adicionais</label>
+                <textarea className={cn(inputClass, 'h-16 py-2')} rows="2" placeholder="Detalhes extras sobre os sintomas..." value={symptomText} onChange={(e) => setSymptomText(e.target.value)} />
+              </div>
+
               <button onClick={analyzeSymptoms} disabled={isAnalyzing}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-60">
                 {isAnalyzing ? <><Loader2 className="size-4 animate-spin" /> Analisando...</> : <><Search className="size-4" /> Analisar Sintomas</>}

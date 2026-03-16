@@ -15,6 +15,8 @@ import {
     CheckCircle,
     XCircle,
     HandHelping,
+    Trash2,
+    Search,
 } from 'lucide-react';
 
 // Sample prescriptions data
@@ -108,14 +110,40 @@ const estatisticas = {
     vencidas: 7
 };
 
+const medicamentosDisponiveis = [
+    'Paracetamol 500mg', 'Ibuprofeno 600mg', 'Amoxicilina 500mg', 'Losartana 50mg',
+    'Metformina 850mg', 'Omeprazol 20mg', 'Sinvastatina 20mg', 'Enalapril 10mg',
+    'Dipirona 500mg', 'Hidroclorotiazida 25mg', 'Captopril 25mg', 'Salbutamol 100mcg',
+    'Atenolol 25mg', 'AAS 100mg', 'Levotiroxina 50mcg', 'Anlodipino 5mg',
+    'Prednisona 20mg', 'Azitromicina 500mg', 'Dexametasona 4mg', 'Ciprofloxacino 500mg',
+];
+
+const posologiasComuns = [
+    '1 comp. 1x/dia', '1 comp. 12/12h', '1 comp. 8/8h', '1 comp. 6/6h',
+    '1 comp. manhã', '1 comp. em jejum', '1 comp. após almoço', '1 comp. à noite',
+    '1 cáps. 12/12h', '1 cáps. 8/8h', '1 cáps. em jejum',
+    '1 comp. se dor (máx 4/dia)', '2 puffs 12/12h', '20 gotas 6/6h',
+];
+
+const emptyMedItem = () => ({ nome: '', quantidade: '', posologia: '', busca: '' });
+
+const novaPrescricaoInicial = {
+    paciente: '', cpf: '', cns: '', medico: '', crm: '', observacoes: '',
+    medicamentos: [emptyMedItem()],
+};
+
 export default function Prescricoes() {
     const [filtroStatus, setFiltroStatus] = useState('');
     const [pesquisa, setPesquisa] = useState('');
     const [prescricaoSelecionada, setPrescricaoSelecionada] = useState(null);
     const [showDispensarModal, setShowDispensarModal] = useState(false);
+    const [showNovaModal, setShowNovaModal] = useState(false);
+    const [novaPrescricao, setNovaPrescricao] = useState(novaPrescricaoInicial);
+    const [prescricoes, setPrescricoes] = useState(prescricoesData);
+    const [focusedMedIdx, setFocusedMedIdx] = useState(null);
 
     // Filter prescriptions
-    const prescricoesFiltradas = prescricoesData.filter(p => {
+    const prescricoesFiltradas = prescricoes.filter(p => {
         const matchStatus = !filtroStatus || p.status === filtroStatus;
         const matchPesquisa = !pesquisa ||
             p.paciente.toLowerCase().includes(pesquisa.toLowerCase()) ||
@@ -167,7 +195,10 @@ export default function Prescricoes() {
                     <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
                         <Printer className="h-4 w-4" /> Imprimir
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                        onClick={() => { setNovaPrescricao({ ...novaPrescricaoInicial, medicamentos: [emptyMedItem()] }); setShowNovaModal(true); }}
+                    >
                         <Plus className="h-4 w-4" /> Nova Prescrição
                     </button>
                 </div>
@@ -422,6 +453,233 @@ export default function Prescricoes() {
                                         <HandHelping className="h-4 w-4" /> Dispensar
                                     </button>
                                 )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Nova Prescrição Modal */}
+            {showNovaModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowNovaModal(false)}>
+                    <div className="rounded-xl border border-border bg-card shadow-sm w-[800px] max-w-[95%] max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="border-b border-border bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <div className="flex items-center justify-between">
+                                <span className="flex items-center gap-2"><Plus className="h-4 w-4" /> Nova Prescrição</span>
+                                <button className="rounded-lg bg-white/20 px-2 py-1 text-white hover:bg-white/30" onClick={() => setShowNovaModal(false)}>
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="p-5 space-y-5">
+                            {/* Dados do Paciente */}
+                            <div>
+                                <h6 className="mb-3 font-semibold text-foreground">Dados do Paciente</h6>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="col-span-3 sm:col-span-1">
+                                        <label className="mb-1 block text-xs font-medium text-foreground">Nome do Paciente *</label>
+                                        <input className="h-9 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder="Nome completo" value={novaPrescricao.paciente}
+                                            onChange={(e) => setNovaPrescricao(p => ({ ...p, paciente: e.target.value }))} />
+                                    </div>
+                                    <div>
+                                        <label className="mb-1 block text-xs font-medium text-foreground">CPF</label>
+                                        <input className="h-9 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder="000.000.000-00" value={novaPrescricao.cpf}
+                                            onChange={(e) => setNovaPrescricao(p => ({ ...p, cpf: e.target.value }))} />
+                                    </div>
+                                    <div>
+                                        <label className="mb-1 block text-xs font-medium text-foreground">Cartão SUS (CNS)</label>
+                                        <input className="h-9 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder="898.0000.0000.0000" value={novaPrescricao.cns}
+                                            onChange={(e) => setNovaPrescricao(p => ({ ...p, cns: e.target.value }))} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Prescritor */}
+                            <div>
+                                <h6 className="mb-3 font-semibold text-foreground">Prescritor</h6>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="mb-1 block text-xs font-medium text-foreground">Médico *</label>
+                                        <input className="h-9 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder="Dr(a). Nome" value={novaPrescricao.medico}
+                                            onChange={(e) => setNovaPrescricao(p => ({ ...p, medico: e.target.value }))} />
+                                    </div>
+                                    <div>
+                                        <label className="mb-1 block text-xs font-medium text-foreground">CRM *</label>
+                                        <input className="h-9 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder="CRM-UF 000000" value={novaPrescricao.crm}
+                                            onChange={(e) => setNovaPrescricao(p => ({ ...p, crm: e.target.value }))} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr className="border-border" />
+
+                            {/* Medicamentos */}
+                            <div>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h6 className="font-semibold text-foreground">Medicamentos *</h6>
+                                    <button className="inline-flex items-center gap-1 rounded-lg border border-primary text-primary px-2.5 py-1.5 text-xs font-medium hover:bg-primary/5"
+                                        onClick={() => setNovaPrescricao(p => ({ ...p, medicamentos: [...p.medicamentos, emptyMedItem()] }))}>
+                                        <Plus className="h-3.5 w-3.5" /> Adicionar Medicamento
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    {novaPrescricao.medicamentos.map((med, idx) => (
+                                        <div key={idx} className="rounded-lg border border-border bg-muted/20 p-3">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="flex items-center justify-center h-5 w-5 rounded-full bg-primary text-white text-[10px] font-bold">{idx + 1}</span>
+                                                <span className="text-xs font-semibold text-foreground flex-1">Medicamento {idx + 1}</span>
+                                                {novaPrescricao.medicamentos.length > 1 && (
+                                                    <button className="text-muted-foreground hover:text-destructive" onClick={() =>
+                                                        setNovaPrescricao(p => ({ ...p, medicamentos: p.medicamentos.filter((_, i) => i !== idx) }))
+                                                    }><Trash2 className="h-3.5 w-3.5" /></button>
+                                                )}
+                                            </div>
+                                            <div className="grid grid-cols-[1fr_80px_1fr] gap-2">
+                                                <div className="relative">
+                                                    <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Medicamento</label>
+                                                    <div className="relative">
+                                                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                                                        <input
+                                                            className="h-9 w-full rounded-lg border border-input bg-white pl-8 pr-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                            placeholder="Buscar medicamento..."
+                                                            value={med.nome || med.busca}
+                                                            onFocus={() => setFocusedMedIdx(idx)}
+                                                            onBlur={() => setTimeout(() => setFocusedMedIdx(null), 150)}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                setNovaPrescricao(p => {
+                                                                    const meds = [...p.medicamentos];
+                                                                    meds[idx] = { ...meds[idx], busca: val, nome: '' };
+                                                                    return { ...p, medicamentos: meds };
+                                                                });
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    {focusedMedIdx === idx && (med.busca || '').length > 0 && !med.nome && (
+                                                        <div className="absolute z-10 mt-1 w-full max-h-40 overflow-auto rounded-lg border border-border bg-white shadow-lg">
+                                                            {medicamentosDisponiveis
+                                                                .filter(m => m.toLowerCase().includes((med.busca || '').toLowerCase()))
+                                                                .map((m, i) => (
+                                                                    <button key={i} className="w-full px-3 py-2 text-left text-sm hover:bg-primary/5 hover:text-primary"
+                                                                        onMouseDown={() => {
+                                                                            setNovaPrescricao(p => {
+                                                                                const meds = [...p.medicamentos];
+                                                                                meds[idx] = { ...meds[idx], nome: m, busca: '' };
+                                                                                return { ...p, medicamentos: meds };
+                                                                            });
+                                                                        }}>
+                                                                        {m}
+                                                                    </button>
+                                                                ))
+                                                            }
+                                                            {medicamentosDisponiveis.filter(m => m.toLowerCase().includes((med.busca || '').toLowerCase())).length === 0 && (
+                                                                <div className="px-3 py-2 text-xs text-muted-foreground">
+                                                                    Nenhum encontrado.
+                                                                    <button className="ml-1 text-primary font-medium" onMouseDown={() => {
+                                                                        setNovaPrescricao(p => {
+                                                                            const meds = [...p.medicamentos];
+                                                                            meds[idx] = { ...meds[idx], nome: med.busca, busca: '' };
+                                                                            return { ...p, medicamentos: meds };
+                                                                        });
+                                                                    }}>Usar "{med.busca}"</button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Qtd.</label>
+                                                    <input type="number" min="1"
+                                                        className="h-9 w-full rounded-lg border border-input bg-white px-2 text-sm text-center focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                        placeholder="30" value={med.quantidade}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            setNovaPrescricao(p => {
+                                                                const meds = [...p.medicamentos];
+                                                                meds[idx] = { ...meds[idx], quantidade: val };
+                                                                return { ...p, medicamentos: meds };
+                                                            });
+                                                        }} />
+                                                </div>
+                                                <div>
+                                                    <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Posologia</label>
+                                                    <select
+                                                        className="h-9 w-full rounded-lg border border-input bg-white px-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                        value={med.posologia}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            setNovaPrescricao(p => {
+                                                                const meds = [...p.medicamentos];
+                                                                meds[idx] = { ...meds[idx], posologia: val };
+                                                                return { ...p, medicamentos: meds };
+                                                            });
+                                                        }}>
+                                                        <option value="">Selecione...</option>
+                                                        {posologiasComuns.map((pos, i) => <option key={i} value={pos}>{pos}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Observações */}
+                            <div>
+                                <label className="mb-1 block text-xs font-medium text-foreground">Observações</label>
+                                <textarea className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    rows="2" placeholder="Observações sobre a prescrição..."
+                                    value={novaPrescricao.observacoes}
+                                    onChange={(e) => setNovaPrescricao(p => ({ ...p, observacoes: e.target.value }))} />
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                    onClick={() => setShowNovaModal(false)}>
+                                    Cancelar
+                                </button>
+                                <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                                    onClick={() => {
+                                        // Validação
+                                        if (!novaPrescricao.paciente.trim()) { alert('Informe o nome do paciente.'); return; }
+                                        if (!novaPrescricao.medico.trim()) { alert('Informe o médico prescritor.'); return; }
+                                        if (!novaPrescricao.crm.trim()) { alert('Informe o CRM.'); return; }
+                                        const medsValidos = novaPrescricao.medicamentos.filter(m => m.nome && m.quantidade && m.posologia);
+                                        if (medsValidos.length === 0) { alert('Adicione ao menos um medicamento com quantidade e posologia.'); return; }
+
+                                        const hoje = new Date();
+                                        const validade = new Date(hoje);
+                                        validade.setMonth(validade.getMonth() + 2);
+                                        const seq = String(prescricoes.length + 1230 + 1).padStart(7, '0');
+
+                                        const nova = {
+                                            id: Date.now(),
+                                            numero: `RX2026${seq}`,
+                                            paciente: novaPrescricao.paciente,
+                                            cpf: novaPrescricao.cpf || '-',
+                                            cns: novaPrescricao.cns || '-',
+                                            medico: novaPrescricao.medico,
+                                            crm: novaPrescricao.crm,
+                                            data: hoje.toISOString().split('T')[0],
+                                            validade: validade.toISOString().split('T')[0],
+                                            status: 'pendente',
+                                            medicamentos: medsValidos.map(m => ({
+                                                nome: m.nome, quantidade: parseInt(m.quantidade), posologia: m.posologia,
+                                            })),
+                                        };
+
+                                        setPrescricoes(prev => [nova, ...prev]);
+                                        setShowNovaModal(false);
+                                        setNovaPrescricao({ ...novaPrescricaoInicial, medicamentos: [emptyMedItem()] });
+                                    }}>
+                                    <Check className="h-4 w-4" /> Criar Prescrição
+                                </button>
                             </div>
                         </div>
                     </div>

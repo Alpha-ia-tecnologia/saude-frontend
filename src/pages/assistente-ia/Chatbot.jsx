@@ -1,7 +1,22 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { config } from '../../config/app.config';
 import { Bot, Paperclip, Send, Trash2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+function renderMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^### (.+)$/gm, '<h4 class="font-bold text-sm mt-3 mb-1">$1</h4>')
+    .replace(/^## (.+)$/gm, '<h3 class="font-bold mt-3 mb-1">$1</h3>')
+    .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
+    .replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal">$1</li>')
+    .replace(/`(.+?)`/g, '<code class="bg-black/10 rounded px-1 text-xs">$1</code>')
+    .replace(/⚠️/g, '<span class="text-amber-600">⚠️</span>')
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>');
+}
 
 export function Chatbot() {
   const [messages, setMessages] = useState([
@@ -76,12 +91,16 @@ Como posso ajudar você hoje?`
           Assistente IA
         </h1>
         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-xs font-medium text-primary">DeepSeek</span>
+          </div>
           <select
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
             className="h-9 rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
-            <option value="deepseek">DeepSeek</option>
+            <option value="deepseek">DeepSeek (Padrão)</option>
             <option value="openai">OpenAI (GPT-4)</option>
             <option value="gemini">Google Gemini</option>
           </select>
@@ -106,7 +125,11 @@ Como posso ajudar você hoje?`
                     ? 'rounded-bl-md border border-red-200 bg-red-50 text-red-700'
                     : 'rounded-bl-md bg-muted text-foreground'
               )}>
-                <div className="whitespace-pre-wrap">{msg.content}</div>
+                {msg.role === 'user' ? (
+                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                ) : (
+                  <div className="prose-sm" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+                )}
                 {msg.mode && (
                   <p className="mt-2 text-[10px] opacity-60">
                     {msg.mode === 'demo' ? 'Modo Demo' : 'Produção'} &middot; {msg.model}

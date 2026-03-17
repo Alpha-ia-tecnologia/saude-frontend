@@ -1,4 +1,9 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+    Coins, FileText, Plus, Eye, Pencil, AreaChart, Wallet,
+    ListChecks, X, FileDown
+} from 'lucide-react';
 
 // Budget data
 const orcamentoGeral = {
@@ -87,17 +92,41 @@ const execucaoMensal = [
 ];
 
 const fonteRecursos = [
-    { fonte: 'PAB Fixo', valor: 850000, cor: 'var(--sus-blue)' },
-    { fonte: 'PAB Variável', valor: 620000, cor: 'var(--sus-green)' },
-    { fonte: 'MAC', valor: 480000, cor: 'var(--sus-yellow)' },
-    { fonte: 'Outros SUS', valor: 350000, cor: '#17a2b8' },
-    { fonte: 'Recursos Próprios', valor: 200000, cor: '#6c757d' }
+    { fonte: 'PAB Fixo', valor: 850000, cor: 'bg-primary' },
+    { fonte: 'PAB Variável', valor: 620000, cor: 'bg-secondary' },
+    { fonte: 'MAC', valor: 480000, cor: 'bg-accent' },
+    { fonte: 'Outros SUS', valor: 350000, cor: 'bg-cyan-500' },
+    { fonte: 'Recursos Próprios', valor: 200000, cor: 'bg-gray-500' }
 ];
 
 export default function Orcamento() {
     const [anoSelecionado, setAnoSelecionado] = useState('2025');
     const [unidadeSelecionada, setUnidadeSelecionada] = useState('todas');
     const [rubricaSelecionada, setRubricaSelecionada] = useState(null);
+    const [showNovaDotacaoModal, setShowNovaDotacaoModal] = useState(false);
+
+    const exportarRelatorio = () => {
+        const headers = ['Codigo', 'Nome', 'Categoria', 'Aprovado', 'Empenhado', 'Executado', 'Percentual (%)'];
+        const rows = rubricas.map(r => [
+            r.codigo,
+            r.nome,
+            r.categoria,
+            r.aprovado,
+            r.empenhado,
+            r.executado,
+            r.percentual
+        ]);
+        const csvContent = [headers.join(';'), ...rows.map(row => row.join(';'))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `relatorio_orcamento_${anoSelecionado}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -109,26 +138,31 @@ export default function Orcamento() {
     };
 
     const getProgressColor = (percentual) => {
-        if (percentual >= 80) return 'var(--sus-green)';
-        if (percentual >= 50) return 'var(--sus-yellow)';
-        return '#dc3545';
+        if (percentual >= 80) return 'bg-secondary';
+        if (percentual >= 50) return 'bg-accent';
+        return 'bg-destructive';
+    };
+
+    const getProgressTextColor = (percentual) => {
+        if (percentual >= 80) return 'text-secondary';
+        if (percentual >= 50) return 'text-accent';
+        return 'text-destructive';
     };
 
     const totalFontes = fonteRecursos.reduce((acc, f) => acc + f.valor, 0);
     const maxMensal = Math.max(...execucaoMensal.map(m => Math.max(m.previsto, m.executado)));
 
     return (
-        <div className="fade-in">
+        <div className="space-y-6">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1 style={{ margin: 0 }}>
-                    <i className="fas fa-coins" style={{ color: 'var(--sus-yellow)', marginRight: '0.5rem' }}></i>
-                    Orçamento
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-foreground">
+                    <Coins className="mr-2 inline-block h-6 w-6 text-accent" />
+                    Orcamento
                 </h1>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="flex gap-2">
                     <select
-                        className="form-control"
-                        style={{ width: 'auto' }}
+                        className="h-10 w-auto rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         value={unidadeSelecionada}
                         onChange={(e) => setUnidadeSelecionada(e.target.value)}
                     >
@@ -138,8 +172,7 @@ export default function Orcamento() {
                         <option value="sul">UBS Sul</option>
                     </select>
                     <select
-                        className="form-control"
-                        style={{ width: 'auto' }}
+                        className="h-10 w-auto rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         value={anoSelecionado}
                         onChange={(e) => setAnoSelecionado(e.target.value)}
                     >
@@ -147,83 +180,79 @@ export default function Orcamento() {
                         <option value="2024">2024</option>
                         <option value="2023">2023</option>
                     </select>
-                    <button className="btn btn-outline-primary">
-                        <i className="fas fa-file-pdf"></i> Relatório
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                        onClick={exportarRelatorio}
+                    >
+                        <FileText className="h-4 w-4" /> Relatorio
                     </button>
-                    <button className="btn btn-primary">
-                        <i className="fas fa-plus"></i> Nova Dotação
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                        onClick={() => setShowNovaDotacaoModal(true)}
+                    >
+                        <Plus className="h-4 w-4" /> Nova Dotacao
                     </button>
                 </div>
             </div>
 
             {/* Summary Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card" style={{ borderTop: '4px solid var(--sus-blue)' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Orçamento Aprovado</p>
-                        <h2 style={{ color: 'var(--sus-blue)', margin: '0.5rem 0' }}>{formatCurrency(orcamentoGeral.aprovado)}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>LOA {anoSelecionado}</small>
+            <div className="grid grid-cols-4 gap-4">
+                <div className="rounded-xl border border-border bg-card shadow-sm border-t-4 border-t-primary">
+                    <div className="p-5 text-center">
+                        <p className="text-sm text-muted-foreground">Orcamento Aprovado</p>
+                        <h2 className="my-2 text-2xl font-bold text-primary">{formatCurrency(orcamentoGeral.aprovado)}</h2>
+                        <small className="text-muted-foreground">LOA {anoSelecionado}</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderTop: '4px solid var(--sus-yellow)' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Empenhado</p>
-                        <h2 style={{ color: 'var(--sus-yellow)', margin: '0.5rem 0' }}>{formatCurrency(orcamentoGeral.empenhado)}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>{((orcamentoGeral.empenhado / orcamentoGeral.aprovado) * 100).toFixed(1)}% do total</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-t-4 border-t-accent">
+                    <div className="p-5 text-center">
+                        <p className="text-sm text-muted-foreground">Empenhado</p>
+                        <h2 className="my-2 text-2xl font-bold text-accent">{formatCurrency(orcamentoGeral.empenhado)}</h2>
+                        <small className="text-muted-foreground">{((orcamentoGeral.empenhado / orcamentoGeral.aprovado) * 100).toFixed(1)}% do total</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderTop: '4px solid var(--sus-green)' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Executado</p>
-                        <h2 style={{ color: 'var(--sus-green)', margin: '0.5rem 0' }}>{formatCurrency(orcamentoGeral.executado)}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>{((orcamentoGeral.executado / orcamentoGeral.aprovado) * 100).toFixed(1)}% do total</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-t-4 border-t-secondary">
+                    <div className="p-5 text-center">
+                        <p className="text-sm text-muted-foreground">Executado</p>
+                        <h2 className="my-2 text-2xl font-bold text-secondary">{formatCurrency(orcamentoGeral.executado)}</h2>
+                        <small className="text-muted-foreground">{((orcamentoGeral.executado / orcamentoGeral.aprovado) * 100).toFixed(1)}% do total</small>
                     </div>
                 </div>
-                <div className="card" style={{ borderTop: '4px solid #17a2b8' }}>
-                    <div className="card-body" style={{ textAlign: 'center' }}>
-                        <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Disponível</p>
-                        <h2 style={{ color: '#17a2b8', margin: '0.5rem 0' }}>{formatCurrency(orcamentoGeral.disponivel)}</h2>
-                        <small style={{ color: 'var(--sus-gray)' }}>{((orcamentoGeral.disponivel / orcamentoGeral.aprovado) * 100).toFixed(1)}% restante</small>
+                <div className="rounded-xl border border-border bg-card shadow-sm border-t-4 border-t-cyan-500">
+                    <div className="p-5 text-center">
+                        <p className="text-sm text-muted-foreground">Disponivel</p>
+                        <h2 className="my-2 text-2xl font-bold text-cyan-500">{formatCurrency(orcamentoGeral.disponivel)}</h2>
+                        <small className="text-muted-foreground">{((orcamentoGeral.disponivel / orcamentoGeral.aprovado) * 100).toFixed(1)}% restante</small>
                     </div>
                 </div>
             </div>
 
             {/* Charts Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+            <div className="grid grid-cols-3 gap-6">
                 {/* Monthly Execution Chart */}
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <i className="fas fa-chart-area"></i> Execução Mensal
+                <div className="col-span-2 rounded-xl border border-border bg-card shadow-sm">
+                    <div className="border-b border-border bg-muted px-5 py-3 text-sm font-semibold">
+                        <AreaChart className="mr-1.5 inline-block h-4 w-4" /> Execucao Mensal
                     </div>
-                    <div className="card-body">
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '1rem', fontSize: '0.85rem' }}>
-                            <span><span style={{ display: 'inline-block', width: '12px', height: '12px', background: 'var(--sus-blue)', marginRight: '0.25rem' }}></span> Previsto</span>
-                            <span><span style={{ display: 'inline-block', width: '12px', height: '12px', background: 'var(--sus-green)', marginRight: '0.25rem' }}></span> Executado</span>
+                    <div className="p-5">
+                        <div className="mb-4 flex justify-end gap-4 text-sm">
+                            <span><span className="mr-1 inline-block h-3 w-3 rounded-sm bg-primary"></span> Previsto</span>
+                            <span><span className="mr-1 inline-block h-3 w-3 rounded-sm bg-secondary"></span> Executado</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '180px', gap: '4px' }}>
+                        <div className="flex h-[180px] items-end justify-between gap-1">
                             {execucaoMensal.map((mes, i) => (
-                                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                                    <div style={{
-                                        display: 'flex',
-                                        gap: '2px',
-                                        alignItems: 'flex-end',
-                                        height: '150px'
-                                    }}>
-                                        <div style={{
-                                            width: '12px',
-                                            height: `${(mes.previsto / maxMensal) * 140}px`,
-                                            background: 'var(--sus-blue)',
-                                            borderRadius: '2px 2px 0 0',
-                                            opacity: 0.7
-                                        }}></div>
-                                        <div style={{
-                                            width: '12px',
-                                            height: `${(mes.executado / maxMensal) * 140}px`,
-                                            background: mes.executado > 0 ? 'var(--sus-green)' : '#e9ecef',
-                                            borderRadius: '2px 2px 0 0'
-                                        }}></div>
+                                <div key={i} className="flex flex-1 flex-col items-center">
+                                    <div className="flex h-[150px] items-end gap-0.5">
+                                        <div
+                                            className="w-3 rounded-t bg-primary/70"
+                                            style={{ height: `${(mes.previsto / maxMensal) * 140}px` }}
+                                        ></div>
+                                        <div
+                                            className={cn('w-3 rounded-t', mes.executado > 0 ? 'bg-secondary' : 'bg-gray-200')}
+                                            style={{ height: `${(mes.executado / maxMensal) * 140}px` }}
+                                        ></div>
                                     </div>
-                                    <small style={{ marginTop: '0.25rem', fontSize: '0.7rem', color: 'var(--sus-gray)' }}>{mes.mes}</small>
+                                    <small className="mt-1 text-xs text-muted-foreground">{mes.mes}</small>
                                 </div>
                             ))}
                         </div>
@@ -231,31 +260,24 @@ export default function Orcamento() {
                 </div>
 
                 {/* Resources by Source */}
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <i className="fas fa-wallet"></i> Fontes de Recursos
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="border-b border-border bg-muted px-5 py-3 text-sm font-semibold">
+                        <Wallet className="mr-1.5 inline-block h-4 w-4" /> Fontes de Recursos
                     </div>
-                    <div className="card-body">
+                    <div className="p-5">
                         {fonteRecursos.map((fonte, i) => (
-                            <div key={i} style={{ marginBottom: i < fonteRecursos.length - 1 ? '1rem' : 0 }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span style={{ fontSize: '0.85rem' }}>{fonte.fonte}</span>
-                                    <strong style={{ fontSize: '0.85rem' }}>{formatCurrency(fonte.valor)}</strong>
+                            <div key={i} className={cn(i < fonteRecursos.length - 1 && 'mb-4')}>
+                                <div className="mb-1 flex justify-between">
+                                    <span className="text-sm">{fonte.fonte}</span>
+                                    <strong className="text-sm">{formatCurrency(fonte.valor)}</strong>
                                 </div>
-                                <div style={{
-                                    height: '8px',
-                                    background: '#e9ecef',
-                                    borderRadius: '4px',
-                                    overflow: 'hidden'
-                                }}>
-                                    <div style={{
-                                        width: `${(fonte.valor / totalFontes) * 100}%`,
-                                        height: '100%',
-                                        background: fonte.cor,
-                                        borderRadius: '4px'
-                                    }}></div>
+                                <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+                                    <div
+                                        className={cn('h-full rounded-full', fonte.cor)}
+                                        style={{ width: `${(fonte.valor / totalFontes) * 100}%` }}
+                                    ></div>
                                 </div>
-                                <small style={{ color: 'var(--sus-gray)' }}>{((fonte.valor / totalFontes) * 100).toFixed(1)}%</small>
+                                <small className="text-muted-foreground">{((fonte.valor / totalFontes) * 100).toFixed(1)}%</small>
                             </div>
                         ))}
                     </div>
@@ -263,12 +285,18 @@ export default function Orcamento() {
             </div>
 
             {/* Budget Items Table */}
-            <div className="card">
-                <div className="card-header" style={{ background: '#f8f9fa', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span><i className="fas fa-list-alt"></i> Execução por Rubrica</span>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <input type="text" className="form-control form-control-sm" placeholder="Buscar rubrica..." style={{ width: '200px' }} />
-                        <select className="form-control form-control-sm" style={{ width: 'auto' }}>
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="flex items-center justify-between border-b border-border bg-muted px-5 py-3">
+                    <span className="text-sm font-semibold">
+                        <ListChecks className="mr-1.5 inline-block h-4 w-4" /> Execucao por Rubrica
+                    </span>
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            className="h-8 w-[200px] rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            placeholder="Buscar rubrica..."
+                        />
+                        <select className="h-8 w-auto rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                             <option>Todas as Categorias</option>
                             <option>Pessoal</option>
                             <option>Custeio</option>
@@ -276,86 +304,82 @@ export default function Orcamento() {
                         </select>
                     </div>
                 </div>
-                <div className="card-body" style={{ padding: 0 }}>
-                    <table className="table" style={{ marginBottom: 0 }}>
-                        <thead>
+                <div>
+                    <table className="w-full text-sm">
+                        <thead className="border-b border-border bg-muted/50">
                             <tr>
-                                <th>Código</th>
-                                <th>Rubrica</th>
-                                <th>Categoria</th>
-                                <th style={{ textAlign: 'right' }}>Aprovado</th>
-                                <th style={{ textAlign: 'right' }}>Empenhado</th>
-                                <th style={{ textAlign: 'right' }}>Executado</th>
-                                <th>Execução</th>
-                                <th>Ações</th>
+                                <th className="px-4 py-3 text-left font-medium">Codigo</th>
+                                <th className="px-4 py-3 text-left font-medium">Rubrica</th>
+                                <th className="px-4 py-3 text-left font-medium">Categoria</th>
+                                <th className="px-4 py-3 text-right font-medium">Aprovado</th>
+                                <th className="px-4 py-3 text-right font-medium">Empenhado</th>
+                                <th className="px-4 py-3 text-right font-medium">Executado</th>
+                                <th className="px-4 py-3 text-left font-medium">Execucao</th>
+                                <th className="px-4 py-3 text-left font-medium">Acoes</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-border">
                             {rubricas.map(rubrica => (
-                                <tr key={rubrica.id}>
-                                    <td><code>{rubrica.codigo}</code></td>
-                                    <td>
+                                <tr key={rubrica.id} className="hover:bg-muted/30">
+                                    <td className="px-4 py-3"><code className="rounded bg-muted px-1.5 py-0.5 text-xs">{rubrica.codigo}</code></td>
+                                    <td className="px-4 py-3">
                                         <strong>{rubrica.nome}</strong>
                                     </td>
-                                    <td>
-                                        <span className={`badge badge-${rubrica.categoria === 'Pessoal' ? 'primary' :
-                                                rubrica.categoria === 'Custeio' ? 'info' : 'warning'
-                                            }`}>
+                                    <td className="px-4 py-3">
+                                        <span className={cn(
+                                            'rounded-md px-2 py-0.5 text-xs font-medium',
+                                            rubrica.categoria === 'Pessoal'
+                                                ? 'bg-primary/10 text-primary'
+                                                : rubrica.categoria === 'Custeio'
+                                                    ? 'bg-cyan-50 text-cyan-700'
+                                                    : 'bg-amber-50 text-amber-700'
+                                        )}>
                                             {rubrica.categoria}
                                         </span>
                                     </td>
-                                    <td style={{ textAlign: 'right' }}>{formatCurrency(rubrica.aprovado)}</td>
-                                    <td style={{ textAlign: 'right', color: 'var(--sus-yellow)' }}>{formatCurrency(rubrica.empenhado)}</td>
-                                    <td style={{ textAlign: 'right', color: 'var(--sus-green)' }}>{formatCurrency(rubrica.executado)}</td>
-                                    <td style={{ width: '150px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <div style={{
-                                                flex: 1,
-                                                height: '8px',
-                                                background: '#e9ecef',
-                                                borderRadius: '4px',
-                                                overflow: 'hidden'
-                                            }}>
-                                                <div style={{
-                                                    width: `${rubrica.percentual}%`,
-                                                    height: '100%',
-                                                    background: getProgressColor(rubrica.percentual),
-                                                    borderRadius: '4px'
-                                                }}></div>
+                                    <td className="px-4 py-3 text-right">{formatCurrency(rubrica.aprovado)}</td>
+                                    <td className="px-4 py-3 text-right text-accent">{formatCurrency(rubrica.empenhado)}</td>
+                                    <td className="px-4 py-3 text-right text-secondary">{formatCurrency(rubrica.executado)}</td>
+                                    <td className="w-[150px] px-4 py-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex-1 overflow-hidden rounded-full bg-gray-200 h-2">
+                                                <div
+                                                    className={cn('h-full rounded-full', getProgressColor(rubrica.percentual))}
+                                                    style={{ width: `${rubrica.percentual}%` }}
+                                                ></div>
                                             </div>
-                                            <span style={{
-                                                fontWeight: '600',
-                                                fontSize: '0.85rem',
-                                                color: getProgressColor(rubrica.percentual)
-                                            }}>
+                                            <span className={cn('text-sm font-semibold', getProgressTextColor(rubrica.percentual))}>
                                                 {rubrica.percentual}%
                                             </span>
                                         </div>
                                     </td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                    <td className="px-4 py-3">
+                                        <div className="flex gap-1">
                                             <button
-                                                className="btn btn-sm btn-outline-primary"
+                                                className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
                                                 onClick={() => setRubricaSelecionada(rubrica)}
                                                 title="Detalhes"
                                             >
-                                                <i className="fas fa-eye"></i>
+                                                <Eye className="h-3.5 w-3.5" />
                                             </button>
-                                            <button className="btn btn-sm btn-outline-secondary" title="Editar">
-                                                <i className="fas fa-edit"></i>
+                                            <button
+                                                className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                                                title="Editar"
+                                            >
+                                                <Pencil className="h-3.5 w-3.5" />
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
-                        <tfoot style={{ background: '#f8f9fa', fontWeight: '600' }}>
+                        <tfoot className="border-t border-border bg-muted/50 font-semibold">
                             <tr>
-                                <td colSpan="3">TOTAL</td>
-                                <td style={{ textAlign: 'right' }}>{formatCurrency(rubricas.reduce((acc, r) => acc + r.aprovado, 0))}</td>
-                                <td style={{ textAlign: 'right' }}>{formatCurrency(rubricas.reduce((acc, r) => acc + r.empenhado, 0))}</td>
-                                <td style={{ textAlign: 'right' }}>{formatCurrency(rubricas.reduce((acc, r) => acc + r.executado, 0))}</td>
-                                <td colSpan="2"></td>
+                                <td className="px-4 py-3" colSpan="3">TOTAL</td>
+                                <td className="px-4 py-3 text-right">{formatCurrency(rubricas.reduce((acc, r) => acc + r.aprovado, 0))}</td>
+                                <td className="px-4 py-3 text-right">{formatCurrency(rubricas.reduce((acc, r) => acc + r.empenhado, 0))}</td>
+                                <td className="px-4 py-3 text-right">{formatCurrency(rubricas.reduce((acc, r) => acc + r.executado, 0))}</td>
+                                <td className="px-4 py-3" colSpan="2"></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -365,116 +389,173 @@ export default function Orcamento() {
             {/* Detail Modal */}
             {rubricaSelecionada && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setRubricaSelecionada(null)}
                 >
                     <div
-                        className="card"
-                        style={{ width: '600px', maxWidth: '90%' }}
+                        className="w-[600px] max-w-[90%] rounded-xl border border-border bg-card shadow-sm"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="card-header" style={{ background: 'var(--sus-blue)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-file-invoice-dollar"></i> Detalhes da Rubrica</span>
-                                <button
-                                    className="btn btn-sm btn-light"
-                                    onClick={() => setRubricaSelecionada(null)}
-                                >
-                                    <i className="fas fa-times"></i>
-                                </button>
-                            </div>
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <span><FileDown className="mr-1.5 inline-block h-4 w-4" /> Detalhes da Rubrica</span>
+                            <button
+                                className="rounded-lg bg-white/20 px-2 py-1 text-xs text-white hover:bg-white/30"
+                                onClick={() => setRubricaSelecionada(null)}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
                         </div>
-                        <div className="card-body">
-                            <h5>{rubricaSelecionada.nome}</h5>
-                            <p><code>{rubricaSelecionada.codigo}</code> - {rubricaSelecionada.categoria}</p>
+                        <div className="p-5">
+                            <h5 className="text-lg font-semibold">{rubricaSelecionada.nome}</h5>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{rubricaSelecionada.codigo}</code> - {rubricaSelecionada.categoria}
+                            </p>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                                <div className="card" style={{ background: '#f8f9fa' }}>
-                                    <div className="card-body" style={{ padding: '1rem', textAlign: 'center' }}>
-                                        <small style={{ color: 'var(--sus-gray)' }}>Aprovado</small>
-                                        <h4 style={{ margin: '0.25rem 0', color: 'var(--sus-blue)' }}>{formatCurrency(rubricaSelecionada.aprovado)}</h4>
-                                    </div>
+                            <div className="mt-4 grid grid-cols-2 gap-4">
+                                <div className="rounded-xl border border-border bg-muted/50 p-4 text-center">
+                                    <small className="text-muted-foreground">Aprovado</small>
+                                    <h4 className="my-1 text-xl font-bold text-primary">{formatCurrency(rubricaSelecionada.aprovado)}</h4>
                                 </div>
-                                <div className="card" style={{ background: '#f8f9fa' }}>
-                                    <div className="card-body" style={{ padding: '1rem', textAlign: 'center' }}>
-                                        <small style={{ color: 'var(--sus-gray)' }}>Executado</small>
-                                        <h4 style={{ margin: '0.25rem 0', color: 'var(--sus-green)' }}>{formatCurrency(rubricaSelecionada.executado)}</h4>
-                                    </div>
+                                <div className="rounded-xl border border-border bg-muted/50 p-4 text-center">
+                                    <small className="text-muted-foreground">Executado</small>
+                                    <h4 className="my-1 text-xl font-bold text-secondary">{formatCurrency(rubricaSelecionada.executado)}</h4>
                                 </div>
                             </div>
 
-                            <h6>Execução</h6>
-                            <div style={{
-                                height: '20px',
-                                background: '#e9ecef',
-                                borderRadius: '10px',
-                                overflow: 'hidden',
-                                marginBottom: '0.5rem'
-                            }}>
-                                <div style={{
-                                    width: `${rubricaSelecionada.percentual}%`,
-                                    height: '100%',
-                                    background: `linear-gradient(90deg, var(--sus-green), ${getProgressColor(rubricaSelecionada.percentual)})`,
-                                    borderRadius: '10px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: 'white',
-                                    fontWeight: '600',
-                                    fontSize: '0.85rem'
-                                }}>
+                            <h6 className="mt-4 font-semibold">Execucao</h6>
+                            <div className="mb-2 h-5 overflow-hidden rounded-full bg-gray-200">
+                                <div
+                                    className={cn('flex h-full items-center justify-center rounded-full text-xs font-semibold text-white', getProgressColor(rubricaSelecionada.percentual))}
+                                    style={{ width: `${rubricaSelecionada.percentual}%` }}
+                                >
                                     {rubricaSelecionada.percentual}%
                                 </div>
                             </div>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--sus-gray)' }}>
-                                Saldo disponível: <strong>{formatCurrency(rubricaSelecionada.aprovado - rubricaSelecionada.empenhado)}</strong>
+                            <p className="text-sm text-muted-foreground">
+                                Saldo disponivel: <strong>{formatCurrency(rubricaSelecionada.aprovado - rubricaSelecionada.empenhado)}</strong>
                             </p>
 
-                            <h6>Últimas Movimentações</h6>
-                            <table className="table table-sm">
-                                <thead>
+                            <h6 className="mt-4 font-semibold">Ultimas Movimentacoes</h6>
+                            <table className="w-full text-sm">
+                                <thead className="border-b border-border bg-muted/50">
                                     <tr>
-                                        <th>Data</th>
-                                        <th>Descrição</th>
-                                        <th style={{ textAlign: 'right' }}>Valor</th>
+                                        <th className="px-3 py-2 text-left font-medium">Data</th>
+                                        <th className="px-3 py-2 text-left font-medium">Descricao</th>
+                                        <th className="px-3 py-2 text-right font-medium">Valor</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-border">
                                     <tr>
-                                        <td>25/01/2025</td>
-                                        <td>Pagamento NF 1234</td>
-                                        <td style={{ textAlign: 'right', color: '#dc3545' }}>-R$ 15.000</td>
+                                        <td className="px-3 py-2">25/01/2025</td>
+                                        <td className="px-3 py-2">Pagamento NF 1234</td>
+                                        <td className="px-3 py-2 text-right text-destructive">-R$ 15.000</td>
                                     </tr>
                                     <tr>
-                                        <td>20/01/2025</td>
-                                        <td>Empenho nº 456</td>
-                                        <td style={{ textAlign: 'right', color: 'var(--sus-yellow)' }}>R$ 25.000</td>
+                                        <td className="px-3 py-2">20/01/2025</td>
+                                        <td className="px-3 py-2">Empenho no 456</td>
+                                        <td className="px-3 py-2 text-right text-accent">R$ 25.000</td>
                                     </tr>
                                     <tr>
-                                        <td>15/01/2025</td>
-                                        <td>Pagamento NF 1198</td>
-                                        <td style={{ textAlign: 'right', color: '#dc3545' }}>-R$ 8.500</td>
+                                        <td className="px-3 py-2">15/01/2025</td>
+                                        <td className="px-3 py-2">Pagamento NF 1198</td>
+                                        <td className="px-3 py-2 text-right text-destructive">-R$ 8.500</td>
                                     </tr>
                                 </tbody>
                             </table>
 
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                <button className="btn btn-outline-secondary">
-                                    <i className="fas fa-file-pdf"></i> Exportar
+                            <div className="mt-4 flex justify-end gap-2">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                                    <FileText className="h-4 w-4" /> Exportar
                                 </button>
-                                <button className="btn btn-primary">
-                                    <i className="fas fa-plus"></i> Novo Empenho
+                                <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                                    <Plus className="h-4 w-4" /> Novo Empenho
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Nova Dotacao Modal */}
+            {showNovaDotacaoModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowNovaDotacaoModal(false)}
+                >
+                    <div
+                        className="w-[600px] max-w-[90%] rounded-xl border border-border bg-card shadow-sm"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <span><Plus className="mr-1.5 inline-block h-4 w-4" /> Nova Dotacao Orcamentaria</span>
+                            <button
+                                className="rounded-lg bg-white/20 px-2 py-1 text-xs text-white hover:bg-white/30"
+                                onClick={() => setShowNovaDotacaoModal(false)}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="p-5">
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Codigo da Rubrica *</label>
+                                <input
+                                    type="text"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Ex: 3.3.90.30"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Nome / Descricao *</label>
+                                <input
+                                    type="text"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Ex: Material de Consumo"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Categoria *</label>
+                                <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="">Selecione a categoria</option>
+                                    <option value="Pessoal">Pessoal</option>
+                                    <option value="Custeio">Custeio</option>
+                                    <option value="Investimento">Investimento</option>
+                                </select>
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Valor Aprovado *</label>
+                                <input
+                                    type="number"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="0,00"
+                                    min="0"
+                                    step="0.01"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Fonte de Recursos *</label>
+                                <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="">Selecione a fonte</option>
+                                    {fonteRecursos.map((f, i) => (
+                                        <option key={i} value={f.fonte}>{f.fonte}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="mt-6 flex justify-end gap-2">
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                    onClick={() => setShowNovaDotacaoModal(false)}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                                    onClick={() => {
+                                        alert('Dotacao criada com sucesso!');
+                                        setShowNovaDotacaoModal(false);
+                                    }}
+                                >
+                                    <Plus className="h-4 w-4" /> Salvar Dotacao
                                 </button>
                             </div>
                         </div>

@@ -1,4 +1,16 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+    MessageCircle,
+    Plus,
+    Search,
+    MoreVertical,
+    Paperclip,
+    Send,
+    CheckCheck,
+    X,
+    UserRound,
+} from 'lucide-react';
 
 // Sample conversations data
 const conversasData = [
@@ -146,111 +158,66 @@ export default function Mensagens() {
     };
 
     return (
-        <div className="fade-in" style={{ height: 'calc(100vh - 120px)' }}>
+        <div className="h-[calc(100vh-120px)] space-y-4">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h1 style={{ margin: 0 }}>
-                    <i className="fas fa-comments" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                    <MessageCircle className="h-6 w-6 text-primary" />
                     Mensagens
                 </h1>
-                <button className="btn btn-primary" onClick={() => setShowNovaConversa(true)}>
-                    <i className="fas fa-plus"></i> Nova Conversa
+                <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark" onClick={() => setShowNovaConversa(true)}>
+                    <Plus className="h-4 w-4" /> Nova Conversa
                 </button>
             </div>
 
             {/* Main Container */}
-            <div className="card" style={{ height: 'calc(100% - 60px)', display: 'flex', flexDirection: 'row', overflow: 'hidden' }}>
+            <div className="rounded-xl border border-border bg-card shadow-sm flex h-[calc(100%-60px)] overflow-hidden">
                 {/* Conversations List */}
-                <div style={{
-                    width: '350px',
-                    borderRight: '1px solid #e9ecef',
-                    display: 'flex',
-                    flexDirection: 'column'
-                }}>
+                <div className="w-[350px] flex flex-col border-r border-border">
                     {/* Search */}
-                    <div style={{ padding: '1rem', borderBottom: '1px solid #e9ecef' }}>
-                        <div style={{ position: 'relative' }}>
+                    <div className="border-b border-border p-4">
+                        <div className="relative">
                             <input
                                 type="text"
-                                className="form-control"
+                                className="h-10 w-full rounded-lg border border-input bg-white pl-10 pr-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 placeholder="Buscar conversas..."
                                 value={pesquisa}
                                 onChange={(e) => setPesquisa(e.target.value)}
-                                style={{ paddingLeft: '2.5rem' }}
                             />
-                            <i className="fas fa-search" style={{
-                                position: 'absolute',
-                                left: '0.75rem',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                color: 'var(--sus-gray)'
-                            }}></i>
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         </div>
                     </div>
 
                     {/* Conversations */}
-                    <div style={{ flex: 1, overflow: 'auto' }}>
+                    <div className="flex-1 overflow-auto">
                         {conversasFiltradas.map(conversa => (
                             <div
                                 key={conversa.id}
                                 onClick={() => setConversaSelecionada(conversa)}
-                                style={{
-                                    padding: '1rem',
-                                    borderBottom: '1px solid #e9ecef',
-                                    cursor: 'pointer',
-                                    background: conversaSelecionada?.id === conversa.id ? '#e7f3ff' : 'white',
-                                    transition: 'background 0.2s'
-                                }}
-                                onMouseEnter={(e) => e.target.style.background = conversaSelecionada?.id === conversa.id ? '#e7f3ff' : '#f8f9fa'}
-                                onMouseLeave={(e) => e.target.style.background = conversaSelecionada?.id === conversa.id ? '#e7f3ff' : 'white'}
+                                className={cn(
+                                    'cursor-pointer border-b border-border p-4 transition-colors hover:bg-muted/50',
+                                    conversaSelecionada?.id === conversa.id && 'bg-primary/5'
+                                )}
                             >
-                                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                                    <div style={{
-                                        width: '48px',
-                                        height: '48px',
-                                        borderRadius: '50%',
-                                        background: 'var(--sus-blue)',
-                                        color: 'white',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontWeight: '600',
-                                        position: 'relative'
-                                    }}>
+                                <div className="flex gap-3">
+                                    <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-white">
                                         {conversa.avatar}
                                         {conversa.online && (
-                                            <div style={{
-                                                position: 'absolute',
-                                                bottom: '2px',
-                                                right: '2px',
-                                                width: '12px',
-                                                height: '12px',
-                                                borderRadius: '50%',
-                                                background: 'var(--sus-green)',
-                                                border: '2px solid white'
-                                            }}></div>
+                                            <div className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                                         )}
                                     </div>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <strong style={{ fontSize: '0.95rem' }}>{conversa.contato}</strong>
-                                            <small style={{ color: 'var(--sus-gray)' }}>{formatDateTime(conversa.dataHora)}</small>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <strong className="text-[0.95rem]">{conversa.contato}</strong>
+                                            <small className="text-muted-foreground">{formatDateTime(conversa.dataHora)}</small>
                                         </div>
-                                        <small style={{ color: 'var(--sus-gray)' }}>{conversa.cargo}</small>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
-                                            <p style={{
-                                                margin: 0,
-                                                fontSize: '0.85rem',
-                                                color: '#666',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                maxWidth: '200px'
-                                            }}>
+                                        <small className="text-muted-foreground">{conversa.cargo}</small>
+                                        <div className="mt-1 flex items-center justify-between">
+                                            <p className="m-0 max-w-[200px] truncate text-[0.85rem] text-muted-foreground">
                                                 {conversa.ultimaMensagem}
                                             </p>
                                             {conversa.naoLidas > 0 && (
-                                                <span className="badge badge-primary" style={{ borderRadius: '50%', minWidth: '20px' }}>
+                                                <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-white">
                                                     {conversa.naoLidas}
                                                 </span>
                                             )}
@@ -263,83 +230,48 @@ export default function Mensagens() {
                 </div>
 
                 {/* Chat Area */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div className="flex flex-1 flex-col">
                     {conversaSelecionada ? (
                         <>
                             {/* Chat Header */}
-                            <div style={{
-                                padding: '1rem',
-                                borderBottom: '1px solid #e9ecef',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.75rem'
-                            }}>
-                                <div style={{
-                                    width: '40px',
-                                    height: '40px',
-                                    borderRadius: '50%',
-                                    background: 'var(--sus-blue)',
-                                    color: 'white',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontWeight: '600'
-                                }}>
+                            <div className="flex items-center gap-3 border-b border-border p-4">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-white">
                                     {conversaSelecionada.avatar}
                                 </div>
                                 <div>
                                     <strong>{conversaSelecionada.contato}</strong>
                                     <br />
-                                    <small style={{ color: conversaSelecionada.online ? 'var(--sus-green)' : 'var(--sus-gray)' }}>
+                                    <small className={conversaSelecionada.online ? 'text-emerald-500' : 'text-muted-foreground'}>
                                         {conversaSelecionada.online ? '● Online' : '○ Offline'}
                                     </small>
                                 </div>
-                                <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
-                                    <button className="btn btn-sm btn-outline-secondary" title="Buscar">
-                                        <i className="fas fa-search"></i>
+                                <div className="ml-auto flex gap-2">
+                                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted" title="Buscar">
+                                        <Search className="h-3.5 w-3.5" />
                                     </button>
-                                    <button className="btn btn-sm btn-outline-secondary" title="Mais opções">
-                                        <i className="fas fa-ellipsis-v"></i>
+                                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted" title="Mais opções">
+                                        <MoreVertical className="h-3.5 w-3.5" />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Messages */}
-                            <div style={{
-                                flex: 1,
-                                overflow: 'auto',
-                                padding: '1rem',
-                                background: '#f8f9fa',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.75rem'
-                            }}>
+                            <div className="flex flex-1 flex-col gap-3 overflow-auto bg-muted/30 p-4">
                                 {mensagens.map(msg => (
                                     <div
                                         key={msg.id}
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: msg.enviada ? 'flex-end' : 'flex-start'
-                                        }}
+                                        className={cn('flex', msg.enviada ? 'justify-end' : 'justify-start')}
                                     >
-                                        <div style={{
-                                            maxWidth: '70%',
-                                            padding: '0.75rem 1rem',
-                                            borderRadius: msg.enviada ? '1rem 1rem 0 1rem' : '1rem 1rem 1rem 0',
-                                            background: msg.enviada ? 'var(--sus-blue)' : 'white',
-                                            color: msg.enviada ? 'white' : 'inherit',
-                                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                                        }}>
-                                            <p style={{ margin: 0 }}>{msg.conteudo}</p>
-                                            <small style={{
-                                                opacity: 0.7,
-                                                fontSize: '0.75rem',
-                                                display: 'block',
-                                                textAlign: 'right',
-                                                marginTop: '0.25rem'
-                                            }}>
+                                        <div className={cn(
+                                            'max-w-[70%] px-4 py-3 shadow-sm',
+                                            msg.enviada
+                                                ? 'rounded-2xl rounded-br-none bg-primary text-white'
+                                                : 'rounded-2xl rounded-bl-none bg-white text-foreground'
+                                        )}>
+                                            <p className="m-0">{msg.conteudo}</p>
+                                            <small className="mt-1 block text-right text-xs opacity-70">
                                                 {formatMessageTime(msg.dataHora)}
-                                                {msg.enviada && <i className="fas fa-check-double" style={{ marginLeft: '0.25rem' }}></i>}
+                                                {msg.enviada && <CheckCheck className="ml-1 inline h-3 w-3" />}
                                             </small>
                                         </div>
                                     </div>
@@ -347,44 +279,31 @@ export default function Mensagens() {
                             </div>
 
                             {/* Input Area */}
-                            <div style={{
-                                padding: '1rem',
-                                borderTop: '1px solid #e9ecef',
-                                display: 'flex',
-                                gap: '0.5rem',
-                                alignItems: 'flex-end'
-                            }}>
-                                <button className="btn btn-outline-secondary">
-                                    <i className="fas fa-paperclip"></i>
+                            <div className="flex items-end gap-2 border-t border-border p-4">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                                    <Paperclip className="h-4 w-4" />
                                 </button>
                                 <textarea
-                                    className="form-control"
+                                    className="w-full resize-none rounded-lg border border-input bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                     placeholder="Digite sua mensagem..."
                                     value={novaMensagem}
                                     onChange={(e) => setNovaMensagem(e.target.value)}
                                     onKeyPress={handleKeyPress}
                                     rows="1"
-                                    style={{ resize: 'none' }}
                                 />
                                 <button
-                                    className="btn btn-primary"
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50"
                                     onClick={handleEnviarMensagem}
                                     disabled={!novaMensagem.trim()}
                                 >
-                                    <i className="fas fa-paper-plane"></i>
+                                    <Send className="h-4 w-4" />
                                 </button>
                             </div>
                         </>
                     ) : (
-                        <div style={{
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'var(--sus-gray)'
-                        }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <i className="fas fa-comments fa-4x" style={{ marginBottom: '1rem', opacity: 0.5 }}></i>
+                        <div className="flex flex-1 items-center justify-center text-muted-foreground">
+                            <div className="text-center">
+                                <MessageCircle className="mx-auto mb-4 h-16 w-16 opacity-50" />
                                 <p>Selecione uma conversa para começar</p>
                             </div>
                         </div>
@@ -395,71 +314,54 @@ export default function Mensagens() {
             {/* New Conversation Modal */}
             {showNovaConversa && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setShowNovaConversa(false)}
                 >
                     <div
-                        className="card"
-                        style={{ width: '500px', maxWidth: '90%' }}
+                        className="rounded-xl border border-border bg-card shadow-sm w-[500px] max-w-[90%]"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="card-header" style={{ background: 'var(--sus-blue)', color: 'white' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span><i className="fas fa-plus"></i> Nova Conversa</span>
+                        <div className="border-b border-border bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <div className="flex items-center justify-between">
+                                <span className="flex items-center gap-2"><Plus className="h-4 w-4" /> Nova Conversa</span>
                                 <button
-                                    className="btn btn-sm btn-light"
+                                    className="rounded-lg bg-white/20 px-2 py-1 text-white hover:bg-white/30"
                                     onClick={() => setShowNovaConversa(false)}
                                 >
-                                    <i className="fas fa-times"></i>
+                                    <X className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
-                        <div className="card-body">
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label className="form-label">Destinatário</label>
-                                <input type="text" className="form-control" placeholder="Buscar profissional ou unidade..." />
+                        <div className="p-5">
+                            <div className="mb-4">
+                                <label className="mb-1 block text-sm font-medium text-foreground">Destinatário</label>
+                                <input type="text" className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Buscar profissional ou unidade..." />
                             </div>
 
-                            <h6>Sugestões</h6>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+                            <h6 className="mb-2 font-semibold">Sugestões</h6>
+                            <div className="mb-4 flex flex-col gap-2">
                                 {['Dr. Paulo Lima - Cardiologista', 'Dra. Ana Santos - UBS Norte', 'Farmácia Central', 'CAPS Municipal'].map((item, i) => (
                                     <div
                                         key={i}
-                                        style={{
-                                            padding: '0.75rem',
-                                            border: '1px solid #e9ecef',
-                                            borderRadius: '0.25rem',
-                                            cursor: 'pointer'
-                                        }}
+                                        className="cursor-pointer rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
                                     >
-                                        <i className="fas fa-user-md" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
+                                        <UserRound className="mr-2 inline h-4 w-4 text-primary" />
                                         {item}
                                     </div>
                                 ))}
                             </div>
 
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label className="form-label">Mensagem Inicial</label>
-                                <textarea className="form-control" rows="3" placeholder="Digite sua mensagem..."></textarea>
+                            <div className="mb-4">
+                                <label className="mb-1 block text-sm font-medium text-foreground">Mensagem Inicial</label>
+                                <textarea className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" rows="3" placeholder="Digite sua mensagem..."></textarea>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                                <button className="btn btn-outline-secondary" onClick={() => setShowNovaConversa(false)}>
+                            <div className="flex justify-end gap-2">
+                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted" onClick={() => setShowNovaConversa(false)}>
                                     Cancelar
                                 </button>
-                                <button className="btn btn-primary">
-                                    <i className="fas fa-paper-plane"></i> Iniciar Conversa
+                                <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                                    <Send className="h-4 w-4" /> Iniciar Conversa
                                 </button>
                             </div>
                         </div>

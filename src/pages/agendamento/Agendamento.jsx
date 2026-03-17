@@ -1,4 +1,29 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+    CalendarCheck,
+    CalendarPlus,
+    PlusCircle,
+    Clock,
+    CheckCircle,
+    Search,
+    UserCheck,
+    Stethoscope,
+    FlaskConical,
+    ArrowRight,
+    ArrowLeft,
+    Check,
+    X,
+    CalendarDays,
+    List,
+    Plus,
+    Info,
+    UserRound,
+    Heart,
+    Ribbon,
+    ScanLine,
+    CalendarX,
+} from 'lucide-react';
 
 // Available professionals
 const profissionais = [
@@ -38,6 +63,32 @@ const agendamentosConfirmados = [
     { id: 4, paciente: 'Pedro Lima', tipo: 'consulta', descricao: 'Dentista - Dr. Paulo', data: '2025-01-27', hora: '10:00', confirmadoEm: '2025-01-25T14:30:00' },
     { id: 5, paciente: 'Carla Souza', tipo: 'exame', descricao: 'Ultrassom Abdominal', data: '2025-01-28', hora: '08:00', confirmadoEm: '2025-01-26T09:15:00' }
 ];
+
+function getExameIcon(categoria) {
+    switch (categoria) {
+        case 'Laboratorial':
+            return FlaskConical;
+        case 'Imagem':
+            return ScanLine;
+        case 'Cardiológico':
+            return Heart;
+        default:
+            return Ribbon;
+    }
+}
+
+function getExameBgColor(categoria) {
+    switch (categoria) {
+        case 'Laboratorial':
+            return 'bg-secondary';
+        case 'Imagem':
+            return 'bg-primary';
+        case 'Cardiológico':
+            return 'bg-destructive';
+        default:
+            return 'bg-accent';
+    }
+}
 
 export default function Agendamento() {
     const [abaAtiva, setAbaAtiva] = useState('novo');
@@ -132,176 +183,179 @@ export default function Agendamento() {
     };
 
     return (
-        <div className="fade-in">
+        <div className="space-y-6">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 style={{ margin: 0 }}>
-                        <i className="fas fa-calendar-check" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
+                    <h1 className="flex items-center gap-2 text-2xl font-bold">
+                        <CalendarCheck className="h-7 w-7 text-primary" />
                         Agendamento
                     </h1>
-                    <p style={{ margin: '0.25rem 0 0', color: 'var(--sus-gray)' }}>Marcação de consultas e exames</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Marcação de consultas e exames</p>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-body" style={{ padding: '0.5rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button
-                            className={`btn ${abaAtiva === 'novo' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            onClick={() => setAbaAtiva('novo')}
-                        >
-                            <i className="fas fa-plus-circle"></i> Novo Agendamento
-                        </button>
-                        <button
-                            className={`btn ${abaAtiva === 'pendentes' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            onClick={() => setAbaAtiva('pendentes')}
-                            style={{ position: 'relative' }}
-                        >
-                            <i className="fas fa-clock"></i> Pendentes de Confirmação
-                            {pendentes.length > 0 && (
-                                <span style={{
-                                    position: 'absolute',
-                                    top: '-5px',
-                                    right: '-5px',
-                                    background: '#dc3545',
-                                    color: 'white',
-                                    borderRadius: '50%',
-                                    width: '20px',
-                                    height: '20px',
-                                    fontSize: '0.75rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    {pendentes.length}
-                                </span>
-                            )}
-                        </button>
-                        <button
-                            className={`btn ${abaAtiva === 'confirmados' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            onClick={() => setAbaAtiva('confirmados')}
-                        >
-                            <i className="fas fa-check-circle"></i> Confirmados
-                        </button>
-                    </div>
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="flex gap-2 p-2">
+                    <button
+                        className={cn(
+                            'border-b-2 px-4 py-2.5 text-sm font-medium',
+                            abaAtiva === 'novo'
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-muted-foreground'
+                        )}
+                        onClick={() => setAbaAtiva('novo')}
+                    >
+                        <span className="inline-flex items-center gap-1.5">
+                            <PlusCircle className="h-4 w-4" /> Novo Agendamento
+                        </span>
+                    </button>
+                    <button
+                        className={cn(
+                            'relative border-b-2 px-4 py-2.5 text-sm font-medium',
+                            abaAtiva === 'pendentes'
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-muted-foreground'
+                        )}
+                        onClick={() => setAbaAtiva('pendentes')}
+                    >
+                        <span className="inline-flex items-center gap-1.5">
+                            <Clock className="h-4 w-4" /> Pendentes de Confirmação
+                        </span>
+                        {pendentes.length > 0 && (
+                            <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[0.75rem] text-white">
+                                {pendentes.length}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        className={cn(
+                            'border-b-2 px-4 py-2.5 text-sm font-medium',
+                            abaAtiva === 'confirmados'
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-muted-foreground'
+                        )}
+                        onClick={() => setAbaAtiva('confirmados')}
+                    >
+                        <span className="inline-flex items-center gap-1.5">
+                            <CheckCircle className="h-4 w-4" /> Confirmados
+                        </span>
+                    </button>
                 </div>
             </div>
 
             {/* Novo Agendamento Tab */}
             {abaAtiva === 'novo' && (
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span>
-                                <i className="fas fa-calendar-plus"></i> Novo Agendamento
-                            </span>
-                            {/* Progress Steps */}
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                {[1, 2, 3, 4].map(step => (
-                                    <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
-                                        <div style={{
-                                            width: '30px',
-                                            height: '30px',
-                                            borderRadius: '50%',
-                                            background: etapa >= step ? 'var(--sus-blue)' : '#e9ecef',
-                                            color: etapa >= step ? 'white' : 'var(--sus-gray)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontWeight: '600',
-                                            fontSize: '0.85rem'
-                                        }}>
-                                            {step === 4 ? <i className="fas fa-check"></i> : step}
-                                        </div>
-                                        {step < 4 && (
-                                            <div style={{ width: '30px', height: '3px', background: etapa > step ? 'var(--sus-blue)' : '#e9ecef' }}></div>
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="flex items-center justify-between border-b border-border bg-muted px-5 py-3 text-sm font-semibold">
+                        <span className="inline-flex items-center gap-1.5">
+                            <CalendarPlus className="h-4 w-4" /> Novo Agendamento
+                        </span>
+                        {/* Progress Steps */}
+                        <div className="flex items-center gap-2">
+                            {[1, 2, 3, 4].map(step => (
+                                <div key={step} className="flex items-center">
+                                    <div
+                                        className={cn(
+                                            'flex h-[30px] w-[30px] items-center justify-center rounded-full text-[0.85rem] font-semibold',
+                                            etapa >= step
+                                                ? 'bg-primary text-white'
+                                                : 'bg-muted text-muted-foreground'
                                         )}
+                                    >
+                                        {step === 4 ? <Check className="h-4 w-4" /> : step}
                                     </div>
-                                ))}
-                            </div>
+                                    {step < 4 && (
+                                        <div
+                                            className={cn(
+                                                'h-[3px] w-[30px]',
+                                                etapa > step ? 'bg-primary' : 'bg-muted'
+                                            )}
+                                        />
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     </div>
-                    <div className="card-body">
+                    <div className="p-5">
                         {/* Step 1: Patient Selection */}
                         {etapa === 1 && (
                             <div>
-                                <h5>1. Identificação do Paciente</h5>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1rem', marginBottom: '1rem' }}>
+                                <h5 className="mb-4 text-base font-semibold">1. Identificação do Paciente</h5>
+                                <div className="mb-4 grid grid-cols-[1fr_auto] gap-4">
                                     <div>
-                                        <label className="form-label">CPF do Paciente *</label>
+                                        <label className="mb-1.5 block text-sm font-medium">CPF do Paciente *</label>
                                         <input
                                             type="text"
-                                            className="form-control"
+                                            className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                             placeholder="000.000.000-00"
                                             value={formData.pacienteCpf}
                                             onChange={(e) => handleInputChange('pacienteCpf', e.target.value)}
                                         />
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                                        <button className="btn btn-primary" onClick={buscarPaciente}>
-                                            <i className="fas fa-search"></i> Buscar
+                                    <div className="flex items-end">
+                                        <button
+                                            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                                            onClick={buscarPaciente}
+                                        >
+                                            <Search className="h-4 w-4" /> Buscar
                                         </button>
                                     </div>
                                 </div>
 
                                 {pacienteBuscado && (
-                                    <div className="alert alert-success">
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                            <div style={{
-                                                width: '50px',
-                                                height: '50px',
-                                                borderRadius: '50%',
-                                                background: 'var(--sus-green)',
-                                                color: 'white',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                fontSize: '1.25rem'
-                                            }}>
-                                                <i className="fas fa-user-check"></i>
+                                    <div className="mb-4 rounded-lg border border-secondary/30 bg-secondary/10 p-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex h-[50px] w-[50px] items-center justify-center rounded-full bg-secondary text-white">
+                                                <UserCheck className="h-5 w-5" />
                                             </div>
                                             <div>
                                                 <strong>{pacienteBuscado.nome}</strong>
-                                                <div style={{ fontSize: '0.85rem' }}>
-                                                    <span>CNS: {pacienteBuscado.cns}</span> •
-                                                    <span> Tel: {pacienteBuscado.telefone}</span>
+                                                <div className="text-sm">
+                                                    <span>CNS: {pacienteBuscado.cns}</span> {' \u2022 '}
+                                                    <span>Tel: {pacienteBuscado.telefone}</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 )}
 
-                                <h6 style={{ marginTop: '1.5rem' }}>Tipo de Agendamento</h6>
-                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                <h6 className="mb-3 mt-6 text-sm font-semibold">Tipo de Agendamento</h6>
+                                <div className="flex gap-4">
                                     <button
-                                        className={`btn ${tipoAgendamento === 'consulta' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                        className={cn(
+                                            'flex flex-1 flex-col items-center gap-2 rounded-lg border px-6 py-6 text-sm font-medium',
+                                            tipoAgendamento === 'consulta'
+                                                ? 'border-primary bg-primary text-white'
+                                                : 'border-border text-muted-foreground hover:bg-muted'
+                                        )}
                                         onClick={() => setTipoAgendamento('consulta')}
-                                        style={{ flex: 1, padding: '1.5rem' }}
                                     >
-                                        <i className="fas fa-stethoscope fa-2x" style={{ marginBottom: '0.5rem' }}></i>
-                                        <br />
+                                        <Stethoscope className="h-8 w-8" />
                                         Consulta
                                     </button>
                                     <button
-                                        className={`btn ${tipoAgendamento === 'exame' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                        className={cn(
+                                            'flex flex-1 flex-col items-center gap-2 rounded-lg border px-6 py-6 text-sm font-medium',
+                                            tipoAgendamento === 'exame'
+                                                ? 'border-primary bg-primary text-white'
+                                                : 'border-border text-muted-foreground hover:bg-muted'
+                                        )}
                                         onClick={() => setTipoAgendamento('exame')}
-                                        style={{ flex: 1, padding: '1.5rem' }}
                                     >
-                                        <i className="fas fa-flask fa-2x" style={{ marginBottom: '0.5rem' }}></i>
-                                        <br />
+                                        <FlaskConical className="h-8 w-8" />
                                         Exame
                                     </button>
                                 </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+                                <div className="mt-6 flex justify-end">
                                     <button
-                                        className="btn btn-primary"
+                                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50"
                                         onClick={proximaEtapa}
                                         disabled={!pacienteBuscado}
                                     >
-                                        Próximo <i className="fas fa-arrow-right"></i>
+                                        Próximo <ArrowRight className="h-4 w-4" />
                                     </button>
                                 </div>
                             </div>
@@ -310,42 +364,36 @@ export default function Agendamento() {
                         {/* Step 2: Service Selection */}
                         {etapa === 2 && (
                             <div>
-                                <h5>2. {tipoAgendamento === 'consulta' ? 'Selecionar Profissional' : 'Selecionar Exame'}</h5>
+                                <h5 className="mb-4 text-base font-semibold">
+                                    2. {tipoAgendamento === 'consulta' ? 'Selecionar Profissional' : 'Selecionar Exame'}
+                                </h5>
 
                                 {tipoAgendamento === 'consulta' ? (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                                    <div className="grid grid-cols-2 gap-4">
                                         {profissionais.map(prof => (
                                             <div
                                                 key={prof.id}
-                                                className={`card ${formData.profissional === String(prof.id) ? 'border-primary' : ''}`}
-                                                style={{
-                                                    cursor: 'pointer',
-                                                    borderWidth: formData.profissional === String(prof.id) ? '2px' : '1px'
-                                                }}
+                                                className={cn(
+                                                    'cursor-pointer rounded-xl border bg-card shadow-sm transition-colors',
+                                                    formData.profissional === String(prof.id)
+                                                        ? 'border-2 border-primary'
+                                                        : 'border-border hover:border-primary-light'
+                                                )}
                                                 onClick={() => handleInputChange('profissional', String(prof.id))}
                                             >
-                                                <div className="card-body" style={{ padding: '1rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                        <div style={{
-                                                            width: '45px',
-                                                            height: '45px',
-                                                            borderRadius: '50%',
-                                                            background: 'var(--sus-blue)',
-                                                            color: 'white',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}>
-                                                            <i className="fas fa-user-md"></i>
+                                                <div className="p-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex h-[45px] w-[45px] items-center justify-center rounded-full bg-primary text-white">
+                                                            <UserRound className="h-5 w-5" />
                                                         </div>
                                                         <div>
                                                             <strong>{prof.nome}</strong>
-                                                            <div style={{ fontSize: '0.85rem', color: 'var(--sus-gray)' }}>
-                                                                {prof.especialidade} • {prof.unidade}
+                                                            <div className="text-sm text-muted-foreground">
+                                                                {prof.especialidade} {' \u2022 '} {prof.unidade}
                                                             </div>
                                                         </div>
                                                         {formData.profissional === String(prof.id) && (
-                                                            <i className="fas fa-check-circle" style={{ marginLeft: 'auto', color: 'var(--sus-blue)' }}></i>
+                                                            <CheckCircle className="ml-auto h-5 w-5 text-primary" />
                                                         )}
                                                     </div>
                                                 </div>
@@ -353,62 +401,59 @@ export default function Agendamento() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-                                        {tiposExame.map(exame => (
-                                            <div
-                                                key={exame.id}
-                                                className={`card ${formData.tipoExame === String(exame.id) ? 'border-primary' : ''}`}
-                                                style={{
-                                                    cursor: 'pointer',
-                                                    borderWidth: formData.tipoExame === String(exame.id) ? '2px' : '1px'
-                                                }}
-                                                onClick={() => handleInputChange('tipoExame', String(exame.id))}
-                                            >
-                                                <div className="card-body" style={{ padding: '1rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                        <div style={{
-                                                            width: '45px',
-                                                            height: '45px',
-                                                            borderRadius: '50%',
-                                                            background: exame.categoria === 'Laboratorial' ? 'var(--sus-green)' :
-                                                                exame.categoria === 'Imagem' ? 'var(--sus-blue)' :
-                                                                    exame.categoria === 'Cardiológico' ? '#dc3545' : 'var(--sus-yellow)',
-                                                            color: 'white',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}>
-                                                            <i className={`fas ${exame.categoria === 'Laboratorial' ? 'fa-flask' :
-                                                                    exame.categoria === 'Imagem' ? 'fa-x-ray' :
-                                                                        exame.categoria === 'Cardiológico' ? 'fa-heartbeat' : 'fa-ribbon'
-                                                                }`}></i>
-                                                        </div>
-                                                        <div>
-                                                            <strong>{exame.nome}</strong>
-                                                            <div style={{ fontSize: '0.85rem', color: 'var(--sus-gray)' }}>
-                                                                {exame.categoria}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {tiposExame.map(exame => {
+                                            const ExameIcon = getExameIcon(exame.categoria);
+                                            const bgColor = getExameBgColor(exame.categoria);
+                                            return (
+                                                <div
+                                                    key={exame.id}
+                                                    className={cn(
+                                                        'cursor-pointer rounded-xl border bg-card shadow-sm transition-colors',
+                                                        formData.tipoExame === String(exame.id)
+                                                            ? 'border-2 border-primary'
+                                                            : 'border-border hover:border-primary-light'
+                                                    )}
+                                                    onClick={() => handleInputChange('tipoExame', String(exame.id))}
+                                                >
+                                                    <div className="p-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={cn(
+                                                                'flex h-[45px] w-[45px] items-center justify-center rounded-full text-white',
+                                                                bgColor
+                                                            )}>
+                                                                <ExameIcon className="h-5 w-5" />
                                                             </div>
+                                                            <div>
+                                                                <strong>{exame.nome}</strong>
+                                                                <div className="text-sm text-muted-foreground">
+                                                                    {exame.categoria}
+                                                                </div>
+                                                            </div>
+                                                            {formData.tipoExame === String(exame.id) && (
+                                                                <CheckCircle className="ml-auto h-5 w-5 text-primary" />
+                                                            )}
                                                         </div>
-                                                        {formData.tipoExame === String(exame.id) && (
-                                                            <i className="fas fa-check-circle" style={{ marginLeft: 'auto', color: 'var(--sus-blue)' }}></i>
-                                                        )}
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 )}
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem' }}>
-                                    <button className="btn btn-outline-secondary" onClick={etapaAnterior}>
-                                        <i className="fas fa-arrow-left"></i> Voltar
+                                <div className="mt-6 flex justify-between">
+                                    <button
+                                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                        onClick={etapaAnterior}
+                                    >
+                                        <ArrowLeft className="h-4 w-4" /> Voltar
                                     </button>
                                     <button
-                                        className="btn btn-primary"
+                                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50"
                                         onClick={proximaEtapa}
                                         disabled={tipoAgendamento === 'consulta' ? !formData.profissional : !formData.tipoExame}
                                     >
-                                        Próximo <i className="fas fa-arrow-right"></i>
+                                        Próximo <ArrowRight className="h-4 w-4" />
                                     </button>
                                 </div>
                             </div>
@@ -417,31 +462,37 @@ export default function Agendamento() {
                         {/* Step 3: Date and Time Selection */}
                         {etapa === 3 && (
                             <div>
-                                <h5>3. Data e Horário</h5>
+                                <h5 className="mb-4 text-base font-semibold">3. Data e Horário</h5>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem' }}>
+                                <div className="grid grid-cols-[1fr_2fr] gap-6">
                                     <div>
-                                        <label className="form-label">Data *</label>
+                                        <label className="mb-1.5 block text-sm font-medium">Data *</label>
                                         <input
                                             type="date"
-                                            className="form-control"
+                                            className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                             value={formData.data}
                                             onChange={(e) => handleInputChange('data', e.target.value)}
                                             min={new Date().toISOString().split('T')[0]}
                                         />
                                     </div>
                                     <div>
-                                        <label className="form-label">Horários Disponíveis *</label>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '0.5rem' }}>
+                                        <label className="mb-1.5 block text-sm font-medium">Horários Disponíveis *</label>
+                                        <div className="grid grid-cols-6 gap-2">
                                             {horariosDisponiveis.map(hora => {
                                                 const indisponivel = Math.random() > 0.7;
                                                 return (
                                                     <button
                                                         key={hora}
-                                                        className={`btn btn-sm ${formData.hora === hora ? 'btn-primary' : indisponivel ? 'btn-outline-secondary' : 'btn-outline-primary'}`}
+                                                        className={cn(
+                                                            'rounded-lg border px-2 py-1.5 text-sm',
+                                                            formData.hora === hora
+                                                                ? 'border-primary bg-primary text-white'
+                                                                : indisponivel
+                                                                    ? 'border-border text-muted-foreground opacity-50'
+                                                                    : 'border-primary/30 text-primary hover:bg-primary/10'
+                                                        )}
                                                         onClick={() => !indisponivel && handleInputChange('hora', hora)}
                                                         disabled={indisponivel}
-                                                        style={{ opacity: indisponivel ? 0.5 : 1 }}
                                                     >
                                                         {hora}
                                                     </button>
@@ -451,27 +502,30 @@ export default function Agendamento() {
                                     </div>
                                 </div>
 
-                                <div style={{ marginTop: '1.5rem' }}>
-                                    <label className="form-label">Observações</label>
+                                <div className="mt-6">
+                                    <label className="mb-1.5 block text-sm font-medium">Observações</label>
                                     <textarea
-                                        className="form-control"
+                                        className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                                         rows={3}
                                         placeholder="Informações adicionais..."
                                         value={formData.observacoes}
                                         onChange={(e) => handleInputChange('observacoes', e.target.value)}
-                                    ></textarea>
+                                    />
                                 </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem' }}>
-                                    <button className="btn btn-outline-secondary" onClick={etapaAnterior}>
-                                        <i className="fas fa-arrow-left"></i> Voltar
+                                <div className="mt-6 flex justify-between">
+                                    <button
+                                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                        onClick={etapaAnterior}
+                                    >
+                                        <ArrowLeft className="h-4 w-4" /> Voltar
                                     </button>
                                     <button
-                                        className="btn btn-success"
+                                        className="inline-flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-2 text-sm font-medium text-white hover:bg-secondary-dark disabled:opacity-50"
                                         onClick={finalizarAgendamento}
                                         disabled={!formData.data || !formData.hora}
                                     >
-                                        <i className="fas fa-check"></i> Finalizar Agendamento
+                                        <Check className="h-4 w-4" /> Finalizar Agendamento
                                     </button>
                                 </div>
                             </div>
@@ -479,57 +533,52 @@ export default function Agendamento() {
 
                         {/* Step 4: Confirmation */}
                         {etapa === 4 && agendamentoCriado && (
-                            <div style={{ textAlign: 'center', padding: '2rem' }}>
-                                <div style={{
-                                    width: '80px',
-                                    height: '80px',
-                                    borderRadius: '50%',
-                                    background: 'var(--sus-green)',
-                                    color: 'white',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    margin: '0 auto 1.5rem',
-                                    fontSize: '2rem'
-                                }}>
-                                    <i className="fas fa-check"></i>
+                            <div className="px-8 py-8 text-center">
+                                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-white">
+                                    <Check className="h-8 w-8" />
                                 </div>
-                                <h3 style={{ color: 'var(--sus-green)' }}>Agendamento Realizado!</h3>
-                                <p style={{ color: 'var(--sus-gray)' }}>O agendamento foi registrado e está pendente de confirmação.</p>
+                                <h3 className="text-xl font-semibold text-secondary">Agendamento Realizado!</h3>
+                                <p className="mt-1 text-muted-foreground">O agendamento foi registrado e está pendente de confirmação.</p>
 
-                                <div className="card" style={{ maxWidth: '400px', margin: '1.5rem auto', textAlign: 'left' }}>
-                                    <div className="card-body">
-                                        <div style={{ marginBottom: '0.75rem' }}>
-                                            <small style={{ color: 'var(--sus-gray)' }}>Paciente</small>
-                                            <p style={{ margin: 0, fontWeight: '600' }}>{agendamentoCriado.paciente}</p>
+                                <div className="mx-auto mt-6 max-w-[400px] rounded-xl border border-border bg-card text-left shadow-sm">
+                                    <div className="p-5">
+                                        <div className="mb-3">
+                                            <small className="text-muted-foreground">Paciente</small>
+                                            <p className="m-0 font-semibold">{agendamentoCriado.paciente}</p>
                                         </div>
-                                        <div style={{ marginBottom: '0.75rem' }}>
-                                            <small style={{ color: 'var(--sus-gray)' }}>{tipoAgendamento === 'consulta' ? 'Profissional' : 'Exame'}</small>
-                                            <p style={{ margin: 0, fontWeight: '600' }}>{agendamentoCriado.descricao}</p>
+                                        <div className="mb-3">
+                                            <small className="text-muted-foreground">{tipoAgendamento === 'consulta' ? 'Profissional' : 'Exame'}</small>
+                                            <p className="m-0 font-semibold">{agendamentoCriado.descricao}</p>
                                         </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <small style={{ color: 'var(--sus-gray)' }}>Data</small>
-                                                <p style={{ margin: 0, fontWeight: '600' }}>{formatDate(agendamentoCriado.data)}</p>
+                                                <small className="text-muted-foreground">Data</small>
+                                                <p className="m-0 font-semibold">{formatDate(agendamentoCriado.data)}</p>
                                             </div>
                                             <div>
-                                                <small style={{ color: 'var(--sus-gray)' }}>Horário</small>
-                                                <p style={{ margin: 0, fontWeight: '600' }}>{agendamentoCriado.hora}</p>
+                                                <small className="text-muted-foreground">Horário</small>
+                                                <p className="m-0 font-semibold">{agendamentoCriado.hora}</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="alert alert-info" style={{ maxWidth: '400px', margin: '0 auto 1.5rem' }}>
-                                    <i className="fas fa-info-circle"></i> Uma notificação será enviada ao paciente para confirmação do agendamento.
+                                <div className="mx-auto mb-6 mt-4 flex max-w-[400px] items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary">
+                                    <Info className="h-4 w-4 shrink-0" /> Uma notificação será enviada ao paciente para confirmação do agendamento.
                                 </div>
 
-                                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                                    <button className="btn btn-outline-primary" onClick={novoAgendamento}>
-                                        <i className="fas fa-plus"></i> Novo Agendamento
+                                <div className="flex justify-center gap-4">
+                                    <button
+                                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                        onClick={novoAgendamento}
+                                    >
+                                        <Plus className="h-4 w-4" /> Novo Agendamento
                                     </button>
-                                    <button className="btn btn-primary" onClick={() => setAbaAtiva('pendentes')}>
-                                        <i className="fas fa-list"></i> Ver Pendentes
+                                    <button
+                                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                                        onClick={() => setAbaAtiva('pendentes')}
+                                    >
+                                        <List className="h-4 w-4" /> Ver Pendentes
                                     </button>
                                 </div>
                             </div>
@@ -540,58 +589,66 @@ export default function Agendamento() {
 
             {/* Pendentes Tab */}
             {abaAtiva === 'pendentes' && (
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <i className="fas fa-clock"></i> Agendamentos Pendentes de Confirmação
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="flex items-center gap-1.5 border-b border-border bg-muted px-5 py-3 text-sm font-semibold">
+                        <Clock className="h-4 w-4" /> Agendamentos Pendentes de Confirmação
                     </div>
-                    <div className="card-body" style={{ padding: pendentes.length === 0 ? '2rem' : 0 }}>
+                    <div className={cn(pendentes.length === 0 && 'p-8')}>
                         {pendentes.length === 0 ? (
-                            <div style={{ textAlign: 'center', color: 'var(--sus-gray)' }}>
-                                <i className="fas fa-check-circle fa-3x" style={{ marginBottom: '1rem', color: 'var(--sus-green)' }}></i>
+                            <div className="text-center text-muted-foreground">
+                                <CheckCircle className="mx-auto mb-4 h-12 w-12 text-secondary" />
                                 <p>Nenhum agendamento pendente de confirmação.</p>
                             </div>
                         ) : (
-                            <table className="table" style={{ marginBottom: 0 }}>
+                            <table className="w-full text-sm">
                                 <thead>
-                                    <tr>
-                                        <th>Paciente</th>
-                                        <th>Tipo</th>
-                                        <th>Descrição</th>
-                                        <th>Data</th>
-                                        <th>Horário</th>
-                                        <th>Ações</th>
+                                    <tr className="border-b border-border bg-muted/50">
+                                        <th className="px-4 py-3 text-left font-medium">Paciente</th>
+                                        <th className="px-4 py-3 text-left font-medium">Tipo</th>
+                                        <th className="px-4 py-3 text-left font-medium">Descrição</th>
+                                        <th className="px-4 py-3 text-left font-medium">Data</th>
+                                        <th className="px-4 py-3 text-left font-medium">Horário</th>
+                                        <th className="px-4 py-3 text-left font-medium">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-border">
                                     {pendentes.map(ag => (
                                         <tr key={ag.id}>
-                                            <td><strong>{ag.paciente}</strong></td>
-                                            <td>
-                                                <span className={`badge badge-${ag.tipo === 'consulta' ? 'primary' : 'info'}`}>
+                                            <td className="px-4 py-3"><strong>{ag.paciente}</strong></td>
+                                            <td className="px-4 py-3">
+                                                <span className={cn(
+                                                    'rounded-md px-2 py-0.5 text-xs font-medium',
+                                                    ag.tipo === 'consulta'
+                                                        ? 'bg-primary/10 text-primary'
+                                                        : 'bg-sky-100 text-sky-700'
+                                                )}>
                                                     {ag.tipo === 'consulta' ? 'Consulta' : 'Exame'}
                                                 </span>
                                             </td>
-                                            <td>{ag.descricao}</td>
-                                            <td>{formatDate(ag.data)}</td>
-                                            <td>{ag.hora}</td>
-                                            <td>
-                                                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                            <td className="px-4 py-3">{ag.descricao}</td>
+                                            <td className="px-4 py-3">{formatDate(ag.data)}</td>
+                                            <td className="px-4 py-3">{ag.hora}</td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex gap-1">
                                                     <button
-                                                        className="btn btn-sm btn-success"
+                                                        className="inline-flex items-center rounded-lg bg-secondary px-2 py-1.5 text-xs text-white hover:bg-secondary-dark"
                                                         onClick={() => setShowConfirmacao(ag)}
                                                         title="Confirmar"
                                                     >
-                                                        <i className="fas fa-check"></i>
+                                                        <Check className="h-3.5 w-3.5" />
                                                     </button>
                                                     <button
-                                                        className="btn btn-sm btn-danger"
+                                                        className="inline-flex items-center rounded-lg bg-destructive px-2 py-1.5 text-xs text-white hover:bg-red-700"
                                                         onClick={() => cancelarAgendamento(ag)}
                                                         title="Cancelar"
                                                     >
-                                                        <i className="fas fa-times"></i>
+                                                        <X className="h-3.5 w-3.5" />
                                                     </button>
-                                                    <button className="btn btn-sm btn-outline-primary" title="Reagendar">
-                                                        <i className="fas fa-calendar-alt"></i>
+                                                    <button
+                                                        className="inline-flex items-center rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted"
+                                                        title="Reagendar"
+                                                    >
+                                                        <CalendarDays className="h-3.5 w-3.5" />
                                                     </button>
                                                 </div>
                                             </td>
@@ -606,43 +663,52 @@ export default function Agendamento() {
 
             {/* Confirmados Tab */}
             {abaAtiva === 'confirmados' && (
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <i className="fas fa-check-circle"></i> Agendamentos Confirmados
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="flex items-center gap-1.5 border-b border-border bg-muted px-5 py-3 text-sm font-semibold">
+                        <CheckCircle className="h-4 w-4" /> Agendamentos Confirmados
                     </div>
-                    <div className="card-body" style={{ padding: confirmados.length === 0 ? '2rem' : 0 }}>
+                    <div className={cn(confirmados.length === 0 && 'p-8')}>
                         {confirmados.length === 0 ? (
-                            <div style={{ textAlign: 'center', color: 'var(--sus-gray)' }}>
-                                <i className="fas fa-calendar-times fa-3x" style={{ marginBottom: '1rem' }}></i>
+                            <div className="text-center text-muted-foreground">
+                                <CalendarX className="mx-auto mb-4 h-12 w-12" />
                                 <p>Nenhum agendamento confirmado.</p>
                             </div>
                         ) : (
-                            <table className="table" style={{ marginBottom: 0 }}>
+                            <table className="w-full text-sm">
                                 <thead>
-                                    <tr>
-                                        <th>Paciente</th>
-                                        <th>Tipo</th>
-                                        <th>Descrição</th>
-                                        <th>Data</th>
-                                        <th>Horário</th>
-                                        <th>Confirmado em</th>
-                                        <th>Status</th>
+                                    <tr className="border-b border-border bg-muted/50">
+                                        <th className="px-4 py-3 text-left font-medium">Paciente</th>
+                                        <th className="px-4 py-3 text-left font-medium">Tipo</th>
+                                        <th className="px-4 py-3 text-left font-medium">Descrição</th>
+                                        <th className="px-4 py-3 text-left font-medium">Data</th>
+                                        <th className="px-4 py-3 text-left font-medium">Horário</th>
+                                        <th className="px-4 py-3 text-left font-medium">Confirmado em</th>
+                                        <th className="px-4 py-3 text-left font-medium">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-border">
                                     {confirmados.map(ag => (
                                         <tr key={ag.id}>
-                                            <td><strong>{ag.paciente}</strong></td>
-                                            <td>
-                                                <span className={`badge badge-${ag.tipo === 'consulta' ? 'primary' : 'info'}`}>
+                                            <td className="px-4 py-3"><strong>{ag.paciente}</strong></td>
+                                            <td className="px-4 py-3">
+                                                <span className={cn(
+                                                    'rounded-md px-2 py-0.5 text-xs font-medium',
+                                                    ag.tipo === 'consulta'
+                                                        ? 'bg-primary/10 text-primary'
+                                                        : 'bg-sky-100 text-sky-700'
+                                                )}>
                                                     {ag.tipo === 'consulta' ? 'Consulta' : 'Exame'}
                                                 </span>
                                             </td>
-                                            <td>{ag.descricao}</td>
-                                            <td>{formatDate(ag.data)}</td>
-                                            <td>{ag.hora}</td>
-                                            <td style={{ fontSize: '0.85rem' }}>{new Date(ag.confirmadoEm).toLocaleString('pt-BR')}</td>
-                                            <td><span className="badge badge-success">Confirmado</span></td>
+                                            <td className="px-4 py-3">{ag.descricao}</td>
+                                            <td className="px-4 py-3">{formatDate(ag.data)}</td>
+                                            <td className="px-4 py-3">{ag.hora}</td>
+                                            <td className="px-4 py-3 text-sm">{new Date(ag.confirmadoEm).toLocaleString('pt-BR')}</td>
+                                            <td className="px-4 py-3">
+                                                <span className="rounded-md bg-secondary/10 px-2 py-0.5 text-xs font-medium text-secondary">
+                                                    Confirmado
+                                                </span>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -655,58 +721,63 @@ export default function Agendamento() {
             {/* Confirmation Modal */}
             {showConfirmacao && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
                     onClick={() => setShowConfirmacao(null)}
                 >
-                    <div className="card" style={{ width: '450px', maxWidth: '90%' }} onClick={(e) => e.stopPropagation()}>
-                        <div className="card-header" style={{ background: 'var(--sus-green)', color: 'white' }}>
-                            <i className="fas fa-check-circle"></i> Confirmar Agendamento
+                    <div
+                        className="w-[450px] max-w-[90%] rounded-xl border border-border bg-card shadow-sm"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center gap-1.5 rounded-t-xl border-b border-border bg-secondary px-5 py-3 text-sm font-semibold text-white">
+                            <CheckCircle className="h-4 w-4" /> Confirmar Agendamento
                         </div>
-                        <div className="card-body">
-                            <p>Deseja confirmar o seguinte agendamento?</p>
+                        <div className="p-5">
+                            <p className="mb-3">Deseja confirmar o seguinte agendamento?</p>
 
-                            <div className="card" style={{ background: '#f8f9fa' }}>
-                                <div className="card-body" style={{ padding: '1rem' }}>
+                            <div className="rounded-xl border border-border bg-muted shadow-sm">
+                                <div className="p-4">
                                     <strong>{showConfirmacao.paciente}</strong>
-                                    <p style={{ margin: '0.5rem 0', color: 'var(--sus-gray)' }}>
+                                    <p className="my-2 text-muted-foreground">
                                         {showConfirmacao.descricao}
                                     </p>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <span><i className="fas fa-calendar"></i> {formatDate(showConfirmacao.data)}</span>
-                                        <span><i className="fas fa-clock"></i> {showConfirmacao.hora}</span>
+                                    <div className="flex gap-4 text-sm">
+                                        <span className="inline-flex items-center gap-1">
+                                            <CalendarDays className="h-3.5 w-3.5" /> {formatDate(showConfirmacao.data)}
+                                        </span>
+                                        <span className="inline-flex items-center gap-1">
+                                            <Clock className="h-3.5 w-3.5" /> {showConfirmacao.hora}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div style={{ marginTop: '1rem' }}>
-                                <label className="form-label">Enviar confirmação para:</label>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <div className="mt-4">
+                                <label className="mb-1.5 block text-sm font-medium">Enviar confirmação para:</label>
+                                <div className="flex gap-3">
+                                    <label className="flex items-center gap-1.5 text-sm">
                                         <input type="checkbox" defaultChecked /> SMS
                                     </label>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                    <label className="flex items-center gap-1.5 text-sm">
                                         <input type="checkbox" defaultChecked /> WhatsApp
                                     </label>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                    <label className="flex items-center gap-1.5 text-sm">
                                         <input type="checkbox" /> E-mail
                                     </label>
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                                <button className="btn btn-outline-secondary" onClick={() => setShowConfirmacao(null)}>
+                            <div className="mt-6 flex justify-end gap-2">
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                    onClick={() => setShowConfirmacao(null)}
+                                >
                                     Cancelar
                                 </button>
-                                <button className="btn btn-success" onClick={() => confirmarAgendamento(showConfirmacao)}>
-                                    <i className="fas fa-check"></i> Confirmar Agendamento
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-2 text-sm font-medium text-white hover:bg-secondary-dark"
+                                    onClick={() => confirmarAgendamento(showConfirmacao)}
+                                >
+                                    <Check className="h-4 w-4" /> Confirmar Agendamento
                                 </button>
                             </div>
                         </div>

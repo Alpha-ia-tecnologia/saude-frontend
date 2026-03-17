@@ -1,10 +1,27 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { config } from '../../config/app.config';
+import { Bot, Paperclip, Send, Trash2, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+function renderMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^### (.+)$/gm, '<h4 class="font-bold text-sm mt-3 mb-1">$1</h4>')
+    .replace(/^## (.+)$/gm, '<h3 class="font-bold mt-3 mb-1">$1</h3>')
+    .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
+    .replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal">$1</li>')
+    .replace(/`(.+?)`/g, '<code class="bg-black/10 rounded px-1 text-xs">$1</code>')
+    .replace(/⚠️/g, '<span class="text-amber-600">⚠️</span>')
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>');
+}
 
 export function Chatbot() {
-    const [messages, setMessages] = useState([
-        {
-            role: 'assistant', content: `Olá! Sou o assistente de IA do **PEC (Prontuário Eletrônico do Cidadão)**, sistema de saúde pública do Brasil.
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant', content: `Olá! Sou o assistente de IA do **PEC (Prontuário Eletrônico do Cidadão)**, sistema de saúde pública do Brasil.
 
 **Minhas habilidades incluem:**
 - Apoio à decisão clínica baseada em evidências
@@ -14,172 +31,184 @@ export function Chatbot() {
 - Orientações sobre protocolos do Ministério da Saúde e SUS
 - Sugestão de medicamentos da RENAME
 
-Como posso ajudar você hoje?` }
-    ]);
-    const [input, setInput] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [provider, setProvider] = useState('deepseek');
-    const messagesEndRef = useRef(null);
+Como posso ajudar você hoje?`
+    }
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [provider, setProvider] = useState('deepseek');
+  const messagesEndRef = useRef(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => { scrollToBottom(); }, [messages]);
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
+    const userMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
+
+    const attemptFetch = () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      return fetch(`${config.api.ai}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        signal: controller.signal,
+        body: JSON.stringify({
+          provider,
+          messages: [...messages, userMessage].map(m => ({ role: m.role, content: m.content }))
+        })
+      }).finally(() => clearTimeout(timeoutId));
     };
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    const sendMessage = async () => {
-        if (!input.trim() || loading) return;
-
-        const userMessage = { role: 'user', content: input };
-        setMessages(prev => [...prev, userMessage]);
-        setInput('');
-        setLoading(true);
-
-        try {
-            const response = await fetch(`${config.api.ai}/chat`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    provider,
-                    messages: [...messages, userMessage].map(m => ({ role: m.role, content: m.content }))
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setMessages(prev => [...prev, {
-                    role: 'assistant',
-                    content: data.response.content,
-                    mode: data.mode,
-                    model: data.response.model
-                }]);
-            } else {
-                throw new Error(data.error || 'Erro ao processar mensagem');
-            }
-        } catch (error) {
-            setMessages(prev => [...prev, {
-                role: 'assistant',
-                content: `Erro: ${error.message}. Verifique se o servidor backend está rodando.`,
-                isError: true
-            }]);
-        } finally {
-            setLoading(false);
+    const maxRetries = 2;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await attemptFetch();
+        if (!response.ok) {
+          throw new Error(`Servidor retornou status ${response.status} (${response.statusText})`);
         }
-    };
-
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
+        const data = await response.json();
+        if (data.success) {
+          setMessages(prev => [...prev, { role: 'assistant', content: data.response.content, mode: data.mode, model: data.response.model }]);
+        } else {
+          throw new Error(data.error || 'Erro ao processar mensagem');
         }
-    };
+        break;
+      } catch (error) {
+        if (attempt < maxRetries) continue;
+        let errorMsg;
+        if (error.name === 'AbortError') {
+          errorMsg = 'Tempo limite de 30 segundos excedido. O servidor demorou muito para responder. Verifique se o backend está rodando e tente novamente.';
+        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          errorMsg = 'Não foi possível conectar ao servidor. Verifique se o backend está rodando em http://localhost:3001 e se não há bloqueio de CORS.';
+        } else {
+          errorMsg = `${error.message}. Verifique se o servidor backend está rodando.`;
+        }
+        setMessages(prev => [...prev, { role: 'assistant', content: `Erro: ${errorMsg}`, isError: true }]);
+      }
+    }
 
-    const clearChat = () => {
-        setMessages([{ role: 'assistant', content: 'Chat limpo. Como posso ajudar?' }]);
-    };
+    setLoading(false);
+  };
 
-    return (
-        <div className="fade-in" style={{ height: 'calc(100vh - 150px)', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h1 style={{ margin: 0 }}>
-                    <i className="fas fa-robot" style={{ color: 'var(--sus-blue)', marginRight: '0.5rem' }}></i>
-                    Assistente IA
-                </h1>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <select
-                        className="form-control"
-                        style={{ width: 'auto' }}
-                        value={provider}
-                        onChange={(e) => setProvider(e.target.value)}
-                    >
-                        <option value="deepseek">DeepSeek</option>
-                        <option value="openai">OpenAI (GPT-4)</option>
-                        <option value="gemini">Google Gemini</option>
-                    </select>
-                    <button className="btn btn-outline-primary" onClick={clearChat}>
-                        <i className="fas fa-trash"></i> Limpar
-                    </button>
-                </div>
-            </div>
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
 
-            {/* Chat Messages */}
-            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
-                    {messages.map((msg, index) => (
-                        <div
-                            key={index}
-                            style={{
-                                display: 'flex',
-                                justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                                marginBottom: '1rem'
-                            }}
-                        >
-                            <div style={{
-                                maxWidth: '70%',
-                                padding: '0.75rem 1rem',
-                                borderRadius: msg.role === 'user' ? '1rem 1rem 0 1rem' : '1rem 1rem 1rem 0',
-                                background: msg.role === 'user' ? 'var(--sus-blue)' : msg.isError ? '#f8d7da' : '#f8f9fa',
-                                color: msg.role === 'user' ? 'white' : msg.isError ? '#721c24' : 'inherit'
-                            }}>
-                                <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
-                                {msg.mode && (
-                                    <small style={{
-                                        display: 'block',
-                                        marginTop: '0.5rem',
-                                        opacity: 0.7,
-                                        fontSize: '0.75rem'
-                                    }}>
-                                        {msg.mode === 'demo' ? '🔸 Modo Demo' : '🟢 Produção'} • {msg.model}
-                                    </small>
-                                )}
-                            </div>
-                        </div>
-                    ))}
+  const clearChat = () => {
+    setMessages([{ role: 'assistant', content: 'Chat limpo. Como posso ajudar?' }]);
+  };
 
-                    {loading && (
-                        <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '1rem' }}>
-                            <div style={{ padding: '0.75rem 1rem', background: '#f8f9fa', borderRadius: '1rem' }}>
-                                <i className="fas fa-spinner fa-spin"></i> Processando...
-                            </div>
-                        </div>
-                    )}
-
-                    <div ref={messagesEndRef} />
-                </div>
-
-                {/* Input Area */}
-                <div style={{ padding: '1rem', borderTop: '1px solid var(--sus-light-gray)' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn btn-outline-primary" title="Anexar arquivo">
-                            <i className="fas fa-paperclip"></i>
-                        </button>
-                        <textarea
-                            className="form-control"
-                            placeholder="Digite sua mensagem..."
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            rows={1}
-                            style={{ resize: 'none' }}
-                        />
-                        <button
-                            className="btn btn-primary"
-                            onClick={sendMessage}
-                            disabled={loading || !input.trim()}
-                        >
-                            <i className="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                    <small style={{ color: 'var(--sus-gray)', marginTop: '0.5rem', display: 'block' }}>
-                        Pressione Enter para enviar. O assistente pode auxiliar em decisões clínicas.
-                    </small>
-                </div>
-            </div>
+  return (
+    <div className="flex h-[calc(100vh-180px)] flex-col space-y-4">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
+          <Bot className="size-6 text-primary" />
+          Assistente IA
+        </h1>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-xs font-medium text-primary">DeepSeek</span>
+          </div>
+          <select
+            value={provider}
+            onChange={(e) => setProvider(e.target.value)}
+            className="h-9 rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="deepseek">DeepSeek (Padrão)</option>
+            <option value="openai">OpenAI (GPT-4)</option>
+            <option value="gemini">Google Gemini</option>
+          </select>
+          <button onClick={clearChat}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors">
+            <Trash2 className="size-4" /> Limpar
+          </button>
         </div>
-    );
+      </div>
+
+      {/* Chat container */}
+      <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((msg, index) => (
+            <div key={index} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+              <div className={cn(
+                'max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed',
+                msg.role === 'user'
+                  ? 'rounded-br-md bg-primary text-white'
+                  : msg.isError
+                    ? 'rounded-bl-md border border-red-200 bg-red-50 text-red-700'
+                    : 'rounded-bl-md bg-muted text-foreground'
+              )}>
+                {msg.role === 'user' ? (
+                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                ) : (
+                  <div className="prose-sm" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+                )}
+                {msg.mode && (
+                  <p className="mt-2 text-[10px] opacity-60">
+                    {msg.mode === 'demo' ? 'Modo Demo' : 'Produção'} &middot; {msg.model}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {loading && (
+            <div className="flex justify-start">
+              <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-muted px-4 py-3 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" /> Processando...
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="border-t border-border p-4">
+          <div className="flex items-end gap-2">
+            <button className="shrink-0 rounded-lg border border-border p-2.5 text-muted-foreground hover:bg-muted" title="Anexar arquivo">
+              <Paperclip className="size-4" />
+            </button>
+            <textarea
+              placeholder="Digite sua mensagem..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              rows={1}
+              className="min-h-[40px] max-h-32 flex-1 resize-none rounded-lg border border-input bg-white px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            <button
+              onClick={sendMessage}
+              disabled={loading || !input.trim()}
+              className={cn(
+                'shrink-0 rounded-lg p-2.5 transition-colors',
+                input.trim() && !loading
+                  ? 'bg-primary text-white hover:bg-primary-dark'
+                  : 'bg-muted text-muted-foreground'
+              )}
+            >
+              <Send className="size-4" />
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Pressione Enter para enviar. O assistente pode auxiliar em decisões clínicas.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Chatbot;

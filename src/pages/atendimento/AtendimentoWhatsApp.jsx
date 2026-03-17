@@ -1,9 +1,35 @@
 import { useState } from 'react';
+import {
+    MessageSquare,
+    CheckCircle,
+    Clock,
+    TrendingUp,
+    Headset,
+    Bell,
+    BellOff,
+    History,
+    User,
+    Search,
+    ArrowRight,
+    ArrowLeft,
+    CalendarPlus,
+    Stethoscope,
+    FlaskConical,
+    UserCheck,
+    Check,
+    Calendar,
+    RefreshCw,
+    Eye,
+    Plus,
+    Info,
+    ScanLine,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Sample professionals
 const profissionais = [
-    { id: 1, nome: 'Dr. Carlos Oliveira', especialidade: 'Clínico Geral', unidade: 'UBS Centro' },
-    { id: 2, nome: 'Dra. Ana Santos', especialidade: 'Médico de Família', unidade: 'UBS Norte' },
+    { id: 1, nome: 'Dr. Carlos Oliveira', especialidade: 'Clinico Geral', unidade: 'UBS Centro' },
+    { id: 2, nome: 'Dra. Ana Santos', especialidade: 'Medico de Familia', unidade: 'UBS Norte' },
     { id: 3, nome: 'Dr. Paulo Lima', especialidade: 'Dentista', unidade: 'UBS Centro' },
     { id: 4, nome: 'Dra. Mariana Costa', especialidade: 'Ginecologista', unidade: 'UBS Sul' },
     { id: 5, nome: 'Enf. Maria Lima', especialidade: 'Enfermagem', unidade: 'UBS Centro' }
@@ -13,15 +39,15 @@ const profissionais = [
 const tiposExame = [
     { id: 1, nome: 'Hemograma Completo', categoria: 'Laboratorial' },
     { id: 2, nome: 'Glicemia de Jejum', categoria: 'Laboratorial' },
-    { id: 3, nome: 'Raio-X Tórax', categoria: 'Imagem' },
+    { id: 3, nome: 'Raio-X Torax', categoria: 'Imagem' },
     { id: 4, nome: 'Ultrassom Abdominal', categoria: 'Imagem' },
-    { id: 5, nome: 'Eletrocardiograma', categoria: 'Cardiológico' }
+    { id: 5, nome: 'Eletrocardiograma', categoria: 'Cardiologico' }
 ];
 
 // Sample reminders
 const lembretesData = [
-    { id: 1, paciente: 'Maria Silva', telefone: '(11) 99999-1234', tipo: 'consulta', descricao: 'Clínico Geral - Dr. Carlos', data: '2025-01-28', hora: '09:00', status: 'enviado', lembreteEnviado: '2025-01-27T09:00:00', confirmado: false },
-    { id: 2, paciente: 'João Santos', telefone: '(11) 98888-5678', tipo: 'exame', descricao: 'Hemograma Completo', data: '2025-01-29', hora: '07:30', status: 'confirmado', lembreteEnviado: '2025-01-28T07:30:00', confirmado: true },
+    { id: 1, paciente: 'Maria Silva', telefone: '(11) 99999-1234', tipo: 'consulta', descricao: 'Clinico Geral - Dr. Carlos', data: '2025-01-28', hora: '09:00', status: 'enviado', lembreteEnviado: '2025-01-27T09:00:00', confirmado: false },
+    { id: 2, paciente: 'Joao Santos', telefone: '(11) 98888-5678', tipo: 'exame', descricao: 'Hemograma Completo', data: '2025-01-29', hora: '07:30', status: 'confirmado', lembreteEnviado: '2025-01-28T07:30:00', confirmado: true },
     { id: 3, paciente: 'Ana Costa', telefone: '(11) 97777-9012', tipo: 'consulta', descricao: 'Ginecologista - Dra. Mariana', data: '2025-01-28', hora: '14:00', status: 'pendente', lembreteEnviado: null, confirmado: false }
 ];
 
@@ -29,7 +55,7 @@ const lembretesData = [
 const historicoData = [
     { id: 1, paciente: 'Pedro Lima', telefone: '(11) 96666-3456', tipo: 'consulta', descricao: 'Dentista - Dr. Paulo', data: '2025-01-25', hora: '10:00', status: 'realizado', mensagensEnviadas: 3 },
     { id: 2, paciente: 'Carla Souza', telefone: '(11) 95555-7890', tipo: 'exame', descricao: 'Ultrassom', data: '2025-01-24', hora: '08:00', status: 'faltou', mensagensEnviadas: 4 },
-    { id: 3, paciente: 'Roberto Alves', telefone: '(11) 94444-2345', tipo: 'consulta', descricao: 'Clínico Geral', data: '2025-01-23', hora: '11:00', status: 'cancelado', mensagensEnviadas: 2 }
+    { id: 3, paciente: 'Roberto Alves', telefone: '(11) 94444-2345', tipo: 'consulta', descricao: 'Clinico Geral', data: '2025-01-23', hora: '11:00', status: 'cancelado', mensagensEnviadas: 2 }
 ];
 
 // Time slots
@@ -37,6 +63,15 @@ const horariosDisponiveis = [
     '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
     '11:00', '11:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00'
 ];
+
+const statusClasses = {
+    pendente: 'bg-amber-400 text-black',
+    enviado: 'bg-cyan-600 text-white',
+    confirmado: 'bg-green-600 text-white',
+    realizado: 'bg-green-600 text-white',
+    faltou: 'bg-red-600 text-white',
+    cancelado: 'bg-gray-500 text-white',
+};
 
 export default function AtendimentoWhatsApp() {
     const [abaAtiva, setAbaAtiva] = useState('atendimento');
@@ -142,224 +177,193 @@ export default function AtendimentoWhatsApp() {
     };
 
     const getStatusBadge = (status) => {
-        const colors = {
-            'pendente': { bg: '#ffc107', color: '#000' },
-            'enviado': { bg: '#17a2b8', color: '#fff' },
-            'confirmado': { bg: '#28a745', color: '#fff' },
-            'realizado': { bg: '#28a745', color: '#fff' },
-            'faltou': { bg: '#dc3545', color: '#fff' },
-            'cancelado': { bg: '#6c757d', color: '#fff' }
-        };
-        const style = colors[status] || colors['pendente'];
+        const classes = statusClasses[status] || statusClasses.pendente;
         return (
-            <span style={{
-                background: style.bg,
-                color: style.color,
-                padding: '0.25rem 0.75rem',
-                borderRadius: '12px',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                textTransform: 'uppercase'
-            }}>
+            <span className={cn('inline-block rounded-xl px-3 py-1 text-xs font-semibold uppercase', classes)}>
                 {status}
             </span>
         );
     };
 
     const reenviarLembrete = (lembrete) => {
-        const mensagem = `🏥 *SmartHealth - Lembrete de ${lembrete.tipo === 'consulta' ? 'Consulta' : 'Exame'}*\n\nOlá ${lembrete.paciente}!\n\nLembramos que você tem ${lembrete.tipo === 'consulta' ? 'uma consulta' : 'um exame'} agendado:\n\n📋 ${lembrete.descricao}\n📅 ${formatDate(lembrete.data)}\n⏰ ${lembrete.hora}\n\nPor favor, confirme sua presença respondendo:\n✅ *SIM* para confirmar\n❌ *NÃO* para cancelar`;
+        const mensagem = `🏥 *SmartHealth - Lembrete de ${lembrete.tipo === 'consulta' ? 'Consulta' : 'Exame'}*\n\nOla ${lembrete.paciente}!\n\nLembramos que voce tem ${lembrete.tipo === 'consulta' ? 'uma consulta' : 'um exame'} agendado:\n\n📋 ${lembrete.descricao}\n📅 ${formatDate(lembrete.data)}\n⏰ ${lembrete.hora}\n\nPor favor, confirme sua presenca respondendo:\n✅ *SIM* para confirmar\n❌ *NAO* para cancelar`;
         enviarWhatsApp(lembrete.telefone, mensagem);
     };
 
     return (
-        <div className="fade-in">
+        <div className="animate-fade-in">
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div className="mb-6 flex items-center justify-between">
                 <div>
-                    <h1 style={{ margin: 0 }}>
-                        <i className="fab fa-whatsapp" style={{ color: '#25D366', marginRight: '0.5rem' }}></i>
+                    <h1 className="m-0 flex items-center gap-2">
+                        <MessageSquare className="size-7 text-emerald-500" />
                         Atendimento WhatsApp
                     </h1>
-                    <p style={{ margin: '0.25rem 0 0', color: 'var(--sus-gray)' }}>Agendamento e lembretes via WhatsApp</p>
+                    <p className="mt-1 text-muted-foreground">Agendamento e lembretes via WhatsApp</p>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <div className="card" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{ width: '10px', height: '10px', background: '#25D366', borderRadius: '50%' }}></div>
-                        <span style={{ fontSize: '0.85rem' }}>WhatsApp Conectado</span>
+                <div className="flex gap-2">
+                    <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 shadow-sm">
+                        <div className="size-2.5 rounded-full bg-emerald-500" />
+                        <span className="text-sm">WhatsApp Conectado</span>
                     </div>
                 </div>
             </div>
 
             {/* Stats Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="card" style={{ background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)', color: 'white' }}>
-                    <div className="card-body" style={{ padding: '1rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <p style={{ margin: 0, opacity: 0.9, fontSize: '0.85rem' }}>Mensagens Hoje</p>
-                                <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.75rem' }}>127</h3>
-                            </div>
-                            <i className="fab fa-whatsapp" style={{ fontSize: '2.5rem', opacity: 0.8 }}></i>
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 p-4 text-white shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="m-0 text-sm opacity-90">Mensagens Hoje</p>
+                            <h3 className="mt-1 text-3xl font-bold">127</h3>
                         </div>
+                        <MessageSquare className="size-10 opacity-80" />
                     </div>
                 </div>
-                <div className="card">
-                    <div className="card-body" style={{ padding: '1rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Confirmados</p>
-                                <h3 style={{ margin: '0.25rem 0 0', color: '#28a745' }}>42</h3>
-                            </div>
-                            <i className="fas fa-check-circle" style={{ fontSize: '2rem', color: '#28a745' }}></i>
+                <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="m-0 text-sm text-muted-foreground">Confirmados</p>
+                            <h3 className="mt-1 text-3xl font-bold text-green-600">42</h3>
                         </div>
+                        <CheckCircle className="size-8 text-green-600" />
                     </div>
                 </div>
-                <div className="card">
-                    <div className="card-body" style={{ padding: '1rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Pendentes</p>
-                                <h3 style={{ margin: '0.25rem 0 0', color: '#ffc107' }}>18</h3>
-                            </div>
-                            <i className="fas fa-clock" style={{ fontSize: '2rem', color: '#ffc107' }}></i>
+                <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="m-0 text-sm text-muted-foreground">Pendentes</p>
+                            <h3 className="mt-1 text-3xl font-bold text-amber-500">18</h3>
                         </div>
+                        <Clock className="size-8 text-amber-500" />
                     </div>
                 </div>
-                <div className="card">
-                    <div className="card-body" style={{ padding: '1rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <p style={{ margin: 0, color: 'var(--sus-gray)', fontSize: '0.85rem' }}>Taxa Confirmação</p>
-                                <h3 style={{ margin: '0.25rem 0 0', color: 'var(--sus-blue)' }}>87%</h3>
-                            </div>
-                            <i className="fas fa-chart-line" style={{ fontSize: '2rem', color: 'var(--sus-blue)' }}></i>
+                <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="m-0 text-sm text-muted-foreground">Taxa Confirmacao</p>
+                            <h3 className="mt-1 text-3xl font-bold text-primary">87%</h3>
                         </div>
+                        <TrendingUp className="size-8 text-primary" />
                     </div>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <div className="card-body" style={{ padding: '0.5rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button
-                            className={`btn ${abaAtiva === 'atendimento' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            onClick={() => setAbaAtiva('atendimento')}
-                        >
-                            <i className="fas fa-headset"></i> Novo Atendimento
-                        </button>
-                        <button
-                            className={`btn ${abaAtiva === 'lembretes' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            onClick={() => setAbaAtiva('lembretes')}
-                            style={{ position: 'relative' }}
-                        >
-                            <i className="fas fa-bell"></i> Lembretes
-                            {lembretes.filter(l => l.status === 'pendente').length > 0 && (
-                                <span style={{
-                                    position: 'absolute',
-                                    top: '-5px',
-                                    right: '-5px',
-                                    background: '#dc3545',
-                                    color: 'white',
-                                    borderRadius: '50%',
-                                    width: '20px',
-                                    height: '20px',
-                                    fontSize: '0.75rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    {lembretes.filter(l => l.status === 'pendente').length}
-                                </span>
-                            )}
-                        </button>
-                        <button
-                            className={`btn ${abaAtiva === 'historico' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            onClick={() => setAbaAtiva('historico')}
-                        >
-                            <i className="fas fa-history"></i> Histórico
-                        </button>
-                    </div>
+            <div className="mb-6 rounded-xl border border-border bg-card p-2 shadow-sm">
+                <div className="flex gap-2">
+                    <button
+                        className={cn(
+                            'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                            abaAtiva === 'atendimento'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'border border-border bg-transparent text-foreground hover:bg-muted'
+                        )}
+                        onClick={() => setAbaAtiva('atendimento')}
+                    >
+                        <Headset className="size-4" /> Novo Atendimento
+                    </button>
+                    <button
+                        className={cn(
+                            'relative inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                            abaAtiva === 'lembretes'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'border border-border bg-transparent text-foreground hover:bg-muted'
+                        )}
+                        onClick={() => setAbaAtiva('lembretes')}
+                    >
+                        <Bell className="size-4" /> Lembretes
+                        {lembretes.filter(l => l.status === 'pendente').length > 0 && (
+                            <span className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-red-600 text-xs text-white">
+                                {lembretes.filter(l => l.status === 'pendente').length}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        className={cn(
+                            'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                            abaAtiva === 'historico'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'border border-border bg-transparent text-foreground hover:bg-muted'
+                        )}
+                        onClick={() => setAbaAtiva('historico')}
+                    >
+                        <History className="size-4" /> Historico
+                    </button>
                 </div>
             </div>
 
             {/* Tab: Atendimento */}
             {abaAtiva === 'atendimento' && (
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span>
-                                <i className="fab fa-whatsapp" style={{ color: '#25D366' }}></i> Novo Atendimento via WhatsApp
-                            </span>
-                            {/* Progress Steps */}
-                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                {[1, 2, 3, 4, 5].map(step => (
-                                    <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
-                                        <div style={{
-                                            width: '30px',
-                                            height: '30px',
-                                            borderRadius: '50%',
-                                            background: etapa >= step ? '#25D366' : '#e9ecef',
-                                            color: etapa >= step ? 'white' : 'var(--sus-gray)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontWeight: '600',
-                                            fontSize: '0.85rem',
-                                            transition: 'all 0.3s'
-                                        }}>
-                                            {etapa > step ? <i className="fas fa-check"></i> : step}
-                                        </div>
-                                        {step < 5 && (
-                                            <div style={{ width: '20px', height: '3px', background: etapa > step ? '#25D366' : '#e9ecef', transition: 'all 0.3s' }}></div>
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="flex items-center justify-between border-b border-border bg-muted px-5 py-3">
+                        <span className="flex items-center gap-2 text-sm font-semibold">
+                            <MessageSquare className="size-4 text-emerald-500" /> Novo Atendimento via WhatsApp
+                        </span>
+                        {/* Progress Steps */}
+                        <div className="flex items-center gap-2">
+                            {[1, 2, 3, 4, 5].map(step => (
+                                <div key={step} className="flex items-center">
+                                    <div
+                                        className={cn(
+                                            'flex size-8 items-center justify-center rounded-full text-sm font-semibold transition-all',
+                                            etapa >= step
+                                                ? 'bg-emerald-500 text-white'
+                                                : 'bg-gray-200 text-muted-foreground'
                                         )}
+                                    >
+                                        {etapa > step ? <Check className="size-4" /> : step}
                                     </div>
-                                ))}
-                            </div>
+                                    {step < 5 && (
+                                        <div
+                                            className={cn(
+                                                'h-0.5 w-5 transition-all',
+                                                etapa > step ? 'bg-emerald-500' : 'bg-gray-200'
+                                            )}
+                                        />
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     </div>
-                    <div className="card-body">
-                        {/* Etapa 1: Identificação */}
+                    <div className="p-5">
+                        {/* Etapa 1: Identificacao */}
                         {etapa === 1 && (
                             <div>
-                                <h5><i className="fas fa-user" style={{ color: '#25D366', marginRight: '0.5rem' }}></i> 1. Identificação do Paciente</h5>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1rem', marginBottom: '1rem' }}>
+                                <h5 className="flex items-center gap-2">
+                                    <User className="size-5 text-emerald-500" />
+                                    1. Identificacao do Paciente
+                                </h5>
+                                <div className="mb-4 grid grid-cols-[1fr_auto] gap-4">
                                     <div>
-                                        <label className="form-label">CPF do Paciente *</label>
+                                        <label className="mb-1 block text-sm font-medium">CPF do Paciente *</label>
                                         <input
                                             type="text"
-                                            className="form-control"
+                                            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                                             placeholder="000.000.000-00"
                                             value={formData.pacienteCpf}
                                             onChange={(e) => handleInputChange('pacienteCpf', e.target.value)}
                                         />
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                                        <button className="btn btn-primary" onClick={buscarPaciente}>
-                                            <i className="fas fa-search"></i> Buscar
+                                    <div className="flex items-end">
+                                        <button
+                                            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-dark"
+                                            onClick={buscarPaciente}
+                                        >
+                                            <Search className="size-4" /> Buscar
                                         </button>
                                     </div>
                                 </div>
 
                                 {pacienteBuscado && (
-                                    <div className="alert" style={{ background: '#d4edda', borderColor: '#c3e6cb' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                            <div style={{
-                                                width: '50px',
-                                                height: '50px',
-                                                borderRadius: '50%',
-                                                background: '#25D366',
-                                                color: 'white',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                fontSize: '1.25rem'
-                                            }}>
-                                                <i className="fas fa-user-check"></i>
+                                    <div className="rounded-lg border border-green-300 bg-green-50 p-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex size-12 items-center justify-center rounded-full bg-emerald-500 text-white">
+                                                <UserCheck className="size-6" />
                                             </div>
-                                            <div style={{ flex: 1 }}>
+                                            <div className="flex-1">
                                                 <strong>{pacienteBuscado.nome}</strong>
-                                                <div style={{ fontSize: '0.85rem' }}>
+                                                <div className="text-sm">
                                                     <span>CNS: {pacienteBuscado.cns}</span>
                                                 </div>
                                             </div>
@@ -368,28 +372,28 @@ export default function AtendimentoWhatsApp() {
                                 )}
 
                                 {pacienteBuscado && (
-                                    <div style={{ marginTop: '1rem' }}>
-                                        <label className="form-label">
-                                            <i className="fab fa-whatsapp" style={{ color: '#25D366' }}></i> Número WhatsApp *
+                                    <div className="mt-4">
+                                        <label className="mb-1 flex items-center gap-2 text-sm font-medium">
+                                            <MessageSquare className="size-4 text-emerald-500" /> Numero WhatsApp *
                                         </label>
                                         <input
                                             type="text"
-                                            className="form-control"
+                                            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                                             placeholder="(00) 00000-0000"
                                             value={formData.telefone}
                                             onChange={(e) => handleInputChange('telefone', e.target.value)}
                                         />
-                                        <small className="text-muted">Confirme o número do WhatsApp do paciente</small>
+                                        <small className="text-muted-foreground">Confirme o numero do WhatsApp do paciente</small>
                                     </div>
                                 )}
 
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+                                <div className="mt-6 flex justify-end">
                                     <button
-                                        className="btn btn-primary"
+                                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-dark disabled:opacity-50"
                                         onClick={proximaEtapa}
                                         disabled={!pacienteBuscado || !formData.telefone}
                                     >
-                                        Próximo <i className="fas fa-arrow-right"></i>
+                                        Proximo <ArrowRight className="size-4" />
                                     </button>
                                 </div>
                             </div>
@@ -398,178 +402,190 @@ export default function AtendimentoWhatsApp() {
                         {/* Etapa 2: Tipo de Agendamento */}
                         {etapa === 2 && (
                             <div>
-                                <h5><i className="fas fa-calendar-plus" style={{ color: '#25D366', marginRight: '0.5rem' }}></i> 2. Tipo de Agendamento</h5>
-                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                <h5 className="flex items-center gap-2">
+                                    <CalendarPlus className="size-5 text-emerald-500" />
+                                    2. Tipo de Agendamento
+                                </h5>
+                                <div className="flex gap-4">
                                     <button
-                                        className={`btn ${tipoAgendamento === 'consulta' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                        className={cn(
+                                            'flex flex-1 flex-col items-center gap-2 rounded-lg border-2 px-6 py-8 text-center transition-colors',
+                                            tipoAgendamento === 'consulta'
+                                                ? 'border-primary bg-primary text-primary-foreground'
+                                                : 'border-border bg-transparent text-foreground hover:bg-muted'
+                                        )}
                                         onClick={() => setTipoAgendamento('consulta')}
-                                        style={{ flex: 1, padding: '2rem' }}
                                     >
-                                        <i className="fas fa-stethoscope fa-2x" style={{ marginBottom: '0.5rem' }}></i>
-                                        <br />
+                                        <Stethoscope className="size-8" />
                                         <strong>Consulta</strong>
-                                        <br />
-                                        <small style={{ opacity: 0.8 }}>Atendimento médico</small>
+                                        <small className="opacity-80">Atendimento medico</small>
                                     </button>
                                     <button
-                                        className={`btn ${tipoAgendamento === 'exame' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                        className={cn(
+                                            'flex flex-1 flex-col items-center gap-2 rounded-lg border-2 px-6 py-8 text-center transition-colors',
+                                            tipoAgendamento === 'exame'
+                                                ? 'border-primary bg-primary text-primary-foreground'
+                                                : 'border-border bg-transparent text-foreground hover:bg-muted'
+                                        )}
                                         onClick={() => setTipoAgendamento('exame')}
-                                        style={{ flex: 1, padding: '2rem' }}
                                     >
-                                        <i className="fas fa-flask fa-2x" style={{ marginBottom: '0.5rem' }}></i>
-                                        <br />
+                                        <FlaskConical className="size-8" />
                                         <strong>Exame</strong>
-                                        <br />
-                                        <small style={{ opacity: 0.8 }}>Exames laboratoriais/imagem</small>
+                                        <small className="opacity-80">Exames laboratoriais/imagem</small>
                                     </button>
                                 </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem' }}>
-                                    <button className="btn btn-outline-secondary" onClick={etapaAnterior}>
-                                        <i className="fas fa-arrow-left"></i> Voltar
+                                <div className="mt-6 flex justify-between">
+                                    <button
+                                        className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                                        onClick={etapaAnterior}
+                                    >
+                                        <ArrowLeft className="size-4" /> Voltar
                                     </button>
-                                    <button className="btn btn-primary" onClick={proximaEtapa}>
-                                        Próximo <i className="fas fa-arrow-right"></i>
+                                    <button
+                                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-dark"
+                                        onClick={proximaEtapa}
+                                    >
+                                        Proximo <ArrowRight className="size-4" />
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        {/* Etapa 3: Seleção de Profissional/Exame */}
+                        {/* Etapa 3: Selecao de Profissional/Exame */}
                         {etapa === 3 && (
                             <div>
-                                <h5>
-                                    <i className={`fas ${tipoAgendamento === 'consulta' ? 'fa-user-md' : 'fa-flask'}`} style={{ color: '#25D366', marginRight: '0.5rem' }}></i>
+                                <h5 className="flex items-center gap-2">
+                                    {tipoAgendamento === 'consulta'
+                                        ? <Stethoscope className="size-5 text-emerald-500" />
+                                        : <FlaskConical className="size-5 text-emerald-500" />
+                                    }
                                     3. {tipoAgendamento === 'consulta' ? 'Selecionar Profissional' : 'Selecionar Exame'}
                                 </h5>
 
                                 {tipoAgendamento === 'consulta' ? (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                         {profissionais.map(prof => (
                                             <div
                                                 key={prof.id}
-                                                className={`card ${formData.profissional === String(prof.id) ? 'border-success' : ''}`}
-                                                style={{
-                                                    cursor: 'pointer',
-                                                    borderWidth: formData.profissional === String(prof.id) ? '2px' : '1px',
-                                                    borderColor: formData.profissional === String(prof.id) ? '#25D366' : ''
-                                                }}
+                                                className={cn(
+                                                    'cursor-pointer rounded-xl border bg-card p-4 shadow-sm transition-all hover:shadow-md',
+                                                    formData.profissional === String(prof.id)
+                                                        ? 'border-2 border-emerald-500'
+                                                        : 'border-border'
+                                                )}
                                                 onClick={() => handleInputChange('profissional', String(prof.id))}
                                             >
-                                                <div className="card-body" style={{ padding: '1rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                        <div style={{
-                                                            width: '45px',
-                                                            height: '45px',
-                                                            borderRadius: '50%',
-                                                            background: 'var(--sus-blue)',
-                                                            color: 'white',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}>
-                                                            <i className="fas fa-user-md"></i>
-                                                        </div>
-                                                        <div>
-                                                            <strong>{prof.nome}</strong>
-                                                            <div style={{ fontSize: '0.85rem', color: 'var(--sus-gray)' }}>
-                                                                {prof.especialidade} • {prof.unidade}
-                                                            </div>
-                                                        </div>
-                                                        {formData.profissional === String(prof.id) && (
-                                                            <i className="fas fa-check-circle" style={{ marginLeft: 'auto', color: '#25D366' }}></i>
-                                                        )}
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex size-11 items-center justify-center rounded-full bg-primary text-white">
+                                                        <Stethoscope className="size-5" />
                                                     </div>
+                                                    <div className="flex-1">
+                                                        <strong>{prof.nome}</strong>
+                                                        <div className="text-sm text-muted-foreground">
+                                                            {prof.especialidade} &bull; {prof.unidade}
+                                                        </div>
+                                                    </div>
+                                                    {formData.profissional === String(prof.id) && (
+                                                        <CheckCircle className="ml-auto size-5 text-emerald-500" />
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                         {tiposExame.map(exame => (
                                             <div
                                                 key={exame.id}
-                                                className={`card ${formData.tipoExame === String(exame.id) ? 'border-success' : ''}`}
-                                                style={{
-                                                    cursor: 'pointer',
-                                                    borderWidth: formData.tipoExame === String(exame.id) ? '2px' : '1px',
-                                                    borderColor: formData.tipoExame === String(exame.id) ? '#25D366' : ''
-                                                }}
+                                                className={cn(
+                                                    'cursor-pointer rounded-xl border bg-card p-4 shadow-sm transition-all hover:shadow-md',
+                                                    formData.tipoExame === String(exame.id)
+                                                        ? 'border-2 border-emerald-500'
+                                                        : 'border-border'
+                                                )}
                                                 onClick={() => handleInputChange('tipoExame', String(exame.id))}
                                             >
-                                                <div className="card-body" style={{ padding: '1rem' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                                        <div style={{
-                                                            width: '45px',
-                                                            height: '45px',
-                                                            borderRadius: '50%',
-                                                            background: exame.categoria === 'Laboratorial' ? 'var(--sus-green)' : 'var(--sus-blue)',
-                                                            color: 'white',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}>
-                                                            <i className={`fas ${exame.categoria === 'Laboratorial' ? 'fa-flask' : 'fa-x-ray'}`}></i>
-                                                        </div>
-                                                        <div>
-                                                            <strong>{exame.nome}</strong>
-                                                            <div style={{ fontSize: '0.85rem', color: 'var(--sus-gray)' }}>
-                                                                {exame.categoria}
-                                                            </div>
-                                                        </div>
-                                                        {formData.tipoExame === String(exame.id) && (
-                                                            <i className="fas fa-check-circle" style={{ marginLeft: 'auto', color: '#25D366' }}></i>
-                                                        )}
+                                                <div className="flex items-center gap-3">
+                                                    <div className={cn(
+                                                        'flex size-11 items-center justify-center rounded-full text-white',
+                                                        exame.categoria === 'Laboratorial' ? 'bg-secondary' : 'bg-primary'
+                                                    )}>
+                                                        {exame.categoria === 'Laboratorial'
+                                                            ? <FlaskConical className="size-5" />
+                                                            : <ScanLine className="size-5" />
+                                                        }
                                                     </div>
+                                                    <div className="flex-1">
+                                                        <strong>{exame.nome}</strong>
+                                                        <div className="text-sm text-muted-foreground">
+                                                            {exame.categoria}
+                                                        </div>
+                                                    </div>
+                                                    {formData.tipoExame === String(exame.id) && (
+                                                        <CheckCircle className="ml-auto size-5 text-emerald-500" />
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 )}
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem' }}>
-                                    <button className="btn btn-outline-secondary" onClick={etapaAnterior}>
-                                        <i className="fas fa-arrow-left"></i> Voltar
+                                <div className="mt-6 flex justify-between">
+                                    <button
+                                        className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                                        onClick={etapaAnterior}
+                                    >
+                                        <ArrowLeft className="size-4" /> Voltar
                                     </button>
                                     <button
-                                        className="btn btn-primary"
+                                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-dark disabled:opacity-50"
                                         onClick={proximaEtapa}
                                         disabled={tipoAgendamento === 'consulta' ? !formData.profissional : !formData.tipoExame}
                                     >
-                                        Próximo <i className="fas fa-arrow-right"></i>
+                                        Proximo <ArrowRight className="size-4" />
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        {/* Etapa 4: Data, Horário e Lembretes */}
+                        {/* Etapa 4: Data, Horario e Lembretes */}
                         {etapa === 4 && (
                             <div>
-                                <h5><i className="fas fa-calendar-alt" style={{ color: '#25D366', marginRight: '0.5rem' }}></i> 4. Data, Horário e Lembretes</h5>
+                                <h5 className="flex items-center gap-2">
+                                    <Calendar className="size-5 text-emerald-500" />
+                                    4. Data, Horario e Lembretes
+                                </h5>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem' }}>
+                                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
                                     <div>
-                                        <label className="form-label">Data *</label>
+                                        <label className="mb-1 block text-sm font-medium">Data *</label>
                                         <input
                                             type="date"
-                                            className="form-control"
+                                            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                                             value={formData.data}
                                             onChange={(e) => handleInputChange('data', e.target.value)}
                                             min={new Date().toISOString().split('T')[0]}
                                         />
                                     </div>
                                     <div>
-                                        <label className="form-label">Horários Disponíveis *</label>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '0.5rem' }}>
+                                        <label className="mb-1 block text-sm font-medium">Horarios Disponiveis *</label>
+                                        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
                                             {horariosDisponiveis.map(hora => {
                                                 const indisponivel = Math.random() > 0.7;
                                                 return (
                                                     <button
                                                         key={hora}
-                                                        className={`btn btn-sm ${formData.hora === hora ? 'btn-success' : indisponivel ? 'btn-outline-secondary' : 'btn-outline-primary'}`}
+                                                        className={cn(
+                                                            'rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
+                                                            formData.hora === hora
+                                                                ? 'border-green-600 bg-green-600 text-white'
+                                                                : indisponivel
+                                                                    ? 'border-border bg-muted text-muted-foreground opacity-50'
+                                                                    : 'border-primary text-primary hover:bg-primary hover:text-primary-foreground'
+                                                        )}
                                                         onClick={() => !indisponivel && handleInputChange('hora', hora)}
                                                         disabled={indisponivel}
-                                                        style={{ opacity: indisponivel ? 0.5 : 1 }}
                                                     >
                                                         {hora}
                                                     </button>
@@ -579,126 +595,119 @@ export default function AtendimentoWhatsApp() {
                                     </div>
                                 </div>
 
-                                {/* Configuração de Lembretes */}
-                                <div className="card" style={{ marginTop: '1.5rem', background: '#f8f9fa' }}>
-                                    <div className="card-body">
-                                        <h6><i className="fas fa-bell" style={{ color: '#25D366' }}></i> Configurar Lembretes WhatsApp</h6>
-                                        <div style={{ display: 'flex', gap: '2rem' }}>
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.lembrete24h}
-                                                    onChange={(e) => handleInputChange('lembrete24h', e.target.checked)}
-                                                    style={{ width: '18px', height: '18px' }}
-                                                />
-                                                <span>Lembrete 24h antes</span>
-                                            </label>
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.lembrete2h}
-                                                    onChange={(e) => handleInputChange('lembrete2h', e.target.checked)}
-                                                    style={{ width: '18px', height: '18px' }}
-                                                />
-                                                <span>Lembrete 2h antes</span>
-                                            </label>
-                                        </div>
+                                {/* Configuracao de Lembretes */}
+                                <div className="mt-6 rounded-xl border border-border bg-muted p-5">
+                                    <h6 className="mb-3 flex items-center gap-2 font-semibold">
+                                        <Bell className="size-4 text-emerald-500" /> Configurar Lembretes WhatsApp
+                                    </h6>
+                                    <div className="flex gap-8">
+                                        <label className="flex cursor-pointer items-center gap-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.lembrete24h}
+                                                onChange={(e) => handleInputChange('lembrete24h', e.target.checked)}
+                                                className="size-4.5 rounded accent-emerald-500"
+                                            />
+                                            <span className="text-sm">Lembrete 24h antes</span>
+                                        </label>
+                                        <label className="flex cursor-pointer items-center gap-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.lembrete2h}
+                                                onChange={(e) => handleInputChange('lembrete2h', e.target.checked)}
+                                                className="size-4.5 rounded accent-emerald-500"
+                                            />
+                                            <span className="text-sm">Lembrete 2h antes</span>
+                                        </label>
                                     </div>
                                 </div>
 
-                                <div style={{ marginTop: '1rem' }}>
-                                    <label className="form-label">Observações</label>
+                                <div className="mt-4">
+                                    <label className="mb-1 block text-sm font-medium">Observacoes</label>
                                     <textarea
-                                        className="form-control"
+                                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                                         rows={2}
-                                        placeholder="Informações adicionais..."
+                                        placeholder="Informacoes adicionais..."
                                         value={formData.observacoes}
                                         onChange={(e) => handleInputChange('observacoes', e.target.value)}
-                                    ></textarea>
+                                    />
                                 </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem' }}>
-                                    <button className="btn btn-outline-secondary" onClick={etapaAnterior}>
-                                        <i className="fas fa-arrow-left"></i> Voltar
+                                <div className="mt-6 flex justify-between">
+                                    <button
+                                        className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                                        onClick={etapaAnterior}
+                                    >
+                                        <ArrowLeft className="size-4" /> Voltar
                                     </button>
                                     <button
-                                        className="btn btn-success"
+                                        className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                                         onClick={finalizarAgendamento}
                                         disabled={!formData.data || !formData.hora}
                                     >
-                                        <i className="fab fa-whatsapp"></i> Enviar via WhatsApp
+                                        <MessageSquare className="size-4" /> Enviar via WhatsApp
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        {/* Etapa 5: Confirmação */}
+                        {/* Etapa 5: Confirmacao */}
                         {etapa === 5 && agendamentoCriado && (
-                            <div style={{ textAlign: 'center', padding: '2rem' }}>
-                                <div style={{
-                                    width: '100px',
-                                    height: '100px',
-                                    borderRadius: '50%',
-                                    background: '#25D366',
-                                    color: 'white',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    margin: '0 auto 1.5rem',
-                                    fontSize: '3rem'
-                                }}>
-                                    <i className="fab fa-whatsapp"></i>
+                            <div className="p-8 text-center">
+                                <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-full bg-emerald-500 text-white">
+                                    <MessageSquare className="size-12" />
                                 </div>
-                                <h3 style={{ color: '#25D366' }}>Agendamento Enviado!</h3>
-                                <p style={{ color: 'var(--sus-gray)' }}>O agendamento foi registrado e enviado via WhatsApp.</p>
+                                <h3 className="text-emerald-500">Agendamento Enviado!</h3>
+                                <p className="text-muted-foreground">O agendamento foi registrado e enviado via WhatsApp.</p>
 
-                                <div className="card" style={{ maxWidth: '450px', margin: '1.5rem auto', textAlign: 'left' }}>
-                                    <div className="card-body">
-                                        <div style={{ marginBottom: '0.75rem' }}>
-                                            <small style={{ color: 'var(--sus-gray)' }}>Paciente</small>
-                                            <p style={{ margin: 0, fontWeight: '600' }}>{agendamentoCriado.paciente}</p>
+                                <div className="mx-auto mt-6 max-w-md rounded-xl border border-border bg-card p-5 text-left shadow-sm">
+                                    <div className="mb-3">
+                                        <small className="text-muted-foreground">Paciente</small>
+                                        <p className="m-0 font-semibold">{agendamentoCriado.paciente}</p>
+                                    </div>
+                                    <div className="mb-3">
+                                        <small className="text-muted-foreground">WhatsApp</small>
+                                        <p className="m-0 font-semibold">{agendamentoCriado.telefone}</p>
+                                    </div>
+                                    <div className="mb-3">
+                                        <small className="text-muted-foreground">{tipoAgendamento === 'consulta' ? 'Profissional' : 'Exame'}</small>
+                                        <p className="m-0 font-semibold">{agendamentoCriado.descricao}</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <small className="text-muted-foreground">Data</small>
+                                            <p className="m-0 font-semibold">{formatDate(agendamentoCriado.data)}</p>
                                         </div>
-                                        <div style={{ marginBottom: '0.75rem' }}>
-                                            <small style={{ color: 'var(--sus-gray)' }}>WhatsApp</small>
-                                            <p style={{ margin: 0, fontWeight: '600' }}>{agendamentoCriado.telefone}</p>
-                                        </div>
-                                        <div style={{ marginBottom: '0.75rem' }}>
-                                            <small style={{ color: 'var(--sus-gray)' }}>{tipoAgendamento === 'consulta' ? 'Profissional' : 'Exame'}</small>
-                                            <p style={{ margin: 0, fontWeight: '600' }}>{agendamentoCriado.descricao}</p>
-                                        </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                            <div>
-                                                <small style={{ color: 'var(--sus-gray)' }}>Data</small>
-                                                <p style={{ margin: 0, fontWeight: '600' }}>{formatDate(agendamentoCriado.data)}</p>
-                                            </div>
-                                            <div>
-                                                <small style={{ color: 'var(--sus-gray)' }}>Horário</small>
-                                                <p style={{ margin: 0, fontWeight: '600' }}>{agendamentoCriado.hora}</p>
-                                            </div>
+                                        <div>
+                                            <small className="text-muted-foreground">Horario</small>
+                                            <p className="m-0 font-semibold">{agendamentoCriado.hora}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="alert" style={{ maxWidth: '450px', margin: '0 auto 1.5rem', background: '#d4edda', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <i className="fas fa-check-circle" style={{ color: '#28a745', fontSize: '1.5rem' }}></i>
-                                    <div style={{ textAlign: 'left' }}>
+                                <div className="mx-auto mb-6 mt-6 flex max-w-md items-center gap-4 rounded-lg border border-green-300 bg-green-50 p-4">
+                                    <CheckCircle className="size-6 shrink-0 text-green-600" />
+                                    <div className="text-left">
                                         <strong>Mensagem enviada!</strong>
-                                        <p style={{ margin: 0, fontSize: '0.85rem' }}>Lembretes automáticos foram configurados.</p>
+                                        <p className="m-0 text-sm">Lembretes automaticos foram configurados.</p>
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                                    <button className="btn btn-outline-primary" onClick={novoAtendimento}>
-                                        <i className="fas fa-plus"></i> Novo Atendimento
+                                <div className="flex justify-center gap-4">
+                                    <button
+                                        className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary hover:text-primary-foreground"
+                                        onClick={novoAtendimento}
+                                    >
+                                        <Plus className="size-4" /> Novo Atendimento
                                     </button>
                                     <button
-                                        className="btn btn-success"
+                                        className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                                         onClick={() => {
-                                            const msg = `🏥 *SmartHealth - Confirmação de Agendamento*\n\nOlá ${agendamentoCriado.paciente}!\n\nSeu agendamento foi confirmado:\n\n📋 ${agendamentoCriado.descricao}\n📅 ${formatDate(agendamentoCriado.data)}\n⏰ ${agendamentoCriado.hora}\n\nVocê receberá lembretes automáticos antes da consulta.\n\nEm caso de dúvidas, responda esta mensagem.`;
+                                            const msg = `🏥 *SmartHealth - Confirmacao de Agendamento*\n\nOla ${agendamentoCriado.paciente}!\n\nSeu agendamento foi confirmado:\n\n📋 ${agendamentoCriado.descricao}\n📅 ${formatDate(agendamentoCriado.data)}\n⏰ ${agendamentoCriado.hora}\n\nVoce recebera lembretes automaticos antes da consulta.\n\nEm caso de duvidas, responda esta mensagem.`;
                                             enviarWhatsApp(agendamentoCriado.telefone, msg);
                                         }}
                                     >
-                                        <i className="fab fa-whatsapp"></i> Abrir WhatsApp
+                                        <MessageSquare className="size-4" /> Abrir WhatsApp
                                     </button>
                                 </div>
                             </div>
@@ -709,134 +718,150 @@ export default function AtendimentoWhatsApp() {
 
             {/* Tab: Lembretes */}
             {abaAtiva === 'lembretes' && (
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span><i className="fas fa-bell"></i> Gerenciamento de Lembretes</span>
-                            <button className="btn btn-sm btn-primary">
-                                <i className="fas fa-sync-alt"></i> Atualizar
-                            </button>
-                        </div>
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="flex items-center justify-between border-b border-border bg-muted px-5 py-3">
+                        <span className="flex items-center gap-2 text-sm font-semibold">
+                            <Bell className="size-4" /> Gerenciamento de Lembretes
+                        </span>
+                        <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary-dark">
+                            <RefreshCw className="size-3.5" /> Atualizar
+                        </button>
                     </div>
-                    <div className="card-body" style={{ padding: lembretes.length === 0 ? '2rem' : 0 }}>
+                    <div className={cn(lembretes.length === 0 && 'p-8')}>
                         {lembretes.length === 0 ? (
-                            <div style={{ textAlign: 'center', color: 'var(--sus-gray)' }}>
-                                <i className="fas fa-bell-slash fa-3x" style={{ marginBottom: '1rem' }}></i>
+                            <div className="text-center text-muted-foreground">
+                                <BellOff className="mx-auto mb-4 size-12" />
                                 <p>Nenhum lembrete configurado.</p>
                             </div>
                         ) : (
-                            <table className="table" style={{ marginBottom: 0 }}>
-                                <thead>
-                                    <tr>
-                                        <th>Paciente</th>
-                                        <th>WhatsApp</th>
-                                        <th>Agendamento</th>
-                                        <th>Data/Hora</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {lembretes.map(l => (
-                                        <tr key={l.id}>
-                                            <td><strong>{l.paciente}</strong></td>
-                                            <td>
-                                                <span style={{ color: '#25D366' }}>
-                                                    <i className="fab fa-whatsapp"></i> {l.telefone}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span className={`badge ${l.tipo === 'consulta' ? 'bg-primary' : 'bg-info'}`} style={{ marginRight: '0.5rem' }}>
-                                                    {l.tipo}
-                                                </span>
-                                                {l.descricao}
-                                            </td>
-                                            <td>{formatDate(l.data)} às {l.hora}</td>
-                                            <td>{getStatusBadge(l.status)}</td>
-                                            <td>
-                                                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                                                    <button
-                                                        className="btn btn-sm btn-success"
-                                                        onClick={() => reenviarLembrete(l)}
-                                                        title="Enviar lembrete"
-                                                    >
-                                                        <i className="fab fa-whatsapp"></i>
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-sm btn-outline-primary"
-                                                        onClick={() => setShowMensagem(l)}
-                                                        title="Ver mensagem"
-                                                    >
-                                                        <i className="fas fa-eye"></i>
-                                                    </button>
-                                                    <button className="btn btn-sm btn-outline-secondary" title="Marcar confirmado">
-                                                        <i className="fas fa-check"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="border-b border-border bg-muted/50">
+                                            <th className="px-4 py-3 text-left font-semibold">Paciente</th>
+                                            <th className="px-4 py-3 text-left font-semibold">WhatsApp</th>
+                                            <th className="px-4 py-3 text-left font-semibold">Agendamento</th>
+                                            <th className="px-4 py-3 text-left font-semibold">Data/Hora</th>
+                                            <th className="px-4 py-3 text-left font-semibold">Status</th>
+                                            <th className="px-4 py-3 text-left font-semibold">Acoes</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {lembretes.map(l => (
+                                            <tr key={l.id} className="border-b border-border last:border-b-0 hover:bg-muted/30">
+                                                <td className="px-4 py-3 font-semibold">{l.paciente}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className="flex items-center gap-1.5 text-emerald-500">
+                                                        <MessageSquare className="size-4" /> {l.telefone}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span className={cn(
+                                                        'mr-2 inline-block rounded px-2 py-0.5 text-xs font-medium text-white',
+                                                        l.tipo === 'consulta' ? 'bg-primary' : 'bg-cyan-500'
+                                                    )}>
+                                                        {l.tipo}
+                                                    </span>
+                                                    {l.descricao}
+                                                </td>
+                                                <td className="px-4 py-3">{formatDate(l.data)} as {l.hora}</td>
+                                                <td className="px-4 py-3">{getStatusBadge(l.status)}</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex gap-1">
+                                                        <button
+                                                            className="inline-flex items-center justify-center rounded-md bg-green-600 p-1.5 text-white hover:bg-green-700"
+                                                            onClick={() => reenviarLembrete(l)}
+                                                            title="Enviar lembrete"
+                                                        >
+                                                            <MessageSquare className="size-4" />
+                                                        </button>
+                                                        <button
+                                                            className="inline-flex items-center justify-center rounded-md border border-primary p-1.5 text-primary hover:bg-primary hover:text-primary-foreground"
+                                                            onClick={() => setShowMensagem(l)}
+                                                            title="Ver mensagem"
+                                                        >
+                                                            <Eye className="size-4" />
+                                                        </button>
+                                                        <button
+                                                            className="inline-flex items-center justify-center rounded-md border border-border p-1.5 text-foreground hover:bg-muted"
+                                                            title="Marcar confirmado"
+                                                        >
+                                                            <Check className="size-4" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </div>
                 </div>
             )}
 
-            {/* Tab: Histórico */}
+            {/* Tab: Historico */}
             {abaAtiva === 'historico' && (
-                <div className="card">
-                    <div className="card-header" style={{ background: '#f8f9fa' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span><i className="fas fa-history"></i> Histórico de Atendimentos</span>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <input type="date" className="form-control form-control-sm" style={{ width: 'auto' }} />
-                                <input type="date" className="form-control form-control-sm" style={{ width: 'auto' }} />
-                                <select className="form-control form-control-sm" style={{ width: 'auto' }}>
-                                    <option value="">Todos os status</option>
-                                    <option value="realizado">Realizado</option>
-                                    <option value="faltou">Faltou</option>
-                                    <option value="cancelado">Cancelado</option>
-                                </select>
-                            </div>
+                <div className="rounded-xl border border-border bg-card shadow-sm">
+                    <div className="flex items-center justify-between border-b border-border bg-muted px-5 py-3">
+                        <span className="flex items-center gap-2 text-sm font-semibold">
+                            <History className="size-4" /> Historico de Atendimentos
+                        </span>
+                        <div className="flex gap-2">
+                            <input type="date" className="w-auto rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+                            <input type="date" className="w-auto rounded-lg border border-input bg-background px-3 py-1.5 text-sm" />
+                            <select className="w-auto rounded-lg border border-input bg-background px-3 py-1.5 text-sm">
+                                <option value="">Todos os status</option>
+                                <option value="realizado">Realizado</option>
+                                <option value="faltou">Faltou</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
                         </div>
                     </div>
-                    <div className="card-body" style={{ padding: 0 }}>
-                        <table className="table" style={{ marginBottom: 0 }}>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
                             <thead>
-                                <tr>
-                                    <th>Paciente</th>
-                                    <th>WhatsApp</th>
-                                    <th>Agendamento</th>
-                                    <th>Data/Hora</th>
-                                    <th>Status</th>
-                                    <th>Mensagens</th>
-                                    <th>Ações</th>
+                                <tr className="border-b border-border bg-muted/50">
+                                    <th className="px-4 py-3 text-left font-semibold">Paciente</th>
+                                    <th className="px-4 py-3 text-left font-semibold">WhatsApp</th>
+                                    <th className="px-4 py-3 text-left font-semibold">Agendamento</th>
+                                    <th className="px-4 py-3 text-left font-semibold">Data/Hora</th>
+                                    <th className="px-4 py-3 text-left font-semibold">Status</th>
+                                    <th className="px-4 py-3 text-left font-semibold">Mensagens</th>
+                                    <th className="px-4 py-3 text-left font-semibold">Acoes</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {historicoData.map(h => (
-                                    <tr key={h.id}>
-                                        <td><strong>{h.paciente}</strong></td>
-                                        <td>
-                                            <span style={{ color: '#25D366' }}>
-                                                <i className="fab fa-whatsapp"></i> {h.telefone}
+                                    <tr key={h.id} className="border-b border-border last:border-b-0 hover:bg-muted/30">
+                                        <td className="px-4 py-3 font-semibold">{h.paciente}</td>
+                                        <td className="px-4 py-3">
+                                            <span className="flex items-center gap-1.5 text-emerald-500">
+                                                <MessageSquare className="size-4" /> {h.telefone}
                                             </span>
                                         </td>
-                                        <td>
-                                            <span className={`badge ${h.tipo === 'consulta' ? 'bg-primary' : 'bg-info'}`} style={{ marginRight: '0.5rem' }}>
+                                        <td className="px-4 py-3">
+                                            <span className={cn(
+                                                'mr-2 inline-block rounded px-2 py-0.5 text-xs font-medium text-white',
+                                                h.tipo === 'consulta' ? 'bg-primary' : 'bg-cyan-500'
+                                            )}>
                                                 {h.tipo}
                                             </span>
                                             {h.descricao}
                                         </td>
-                                        <td>{formatDate(h.data)} às {h.hora}</td>
-                                        <td>{getStatusBadge(h.status)}</td>
-                                        <td>
-                                            <span className="badge bg-secondary">{h.mensagensEnviadas} msgs</span>
+                                        <td className="px-4 py-3">{formatDate(h.data)} as {h.hora}</td>
+                                        <td className="px-4 py-3">{getStatusBadge(h.status)}</td>
+                                        <td className="px-4 py-3">
+                                            <span className="inline-block rounded bg-gray-500 px-2 py-0.5 text-xs font-medium text-white">
+                                                {h.mensagensEnviadas} msgs
+                                            </span>
                                         </td>
-                                        <td>
-                                            <button className="btn btn-sm btn-outline-primary" title="Ver detalhes">
-                                                <i className="fas fa-info-circle"></i>
+                                        <td className="px-4 py-3">
+                                            <button
+                                                className="inline-flex items-center justify-center rounded-md border border-primary p-1.5 text-primary hover:bg-primary hover:text-primary-foreground"
+                                                title="Ver detalhes"
+                                            >
+                                                <Info className="size-4" />
                                             </button>
                                         </td>
                                     </tr>
@@ -850,42 +875,36 @@ export default function AtendimentoWhatsApp() {
             {/* Modal: Preview Mensagem */}
             {showMensagem && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
                     onClick={() => setShowMensagem(null)}
                 >
-                    <div className="card" style={{ width: '400px', maxWidth: '90%' }} onClick={(e) => e.stopPropagation()}>
-                        <div className="card-header" style={{ background: '#25D366', color: 'white' }}>
-                            <i className="fab fa-whatsapp"></i> Preview da Mensagem
+                    <div
+                        className="w-full max-w-md rounded-xl border border-border bg-card shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center gap-2 rounded-t-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white">
+                            <MessageSquare className="size-4" /> Preview da Mensagem
                         </div>
-                        <div className="card-body">
-                            <div style={{
-                                background: '#dcf8c6',
-                                borderRadius: '8px',
-                                padding: '1rem',
-                                fontFamily: 'system-ui',
-                                fontSize: '0.9rem',
-                                lineHeight: '1.5'
-                            }}>
-                                <p style={{ margin: '0 0 0.5rem' }}>🏥 <strong>SmartHealth - Lembrete de {showMensagem.tipo === 'consulta' ? 'Consulta' : 'Exame'}</strong></p>
-                                <p style={{ margin: '0 0 0.5rem' }}>Olá {showMensagem.paciente}!</p>
-                                <p style={{ margin: '0 0 0.5rem' }}>Lembramos que você tem {showMensagem.tipo === 'consulta' ? 'uma consulta' : 'um exame'} agendado:</p>
-                                <p style={{ margin: '0 0 0.5rem' }}>📋 {showMensagem.descricao}<br />📅 {formatDate(showMensagem.data)}<br />⏰ {showMensagem.hora}</p>
-                                <p style={{ margin: '0' }}>Por favor, confirme sua presença respondendo:<br />✅ <strong>SIM</strong> para confirmar<br />❌ <strong>NÃO</strong> para cancelar</p>
+                        <div className="p-5">
+                            <div className="rounded-lg bg-green-100 p-4 font-sans text-sm leading-relaxed">
+                                <p className="mb-2">🏥 <strong>SmartHealth - Lembrete de {showMensagem.tipo === 'consulta' ? 'Consulta' : 'Exame'}</strong></p>
+                                <p className="mb-2">Ola {showMensagem.paciente}!</p>
+                                <p className="mb-2">Lembramos que voce tem {showMensagem.tipo === 'consulta' ? 'uma consulta' : 'um exame'} agendado:</p>
+                                <p className="mb-2">📋 {showMensagem.descricao}<br />📅 {formatDate(showMensagem.data)}<br />⏰ {showMensagem.hora}</p>
+                                <p className="m-0">Por favor, confirme sua presenca respondendo:<br />✅ <strong>SIM</strong> para confirmar<br />❌ <strong>NAO</strong> para cancelar</p>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                <button className="btn btn-outline-secondary" onClick={() => setShowMensagem(null)}>
+                            <div className="mt-4 flex justify-end gap-2">
+                                <button
+                                    className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                                    onClick={() => setShowMensagem(null)}
+                                >
                                     Fechar
                                 </button>
-                                <button className="btn btn-success" onClick={() => { reenviarLembrete(showMensagem); setShowMensagem(null); }}>
-                                    <i className="fab fa-whatsapp"></i> Enviar
+                                <button
+                                    className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                    onClick={() => { reenviarLembrete(showMensagem); setShowMensagem(null); }}
+                                >
+                                    <MessageSquare className="size-4" /> Enviar
                                 </button>
                             </div>
                         </div>

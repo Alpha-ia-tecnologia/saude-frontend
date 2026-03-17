@@ -50,6 +50,34 @@ import Agendamento from './pages/agendamento/Agendamento';
 // Atendimento
 import AtendimentoWhatsApp from './pages/atendimento/AtendimentoWhatsApp';
 
+// Triagem
+import Triagem from './pages/triagem/Triagem';
+
+// Enfermagem
+import AprazamentoChecagem from './pages/enfermagem/AprazamentoChecagem';
+
+// Farmácia - Novos
+import Reconciliacao from './pages/farmacia/Reconciliacao';
+import Estoque from './pages/farmacia/Estoque';
+
+// Gestão - Novos
+import NPS from './pages/gestao/NPS';
+
+// Administração
+import Usuarios from './pages/admin/Usuarios';
+
+// Comunicação - Novo
+import ChatInterno from './pages/comunicacao/ChatInterno';
+
+// ACS - Agentes Comunitários
+import Territorio from './pages/acs/Territorio';
+import VisitasDomiciliares from './pages/acs/VisitasDomiciliares';
+import LinhasCuidado from './pages/acs/LinhasCuidado';
+
+// Painel de Chamada
+import PainelChamada from './pages/painel/PainelChamada';
+import PainelTV from './pages/painel/PainelTV';
+
 // Componente para proteger rotas
 function ProtectedRoute({ children }) {
     const { isAuthenticated, loading } = useAuth();
@@ -69,6 +97,10 @@ export const router = createBrowserRouter([
     {
         path: '/login',
         element: <Login />
+    },
+    {
+        path: '/painel/tv',
+        element: <PainelTV />
     },
     {
         path: '/',
@@ -122,7 +154,34 @@ export const router = createBrowserRouter([
             { path: 'agendamento', element: <Agendamento /> },
 
             // Atendimento
-            { path: 'atendimento/whatsapp', element: <AtendimentoWhatsApp /> }
+            { path: 'atendimento/whatsapp', element: <AtendimentoWhatsApp /> },
+
+            // Triagem
+            { path: 'triagem', element: <Triagem /> },
+
+            // Enfermagem
+            { path: 'enfermagem/aprazamento', element: <AprazamentoChecagem /> },
+
+            // Farmácia - Novos
+            { path: 'farmacia/reconciliacao', element: <Reconciliacao /> },
+            { path: 'farmacia/estoque', element: <Estoque /> },
+
+            // Gestão - NPS
+            { path: 'gestao/nps', element: <NPS /> },
+
+            // Administração
+            { path: 'admin/usuarios', element: <Usuarios /> },
+
+            // Comunicação - Chat Interno
+            { path: 'comunicacao/chat', element: <ChatInterno /> },
+
+            // ACS - Agentes Comunitários
+            { path: 'acs/territorio', element: <Territorio /> },
+            { path: 'acs/visitas', element: <VisitasDomiciliares /> },
+            { path: 'acs/linhas-cuidado', element: <LinhasCuidado /> },
+
+            // Painel de Chamada
+            { path: 'painel/chamada', element: <PainelChamada /> }
         ]
     }
 ]);

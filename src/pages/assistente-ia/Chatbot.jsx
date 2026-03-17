@@ -52,29 +52,54 @@ Como posso ajudar você hoje?`
     setInput('');
     setLoading(true);
 
-    try {
-      const response = await fetch(`${config.api.ai}/chat`, {
+    const attemptFetch = () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      return fetch(`${config.api.ai}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        signal: controller.signal,
         body: JSON.stringify({
           provider,
           messages: [...messages, userMessage].map(m => ({ role: m.role, content: m.content }))
         })
-      });
-      const data = await response.json();
-      if (data.success) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.response.content, mode: data.mode, model: data.response.model }]);
-      } else {
-        throw new Error(data.error || 'Erro ao processar mensagem');
+      }).finally(() => clearTimeout(timeoutId));
+    };
+
+    const maxRetries = 2;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await attemptFetch();
+        if (!response.ok) {
+          throw new Error(`Servidor retornou status ${response.status} (${response.statusText})`);
+        }
+        const data = await response.json();
+        if (data.success) {
+          setMessages(prev => [...prev, { role: 'assistant', content: data.response.content, mode: data.mode, model: data.response.model }]);
+        } else {
+          throw new Error(data.error || 'Erro ao processar mensagem');
+        }
+        break;
+      } catch (error) {
+        if (attempt < maxRetries) continue;
+        let errorMsg;
+        if (error.name === 'AbortError') {
+          errorMsg = 'Tempo limite de 30 segundos excedido. O servidor demorou muito para responder. Verifique se o backend está rodando e tente novamente.';
+        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          errorMsg = 'Não foi possível conectar ao servidor. Verifique se o backend está rodando em http://localhost:3001 e se não há bloqueio de CORS.';
+        } else {
+          errorMsg = `${error.message}. Verifique se o servidor backend está rodando.`;
+        }
+        setMessages(prev => [...prev, { role: 'assistant', content: `Erro: ${errorMsg}`, isError: true }]);
       }
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: `Erro: ${error.message}. Verifique se o servidor backend está rodando.`, isError: true }]);
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
@@ -160,7 +185,7 @@ Como posso ajudar você hoje?`
               placeholder="Digite sua mensagem..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               rows={1}
               className="min-h-[40px] max-h-32 flex-1 resize-none rounded-lg border border-input bg-white px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />

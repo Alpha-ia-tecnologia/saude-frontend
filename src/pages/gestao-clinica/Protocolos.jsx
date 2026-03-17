@@ -133,6 +133,15 @@ export default function Protocolos() {
     const [filtroStatus, setFiltroStatus] = useState('');
     const [pesquisa, setPesquisa] = useState('');
     const [protocoloSelecionado, setProtocoloSelecionado] = useState(null);
+    const [showIAModal, setShowIAModal] = useState(false);
+    const [showNovoModal, setShowNovoModal] = useState(false);
+    const [novoProtocolo, setNovoProtocolo] = useState({
+        nome: '',
+        categoria: 'Doenças Crônicas',
+        origem: 'Ministério da Saúde',
+        descricao: '',
+        status: 'rascunho',
+    });
 
     // Filter protocols
     const protocolosFiltrados = protocolsData.filter(p => {
@@ -186,13 +195,22 @@ export default function Protocolos() {
                     Protocolos Clínicos
                 </h1>
                 <div className="flex gap-2">
-                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                        onClick={() => setShowIAModal(true)}
+                    >
                         <Bot className="h-4 w-4" /> Análise IA
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                        onClick={() => window.print()}
+                    >
                         <Printer className="h-4 w-4" /> Imprimir
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                        onClick={() => setShowNovoModal(true)}
+                    >
                         <Plus className="h-4 w-4" /> Novo Protocolo
                     </button>
                 </div>
@@ -448,6 +466,186 @@ export default function Protocolos() {
                                 </button>
                                 <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
                                     <Play className="h-4 w-4" /> Aplicar Protocolo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* IA Analysis Modal */}
+            {showIAModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowIAModal(false)}
+                >
+                    <div
+                        className="w-[600px] max-w-[90%] max-h-[80vh] overflow-auto rounded-xl border border-border bg-card shadow-sm"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <span className="flex items-center gap-1.5">
+                                <Bot className="h-4 w-4" /> Análise IA - Protocolos Clínicos
+                            </span>
+                            <button
+                                className="inline-flex items-center rounded-lg p-1 text-white/80 hover:bg-white/20 hover:text-white"
+                                onClick={() => setShowIAModal(false)}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="space-y-4 p-5">
+                            <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+                                <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                                <div>
+                                    <h6 className="mb-1 font-semibold text-foreground">Resumo Geral</h6>
+                                    <p className="text-muted-foreground">
+                                        Análise de adesão aos protocolos: média <strong>78%</strong>. Foram analisados 1.245 atendimentos
+                                        nos últimos 3 meses com variação significativa entre equipes (62% a 91%).
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm">
+                                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                                <div>
+                                    <h6 className="mb-1 font-semibold text-amber-800">Recomendações de Melhoria</h6>
+                                    <ul className="list-inside list-disc space-y-1 text-amber-800">
+                                        <li>
+                                            <strong>Diabetes Mellitus (58%):</strong> Baixa adesão. Sugere-se revisão para simplificação
+                                            de passos frequentemente omitidos e capacitação das equipes.
+                                        </li>
+                                        <li>
+                                            <strong>DPOC e Asma (Rascunho):</strong> Protocolo em rascunho precisa de revisão urgente
+                                            para publicação. Equipes estão sem diretriz padronizada.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3 rounded-lg border border-secondary/20 bg-secondary/5 p-4 text-sm">
+                                <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
+                                <div>
+                                    <h6 className="mb-1 font-semibold text-secondary-dark">Destaques Positivos</h6>
+                                    <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+                                        <li>Pré-Natal de Baixo Risco com 92% de adesão - referência para outras áreas.</li>
+                                        <li>Puericultura (88%) e Hipertensão (85%) acima da meta de 80%.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="flex justify-end pt-2">
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                                    onClick={() => setShowIAModal(false)}
+                                >
+                                    Fechar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Novo Protocolo Modal */}
+            {showNovoModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowNovoModal(false)}
+                >
+                    <div
+                        className="w-[600px] max-w-[90%] max-h-[80vh] overflow-auto rounded-xl border border-border bg-card shadow-sm"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <span className="flex items-center gap-1.5">
+                                <Plus className="h-4 w-4" /> Novo Protocolo
+                            </span>
+                            <button
+                                className="inline-flex items-center rounded-lg p-1 text-white/80 hover:bg-white/20 hover:text-white"
+                                onClick={() => setShowNovoModal(false)}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="space-y-4 p-5">
+                            <div>
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Nome do Protocolo</label>
+                                <input
+                                    type="text"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Ex: Protocolo de Saúde Bucal"
+                                    value={novoProtocolo.nome}
+                                    onChange={(e) => setNovoProtocolo({ ...novoProtocolo, nome: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-foreground">Categoria</label>
+                                    <select
+                                        className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        value={novoProtocolo.categoria}
+                                        onChange={(e) => setNovoProtocolo({ ...novoProtocolo, categoria: e.target.value })}
+                                    >
+                                        {categorias.filter(c => c !== 'Todas').map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-foreground">Origem</label>
+                                    <select
+                                        className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        value={novoProtocolo.origem}
+                                        onChange={(e) => setNovoProtocolo({ ...novoProtocolo, origem: e.target.value })}
+                                    >
+                                        {origens.filter(o => o !== 'Todas').map(org => (
+                                            <option key={org} value={org}>{org}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Descrição</label>
+                                <textarea
+                                    className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    rows={4}
+                                    placeholder="Descreva o protocolo clínico..."
+                                    value={novoProtocolo.descricao}
+                                    onChange={(e) => setNovoProtocolo({ ...novoProtocolo, descricao: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Status</label>
+                                <select
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    value={novoProtocolo.status}
+                                    onChange={(e) => setNovoProtocolo({ ...novoProtocolo, status: e.target.value })}
+                                >
+                                    {statusOptions.filter(s => s.value).map(s => (
+                                        <option key={s.value} value={s.value}>{s.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                    onClick={() => setShowNovoModal(false)}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                                    onClick={() => {
+                                        alert('Protocolo criado com sucesso!');
+                                        setShowNovoModal(false);
+                                        setNovoProtocolo({
+                                            nome: '',
+                                            categoria: 'Doenças Crônicas',
+                                            origem: 'Ministério da Saúde',
+                                            descricao: '',
+                                            status: 'rascunho',
+                                        });
+                                    }}
+                                >
+                                    <CheckCircle className="h-4 w-4" /> Salvar Protocolo
                                 </button>
                             </div>
                         </div>

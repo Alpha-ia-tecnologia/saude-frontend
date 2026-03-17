@@ -141,6 +141,7 @@ export default function Prescricoes() {
     const [novaPrescricao, setNovaPrescricao] = useState(novaPrescricaoInicial);
     const [prescricoes, setPrescricoes] = useState(prescricoesData);
     const [focusedMedIdx, setFocusedMedIdx] = useState(null);
+    const [filtroPeriodo, setFiltroPeriodo] = useState('');
 
     // Filter prescriptions
     const prescricoesFiltradas = prescricoes.filter(p => {
@@ -149,8 +150,50 @@ export default function Prescricoes() {
             p.paciente.toLowerCase().includes(pesquisa.toLowerCase()) ||
             p.numero.toLowerCase().includes(pesquisa.toLowerCase()) ||
             p.cns.includes(pesquisa);
-        return matchStatus && matchPesquisa;
+
+        let matchPeriodo = true;
+        if (filtroPeriodo) {
+            const dataPrescrição = new Date(p.data);
+            const hoje = new Date();
+            const diffDias = Math.floor((hoje - dataPrescrição) / (1000 * 60 * 60 * 24));
+            if (filtroPeriodo === '7') matchPeriodo = diffDias <= 7;
+            else if (filtroPeriodo === '30') matchPeriodo = diffDias <= 30;
+            else if (filtroPeriodo === '90') matchPeriodo = diffDias <= 90;
+        }
+
+        return matchStatus && matchPesquisa && matchPeriodo;
     });
+
+    // Export prescriptions to CSV
+    const exportarCSV = () => {
+        const headers = ['Numero', 'Paciente', 'CPF', 'CNS', 'Medico', 'CRM', 'Data', 'Validade', 'Status', 'Medicamentos'];
+        const rows = prescricoesFiltradas.map(p => [
+            p.numero,
+            p.paciente,
+            p.cpf,
+            p.cns,
+            p.medico,
+            p.crm,
+            p.data,
+            p.validade,
+            p.status,
+            p.medicamentos.map(m => `${m.nome} (${m.quantidade}un - ${m.posologia})`).join('; ')
+        ]);
+
+        const csvContent = [headers, ...rows]
+            .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `prescricoes_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
 
     const getStatusBadge = (status) => {
         const config = {
@@ -189,10 +232,16 @@ export default function Prescricoes() {
                     Prescrições
                 </h1>
                 <div className="flex gap-2">
-                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                        onClick={exportarCSV}
+                    >
                         <FileOutput className="h-4 w-4" /> Exportar
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                        onClick={() => window.print()}
+                    >
                         <Printer className="h-4 w-4" /> Imprimir
                     </button>
                     <button
@@ -241,7 +290,10 @@ export default function Prescricoes() {
             {/* Alert */}
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
                 <strong className="inline-flex items-center gap-1"><AlertTriangle className="h-4 w-4" /> Atenção:</strong> {estatisticas.pendentes} prescrições aguardando dispensação.
-                <button className="ml-4 inline-flex items-center rounded-lg bg-amber-200 px-3 py-1 text-xs font-medium text-amber-900 hover:bg-amber-300">
+                <button
+                    className="ml-4 inline-flex items-center rounded-lg bg-amber-200 px-3 py-1 text-xs font-medium text-amber-900 hover:bg-amber-300"
+                    onClick={() => setFiltroStatus('pendente')}
+                >
                     Ver Pendentes
                 </button>
             </div>
@@ -267,11 +319,15 @@ export default function Prescricoes() {
                         </div>
                         <div>
                             <label className="mb-1 block text-sm font-medium text-foreground">Período</label>
-                            <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                                <option>Últimos 7 dias</option>
-                                <option>Últimos 30 dias</option>
-                                <option>Últimos 3 meses</option>
-                                <option>Todos</option>
+                            <select
+                                className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                value={filtroPeriodo}
+                                onChange={(e) => setFiltroPeriodo(e.target.value)}
+                            >
+                                <option value="">Todos</option>
+                                <option value="7">Últimos 7 dias</option>
+                                <option value="30">Últimos 30 dias</option>
+                                <option value="90">Últimos 3 meses</option>
                             </select>
                         </div>
                         <div>
@@ -352,7 +408,11 @@ export default function Prescricoes() {
                                                 <HandHelping className="h-3.5 w-3.5" />
                                             </button>
                                         )}
-                                        <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted" title="Imprimir">
+                                        <button
+                                            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted"
+                                            title="Imprimir"
+                                            onClick={() => window.print()}
+                                        >
                                             <Printer className="h-3.5 w-3.5" />
                                         </button>
                                     </div>
@@ -442,7 +502,10 @@ export default function Prescricoes() {
                             </table>
 
                             <div className="mt-4 flex justify-end gap-2">
-                                <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                    onClick={() => window.print()}
+                                >
                                     <Printer className="h-4 w-4" /> Imprimir
                                 </button>
                                 {(prescricaoSelecionada.status === 'pendente' || prescricaoSelecionada.status === 'parcial') && (

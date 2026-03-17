@@ -125,6 +125,48 @@ export default function CondicoesCronicas() {
     const [filtroStatus, setFiltroStatus] = useState('');
     const [pesquisa, setPesquisa] = useState('');
     const [pacienteSelecionado, setPacienteSelecionado] = useState(null);
+    const [showCadastroModal, setShowCadastroModal] = useState(false);
+    const [novoPaciente, setNovoPaciente] = useState({
+        nome: '',
+        idade: '',
+        cns: '',
+        condicoes: [],
+        risco: 'baixo',
+        status: 'controlado',
+    });
+
+    const exportarCSV = () => {
+        const headers = ['Nome', 'Idade', 'CNS', 'Condições', 'Risco', 'Último Atendimento', 'Próximo Retorno', 'Status'];
+        const rows = pacientesCronicos.map(p => [
+            p.nome,
+            p.idade,
+            p.cns,
+            p.condicoes.join('; '),
+            p.risco,
+            p.ultimoAtendimento,
+            p.proximoRetorno,
+            p.status,
+        ]);
+        const csvContent = [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'pacientes_cronicos.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    const toggleCondicao = (condicao) => {
+        setNovoPaciente(prev => ({
+            ...prev,
+            condicoes: prev.condicoes.includes(condicao)
+                ? prev.condicoes.filter(c => c !== condicao)
+                : [...prev.condicoes, condicao],
+        }));
+    };
 
     // Filter patients
     const pacientesFiltrados = pacientesCronicos.filter(p => {
@@ -187,10 +229,16 @@ export default function CondicoesCronicas() {
                     Condições Crônicas
                 </h1>
                 <div className="flex gap-2">
-                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                        onClick={exportarCSV}
+                    >
                         <FileOutput className="h-4 w-4" /> Exportar
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                        onClick={() => setShowCadastroModal(true)}
+                    >
                         <Plus className="h-4 w-4" /> Cadastrar Paciente
                     </button>
                 </div>
@@ -560,6 +608,140 @@ export default function CondicoesCronicas() {
                                 </button>
                                 <button className="inline-flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-2 text-sm font-medium text-white hover:bg-secondary-dark">
                                     <ClipboardPlus className="h-4 w-4" /> Novo Atendimento
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Cadastrar Paciente Modal */}
+            {showCadastroModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowCadastroModal(false)}
+                >
+                    <div
+                        className="w-[600px] max-w-[90%] max-h-[80vh] overflow-auto rounded-xl border border-border bg-card shadow-sm"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <span className="flex items-center gap-1.5">
+                                <Plus className="h-4 w-4" /> Cadastrar Paciente
+                            </span>
+                            <button
+                                className="inline-flex items-center rounded-lg p-1 text-white/80 hover:bg-white/20 hover:text-white"
+                                onClick={() => setShowCadastroModal(false)}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="space-y-4 p-5">
+                            <div>
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Nome Completo</label>
+                                <input
+                                    type="text"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Nome do paciente"
+                                    value={novoPaciente.nome}
+                                    onChange={(e) => setNovoPaciente({ ...novoPaciente, nome: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-foreground">Idade</label>
+                                    <input
+                                        type="number"
+                                        className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        placeholder="Ex: 55"
+                                        value={novoPaciente.idade}
+                                        onChange={(e) => setNovoPaciente({ ...novoPaciente, idade: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-foreground">CNS</label>
+                                    <input
+                                        type="text"
+                                        className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        placeholder="000.0000.0000.0000"
+                                        value={novoPaciente.cns}
+                                        onChange={(e) => setNovoPaciente({ ...novoPaciente, cns: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Condições</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {condicoesFiltro.filter(c => c !== 'Todas').map(condicao => (
+                                        <label
+                                            key={condicao}
+                                            className={cn(
+                                                'inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
+                                                novoPaciente.condicoes.includes(condicao)
+                                                    ? 'border-primary bg-primary/10 text-primary'
+                                                    : 'border-border text-muted-foreground hover:bg-muted'
+                                            )}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only"
+                                                checked={novoPaciente.condicoes.includes(condicao)}
+                                                onChange={() => toggleCondicao(condicao)}
+                                            />
+                                            {condicao}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-foreground">Risco</label>
+                                    <select
+                                        className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        value={novoPaciente.risco}
+                                        onChange={(e) => setNovoPaciente({ ...novoPaciente, risco: e.target.value })}
+                                    >
+                                        <option value="baixo">Baixo</option>
+                                        <option value="medio">Médio</option>
+                                        <option value="alto">Alto</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-foreground">Status</label>
+                                    <select
+                                        className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        value={novoPaciente.status}
+                                        onChange={(e) => setNovoPaciente({ ...novoPaciente, status: e.target.value })}
+                                    >
+                                        <option value="controlado">Controlado</option>
+                                        <option value="atencao">Atenção</option>
+                                        <option value="critico">Crítico</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                    onClick={() => setShowCadastroModal(false)}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                                    onClick={() => {
+                                        alert('Paciente cadastrado com sucesso!');
+                                        setShowCadastroModal(false);
+                                        setNovoPaciente({
+                                            nome: '',
+                                            idade: '',
+                                            cns: '',
+                                            condicoes: [],
+                                            risco: 'baixo',
+                                            status: 'controlado',
+                                        });
+                                    }}
+                                >
+                                    <CheckCircle className="h-4 w-4" /> Salvar Paciente
                                 </button>
                             </div>
                         </div>

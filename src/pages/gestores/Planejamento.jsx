@@ -111,6 +111,10 @@ function getBorderColor(prioridade) {
 export default function Planejamento() {
     const [abaAtiva, setAbaAtiva] = useState('objetivos');
     const [objetivoSelecionado, setObjetivoSelecionado] = useState(null);
+    const [showNovoModal, setShowNovoModal] = useState(false);
+    const [novoObjetivo, setNovoObjetivo] = useState({
+        titulo: '', descricao: '', prazo: '', responsavel: '', prioridade: 'media', status: 'planejado'
+    });
 
     const getStatusBadge = (status) => {
         const s = statusConfig[status] || statusConfig.planejado;
@@ -144,6 +148,37 @@ export default function Planejamento() {
 
     const resumo = calcularResumo();
 
+    const exportarPMS = () => {
+        const linhas = [
+            ['Titulo', 'Descricao', 'Progresso (%)', 'Prazo', 'Status', 'Responsavel', 'Prioridade']
+        ];
+        objetivosEstrategicos.forEach(obj => {
+            linhas.push([
+                obj.titulo,
+                obj.descricao,
+                obj.progresso,
+                obj.prazo,
+                statusConfig[obj.status]?.label || obj.status,
+                obj.responsavel,
+                prioridadeConfig[obj.prioridade]?.label || obj.prioridade
+            ]);
+        });
+        const csv = linhas.map(l => l.map(c => `"${c}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'plano_municipal_saude.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleSalvarObjetivo = () => {
+        alert('Objetivo criado com sucesso!');
+        setShowNovoModal(false);
+        setNovoObjetivo({ titulo: '', descricao: '', prazo: '', responsavel: '', prioridade: 'media', status: 'planejado' });
+    };
+
     const tabs = [
         { key: 'objetivos', label: 'Objetivos Estratégicos', icon: Target },
         { key: 'acoes', label: 'Planos de Ação', icon: ListChecks },
@@ -163,10 +198,16 @@ export default function Planejamento() {
                     <p className="mt-1 text-sm text-muted-foreground">Plano Municipal de Saúde 2022-2025</p>
                 </div>
                 <div className="flex gap-2">
-                    <button className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5">
+                    <button
+                        className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+                        onClick={exportarPMS}
+                    >
                         <FileText className="size-4" /> Exportar PMS
                     </button>
-                    <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-dark">
+                    <button
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
+                        onClick={() => setShowNovoModal(true)}
+                    >
                         <Plus className="size-4" /> Novo Objetivo
                     </button>
                 </div>
@@ -427,6 +468,115 @@ export default function Planejamento() {
                                     </div>
                                 );
                             })}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Novo Objetivo Modal */}
+            {showNovoModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowNovoModal(false)}
+                >
+                    <div
+                        className="w-full max-w-lg rounded-xl border border-border bg-card shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-primary-foreground">
+                            <span className="flex items-center gap-2 text-sm font-semibold">
+                                <Plus className="size-4" /> Novo Objetivo Estratégico
+                            </span>
+                            <button
+                                className="rounded-lg bg-white/20 p-1.5 text-primary-foreground transition-colors hover:bg-white/30"
+                                onClick={() => setShowNovoModal(false)}
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+                        <div className="p-5 space-y-4">
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-foreground">Título</label>
+                                <input
+                                    type="text"
+                                    className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                    placeholder="Título do objetivo"
+                                    value={novoObjetivo.titulo}
+                                    onChange={(e) => setNovoObjetivo({ ...novoObjetivo, titulo: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-foreground">Descrição</label>
+                                <textarea
+                                    className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                    rows={3}
+                                    placeholder="Descreva o objetivo estratégico"
+                                    value={novoObjetivo.descricao}
+                                    onChange={(e) => setNovoObjetivo({ ...novoObjetivo, descricao: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Prazo</label>
+                                    <input
+                                        type="date"
+                                        className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                        value={novoObjetivo.prazo}
+                                        onChange={(e) => setNovoObjetivo({ ...novoObjetivo, prazo: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Responsável</label>
+                                    <input
+                                        type="text"
+                                        className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                        placeholder="Nome do responsável"
+                                        value={novoObjetivo.responsavel}
+                                        onChange={(e) => setNovoObjetivo({ ...novoObjetivo, responsavel: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Prioridade</label>
+                                    <select
+                                        className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                        value={novoObjetivo.prioridade}
+                                        onChange={(e) => setNovoObjetivo({ ...novoObjetivo, prioridade: e.target.value })}
+                                    >
+                                        <option value="alta">Alta</option>
+                                        <option value="media">Média</option>
+                                        <option value="baixa">Baixa</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Status</label>
+                                    <select
+                                        className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                        value={novoObjetivo.status}
+                                        onChange={(e) => setNovoObjetivo({ ...novoObjetivo, status: e.target.value })}
+                                    >
+                                        <option value="planejado">Planejado</option>
+                                        <option value="em_andamento">Em Andamento</option>
+                                        <option value="concluido">Concluído</option>
+                                        <option value="atrasado">Atrasado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button
+                                    className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                    onClick={() => setShowNovoModal(false)}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
+                                    onClick={handleSalvarObjetivo}
+                                >
+                                    <CheckCircle2 className="size-4" /> Salvar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

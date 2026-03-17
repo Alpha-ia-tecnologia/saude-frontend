@@ -93,6 +93,33 @@ export default function RecursosHumanos() {
     const [pesquisa, setPesquisa] = useState('');
     const [funcionarioSelecionado, setFuncionarioSelecionado] = useState(null);
     const [abaAtiva, setAbaAtiva] = useState('funcionarios');
+    const [showNovoModal, setShowNovoModal] = useState(false);
+    const [novoFuncionario, setNovoFuncionario] = useState({
+        nome: '', cargo: 'Médico', unidade: 'UBS Centro', cargaHoraria: '', vinculo: 'Efetivo', admissao: ''
+    });
+
+    const exportarFuncionarios = () => {
+        const linhas = [
+            ['Nome', 'Cargo', 'Unidade', 'Status', 'Carga Horaria', 'Vinculo', 'Admissao']
+        ];
+        funcionariosData.forEach(f => {
+            linhas.push([f.nome, f.cargo, f.unidade, f.status, f.cargaHoraria + 'h', f.vinculo, f.admissao]);
+        });
+        const csv = linhas.map(l => l.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'recursos_humanos.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleSalvarFuncionario = () => {
+        alert('Funcionário cadastrado com sucesso!');
+        setShowNovoModal(false);
+        setNovoFuncionario({ nome: '', cargo: 'Médico', unidade: 'UBS Centro', cargaHoraria: '', vinculo: 'Efetivo', admissao: '' });
+    };
 
     const funcionariosFiltrados = funcionariosData.filter(f => {
         const matchStatus = !filtroStatus || f.status === filtroStatus;
@@ -144,10 +171,16 @@ export default function RecursosHumanos() {
                     <p className="mt-1 text-sm text-muted-foreground">Gestão de pessoal e capacitação</p>
                 </div>
                 <div className="flex gap-2">
-                    <button className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5">
+                    <button
+                        className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+                        onClick={exportarFuncionarios}
+                    >
                         <FileText className="size-4" /> Exportar
                     </button>
-                    <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-dark">
+                    <button
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
+                        onClick={() => setShowNovoModal(true)}
+                    >
                         <Plus className="size-4" /> Novo Funcionário
                     </button>
                 </div>
@@ -423,6 +456,120 @@ export default function RecursosHumanos() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Novo Funcionário Modal */}
+            {showNovoModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowNovoModal(false)}
+                >
+                    <div
+                        className="w-full max-w-lg rounded-xl border border-border bg-card shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-primary-foreground">
+                            <span className="flex items-center gap-2 text-sm font-semibold">
+                                <Plus className="size-4" /> Novo Funcionário
+                            </span>
+                            <button
+                                className="rounded-md bg-white/20 p-1 transition-colors hover:bg-white/30"
+                                onClick={() => setShowNovoModal(false)}
+                            >
+                                <X className="size-4" />
+                            </button>
+                        </div>
+                        <div className="p-5 space-y-4">
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-foreground">Nome</label>
+                                <input
+                                    type="text"
+                                    className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                    placeholder="Nome completo"
+                                    value={novoFuncionario.nome}
+                                    onChange={(e) => setNovoFuncionario({ ...novoFuncionario, nome: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Cargo</label>
+                                    <select
+                                        className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                        value={novoFuncionario.cargo}
+                                        onChange={(e) => setNovoFuncionario({ ...novoFuncionario, cargo: e.target.value })}
+                                    >
+                                        <option value="Médico">Médico</option>
+                                        <option value="Enfermeiro">Enfermeiro</option>
+                                        <option value="Técnico de Enfermagem">Técnico de Enfermagem</option>
+                                        <option value="Dentista">Dentista</option>
+                                        <option value="ACS">ACS</option>
+                                        <option value="Farmacêutico">Farmacêutico</option>
+                                        <option value="Psicólogo">Psicólogo</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Unidade</label>
+                                    <select
+                                        className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                        value={novoFuncionario.unidade}
+                                        onChange={(e) => setNovoFuncionario({ ...novoFuncionario, unidade: e.target.value })}
+                                    >
+                                        <option value="UBS Centro">UBS Centro</option>
+                                        <option value="UBS Norte">UBS Norte</option>
+                                        <option value="UBS Sul">UBS Sul</option>
+                                        <option value="NASF">NASF</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Carga Horária (h/semana)</label>
+                                    <input
+                                        type="number"
+                                        className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                        placeholder="40"
+                                        value={novoFuncionario.cargaHoraria}
+                                        onChange={(e) => setNovoFuncionario({ ...novoFuncionario, cargaHoraria: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-foreground">Vínculo</label>
+                                    <select
+                                        className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                        value={novoFuncionario.vinculo}
+                                        onChange={(e) => setNovoFuncionario({ ...novoFuncionario, vinculo: e.target.value })}
+                                    >
+                                        <option value="Efetivo">Efetivo</option>
+                                        <option value="Contratado">Contratado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-foreground">Data de Admissão</label>
+                                <input
+                                    type="date"
+                                    className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                    value={novoFuncionario.admissao}
+                                    onChange={(e) => setNovoFuncionario({ ...novoFuncionario, admissao: e.target.value })}
+                                />
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button
+                                    className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                                    onClick={() => setShowNovoModal(false)}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
+                                    onClick={handleSalvarFuncionario}
+                                >
+                                    <CheckCircle className="size-4" /> Salvar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

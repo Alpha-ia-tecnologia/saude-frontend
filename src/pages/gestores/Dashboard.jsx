@@ -52,6 +52,35 @@ const barColors = ['bg-primary', 'bg-secondary', 'bg-accent', 'bg-cyan-500', 'bg
 
 export default function Dashboard() {
     const [periodoSelecionado, setPeriodoSelecionado] = useState('mes');
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const exportarDashboard = () => {
+        const linhas = [
+            ['=== KPIs Executivos ==='],
+            ['Indicador', 'Valor', 'Meta', 'Unidade'],
+            ['Execucao Orcamentaria', kpisExecutivos.orcamentoExecutado.valor, kpisExecutivos.orcamentoExecutado.meta, kpisExecutivos.orcamentoExecutado.unidade],
+            ['Satisfacao do Usuario', kpisExecutivos.satisfacaoUsuario.valor, kpisExecutivos.satisfacaoUsuario.meta, kpisExecutivos.satisfacaoUsuario.unidade],
+            ['Cobertura Vacinal', kpisExecutivos.coberturaVacinal.valor, kpisExecutivos.coberturaVacinal.meta, kpisExecutivos.coberturaVacinal.unidade],
+            ['Tempo Medio de Espera', kpisExecutivos.tempoMedioEspera.valor, kpisExecutivos.tempoMedioEspera.meta, kpisExecutivos.tempoMedioEspera.unidade],
+            [],
+            ['=== Desempenho por Unidade ==='],
+            ['Unidade', 'Atendimentos', 'Meta', 'Satisfacao', 'Cobertura'],
+            ...desempenhoUnidades.map(u => [u.nome, u.atendimentos, u.meta, u.satisfacao, u.cobertura])
+        ];
+        const csv = linhas.map(l => l.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'dashboard_gerencial.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleRefresh = () => {
+        setIsRefreshing(true);
+        setTimeout(() => setIsRefreshing(false), 1500);
+    };
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -93,11 +122,18 @@ export default function Dashboard() {
                         <option value="trimestre">Trimestre</option>
                         <option value="ano">Este Ano</option>
                     </select>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                        onClick={exportarDashboard}
+                    >
                         <FileText className="h-4 w-4" /> Exportar
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
-                        <RefreshCw className="h-4 w-4" /> Atualizar
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                    >
+                        <RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} /> Atualizar
                     </button>
                 </div>
             </div>

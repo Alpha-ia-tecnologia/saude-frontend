@@ -100,6 +100,34 @@ export default function Indicadores() {
 
     const resumo = calcularResumo();
 
+    const exportarIndicadores = () => {
+        const linhas = [
+            ['Categoria', 'Indicador', 'Valor', 'Meta', 'Unidade', 'Tendencia', 'Alcance (%)']
+        ];
+        Object.entries(indicadoresData).forEach(([categoria, indicadores]) => {
+            const catNome = categorias.find(c => c.id === categoria)?.nome || categoria;
+            indicadores.forEach(ind => {
+                linhas.push([
+                    catNome,
+                    ind.nome,
+                    ind.valor,
+                    ind.meta,
+                    ind.unidade,
+                    ind.tendencia,
+                    ((ind.valor / ind.meta) * 100).toFixed(1)
+                ]);
+            });
+        });
+        const csv = linhas.map(l => l.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'indicadores_desempenho.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -122,7 +150,10 @@ export default function Indicadores() {
                         <option value="semestre">Semestre</option>
                         <option value="ano">Este Ano</option>
                     </select>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                        onClick={exportarIndicadores}
+                    >
                         <FileSpreadsheet className="h-4 w-4" /> Exportar
                     </button>
                 </div>

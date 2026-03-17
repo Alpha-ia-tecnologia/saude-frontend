@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import {
   User, CreditCard, Cake, Phone, BadgeCheck, Pencil,
-  Clock, History, FlaskConical, ClipboardList, Syringe, FolderOpen
+  Clock, History, FlaskConical, ClipboardList, Syringe, FolderOpen, X, Save
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const tabs = [
   { id: 'resumo', label: 'Resumo', icon: User },
-  { id: 'historico', label: 'Histórico', icon: History },
+  { id: 'historico', label: 'Historico', icon: History },
   { id: 'exames', label: 'Exames', icon: FlaskConical },
-  { id: 'prescricoes', label: 'Prescrições', icon: ClipboardList },
+  { id: 'prescricoes', label: 'Prescricoes', icon: ClipboardList },
   { id: 'vacinas', label: 'Vacinas', icon: Syringe }
 ];
 
@@ -23,20 +23,31 @@ const patientData = {
 };
 
 const historicoItems = [
-  { data: '10/01/2026', tipo: 'Consulta', descricao: 'Consulta de rotina - Hipertensão controlada', medico: 'Dr. Roberto Almeida' },
-  { data: '15/12/2025', tipo: 'Exame', descricao: 'Hemograma completo - Resultados normais', medico: 'Laboratório Central' },
-  { data: '01/11/2025', tipo: 'Consulta', descricao: 'Retorno - Ajuste de medicação', medico: 'Dr. Roberto Almeida' }
+  { data: '10/01/2026', tipo: 'Consulta', descricao: 'Consulta de rotina - Hipertensao controlada', medico: 'Dr. Roberto Almeida' },
+  { data: '15/12/2025', tipo: 'Exame', descricao: 'Hemograma completo - Resultados normais', medico: 'Laboratorio Central' },
+  { data: '01/11/2025', tipo: 'Consulta', descricao: 'Retorno - Ajuste de medicacao', medico: 'Dr. Roberto Almeida' }
 ];
 
 export function Prontuario() {
   const [activeTab, setActiveTab] = useState('resumo');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState(patientData);
+
+  const handleEditChange = (e) => {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSave = () => {
+    alert('Dados atualizados com sucesso!');
+    setShowEditModal(false);
+  };
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Prontuário Eletrônico</h1>
+        <h1 className="text-2xl font-bold text-foreground">Prontuario Eletronico</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Visualize e gerencie o prontuário do paciente
+          Visualize e gerencie o prontuario do paciente
         </p>
       </div>
 
@@ -63,7 +74,10 @@ export function Prontuario() {
               </span>
             </div>
           </div>
-          <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">
+          <button
+            onClick={() => setShowEditModal(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark"
+          >
             <Pencil className="size-4" /> Editar
           </button>
         </div>
@@ -97,15 +111,15 @@ export function Prontuario() {
             <h3 className="mb-4 text-lg font-semibold text-foreground">Resumo do Paciente</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                <p className="text-sm font-semibold text-primary">Condições Crônicas</p>
-                <p className="mt-1 text-sm text-foreground">Hipertensão Arterial, Diabetes Tipo 2</p>
+                <p className="text-sm font-semibold text-primary">Condicoes Cronicas</p>
+                <p className="mt-1 text-sm text-foreground">Hipertensao Arterial, Diabetes Tipo 2</p>
               </div>
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                 <p className="text-sm font-semibold text-amber-700">Alergias</p>
                 <p className="mt-1 text-sm text-foreground">Dipirona, Penicilina</p>
               </div>
               <div className="rounded-lg border border-secondary/20 bg-secondary/5 p-4">
-                <p className="text-sm font-semibold text-secondary-dark">Última Consulta</p>
+                <p className="text-sm font-semibold text-secondary-dark">Ultima Consulta</p>
                 <p className="mt-1 text-sm text-foreground">10/01/2026 - Dr. Roberto</p>
               </div>
             </div>
@@ -114,7 +128,7 @@ export function Prontuario() {
 
         {activeTab === 'historico' && (
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-foreground">Histórico de Atendimentos</h3>
+            <h3 className="mb-4 text-lg font-semibold text-foreground">Historico de Atendimentos</h3>
             <div className="relative space-y-6 pl-6 before:absolute before:left-[3px] before:top-2 before:h-[calc(100%-16px)] before:w-0.5 before:bg-border">
               {historicoItems.map((item, index) => (
                 <div key={index} className="relative">
@@ -136,10 +150,86 @@ export function Prontuario() {
         {(activeTab === 'exames' || activeTab === 'prescricoes' || activeTab === 'vacinas') && (
           <div className="py-8 text-center">
             <FolderOpen className="mx-auto mb-3 size-12 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">Nenhum registro encontrado nesta seção.</p>
+            <p className="text-sm text-muted-foreground">Nenhum registro encontrado nesta secao.</p>
           </div>
         )}
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowEditModal(false)}>
+          <div className="mx-4 w-full max-w-lg rounded-xl border border-border bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-5 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-foreground">Editar Dados do Paciente</h3>
+              <button onClick={() => setShowEditModal(false)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Nome Completo</label>
+                <input
+                  type="text"
+                  name="nome"
+                  value={editData.nome}
+                  onChange={handleEditChange}
+                  className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">CPF</label>
+                  <input
+                    type="text"
+                    name="cpf"
+                    value={editData.cpf}
+                    onChange={handleEditChange}
+                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">Data de Nascimento</label>
+                  <input
+                    type="text"
+                    name="dataNascimento"
+                    value={editData.dataNascimento}
+                    onChange={handleEditChange}
+                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Telefone</label>
+                <input
+                  type="text"
+                  name="telefone"
+                  value={editData.telefone}
+                  onChange={handleEditChange}
+                  className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
+              >
+                <X className="size-4" />
+                Cancelar
+              </button>
+              <button
+                onClick={handleEditSave}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-dark"
+              >
+                <Save className="size-4" />
+                Salvar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

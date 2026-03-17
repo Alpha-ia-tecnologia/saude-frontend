@@ -217,6 +217,73 @@ export default function DecisaoClinica() {
     }
   };
 
+  const exportarAnalise = () => {
+    const symptomEntries = Object.values(selectedSymptoms);
+    const lines = [];
+    lines.push('Relatório de Decisão Clínica');
+    lines.push(`Data: ${new Date().toLocaleDateString('pt-BR')}`);
+    lines.push('');
+    lines.push(`Paciente: ${samplePatient.nome}`);
+    lines.push(`CPF: ${samplePatient.cpf}`);
+    lines.push(`CNS: ${samplePatient.cns}`);
+    lines.push(`Idade: ${samplePatient.idade} anos | Sexo: ${samplePatient.sexo}`);
+    lines.push('');
+    lines.push('--- Sintomas Selecionados ---');
+    if (symptomEntries.length > 0) {
+      symptomEntries.forEach(s => {
+        lines.push(`- ${s.label} | Intensidade: ${s.intensity}/10 (${getIntensityLabel(s.intensity)}) | Duração: ${s.duration || 'Não informada'}`);
+      });
+    } else {
+      lines.push('Nenhum sintoma selecionado.');
+    }
+    lines.push('');
+    lines.push('--- Diagnósticos Sugeridos ---');
+    if (analysisResult?.possibleDiagnoses?.length > 0) {
+      analysisResult.possibleDiagnoses.forEach(d => {
+        lines.push(`- ${d.name} (${d.probability}%) - ${d.matchingSymptoms} sintoma(s)`);
+      });
+    } else {
+      lines.push('Nenhuma análise realizada.');
+    }
+    if (selectedDiagnosis) {
+      lines.push('');
+      lines.push(`--- Diagnóstico Selecionado: ${selectedDiagnosis.name} ---`);
+    }
+    if (recommendations) {
+      if (recommendations.treatments?.length > 0) {
+        lines.push('');
+        lines.push('--- Tratamentos ---');
+        recommendations.treatments.forEach(t => lines.push(`- ${t}`));
+      }
+      if (recommendations.medications?.length > 0) {
+        lines.push('');
+        lines.push('--- Medicamentos ---');
+        recommendations.medications.forEach(m => lines.push(`- ${m}`));
+      }
+      if (recommendations.warnings?.length > 0) {
+        lines.push('');
+        lines.push('--- Alertas ---');
+        recommendations.warnings.forEach(w => lines.push(`- ${w}`));
+      }
+    }
+    if (analysisResult?.recommendedExams?.length > 0) {
+      lines.push('');
+      lines.push('--- Exames Recomendados ---');
+      analysisResult.recommendedExams.forEach(e => lines.push(`- ${e}`));
+    }
+
+    const content = lines.join('\n');
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `decisao-clinica-${samplePatient.nome.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const inputClass = 'h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20';
 
   return (
@@ -228,10 +295,10 @@ export default function DecisaoClinica() {
           Apoio à Decisão Clínica
         </h1>
         <div className="flex gap-2">
-          <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+          <button onClick={exportarAnalise} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
             <FileOutput className="size-4" /> Exportar
           </button>
-          <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+          <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
             <Printer className="size-4" /> Imprimir
           </button>
         </div>
@@ -501,7 +568,7 @@ export default function DecisaoClinica() {
                         <tr key={i} className="hover:bg-muted/50">
                           <td className="flex items-center gap-2 px-4 py-3"><Pill className="size-4 text-accent" /> {med}</td>
                           <td className="px-4 py-3">
-                            <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/5">
+                            <button onClick={() => alert(`Prescrição de ${med} adicionada. Acesse Farmácia > Prescrições para finalizar.`)} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/5">
                               <ClipboardList className="size-3" /> Prescrever
                             </button>
                           </td>

@@ -105,11 +105,53 @@ function KpiCard({ title, value, period, variation, variationLabel, icon: Icon, 
     );
 }
 
+function exportarDashboard() {
+    let csv = 'Secao,Campo,Valor\n';
+
+    // KPIs
+    csv += `KPI,Atendimentos - Valor,${kpisData.atendimentos.valor}\n`;
+    csv += `KPI,Atendimentos - Variacao,${kpisData.atendimentos.variacao}%\n`;
+    csv += `KPI,Pacientes - Valor,${kpisData.pacientes.valor}\n`;
+    csv += `KPI,Pacientes - Variacao,${kpisData.pacientes.variacao}%\n`;
+    csv += `KPI,Consultas Hoje - Valor,${kpisData.consultas.valor}\n`;
+    csv += `KPI,Consultas Hoje - Variacao,${kpisData.consultas.variacao}%\n`;
+    csv += `KPI,Satisfacao - Valor,${kpisData.satisfacao.valor}\n`;
+    csv += `KPI,Satisfacao - Variacao,${kpisData.satisfacao.variacao}\n`;
+
+    // Atendimentos Diarios
+    csv += '\nDia,Consultas,Procedimentos,Urgencias\n';
+    atendimentosDiarios.forEach(d => {
+        csv += `${d.dia},${d.consultas},${d.procedimentos},${d.urgencias}\n`;
+    });
+
+    // Doencas Mais Frequentes
+    csv += '\nCID,Doenca,Casos,Percentual\n';
+    doencasMaisFrequentes.forEach(d => {
+        csv += `${d.cid},${d.nome},${d.casos},${d.percentual}%\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'dashboard_saude.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
 export default function Dashboard() {
     const [periodoSelecionado, setPeriodoSelecionado] = useState('mes');
     const [unidadeSelecionada, setUnidadeSelecionada] = useState('todas');
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const maxBarValue = Math.max(...atendimentosDiarios.map(d => d.consultas + d.procedimentos + d.urgencias));
+
+    const handleRefresh = () => {
+        setIsRefreshing(true);
+        setTimeout(() => setIsRefreshing(false), 1500);
+    };
 
     return (
         <div className="animate-fade-in">
@@ -140,10 +182,16 @@ export default function Dashboard() {
                         <option value="trimestre">Trimestre</option>
                         <option value="ano">Este Ano</option>
                     </select>
-                    <button className="inline-flex items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5">
-                        <RefreshCw className="size-4" /> Atualizar
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5"
+                        onClick={handleRefresh}
+                    >
+                        <RefreshCw className={cn('size-4', isRefreshing && 'animate-spin')} /> Atualizar
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-dark">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-dark"
+                        onClick={exportarDashboard}
+                    >
                         <FileDown className="size-4" /> Exportar
                     </button>
                 </div>

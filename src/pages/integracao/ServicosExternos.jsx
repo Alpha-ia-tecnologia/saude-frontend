@@ -140,6 +140,8 @@ export default function ServicosExternos() {
     const [filtroTipo, setFiltroTipo] = useState('');
     const [servicoSelecionado, setServicoSelecionado] = useState(null);
     const [showConfigurar, setShowConfigurar] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [showNovaIntegracaoModal, setShowNovaIntegracaoModal] = useState(false);
 
     const servicosFiltrados = servicosData.filter(s => {
         const matchStatus = !filtroStatus || s.status === filtroStatus;
@@ -201,10 +203,26 @@ export default function ServicosExternos() {
                     Servicos Externos
                 </h1>
                 <div className="flex gap-2">
-                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
-                        <RefreshCw className="h-4 w-4" /> Sincronizar Todos
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted disabled:opacity-50"
+                        disabled={isSyncing}
+                        onClick={() => {
+                            setIsSyncing(true);
+                            setTimeout(() => {
+                                setIsSyncing(false);
+                                const totalRegistros = servicosData
+                                    .filter(s => s.status === 'conectado')
+                                    .reduce((acc, s) => acc + s.registrosSincronizados, 0);
+                                alert(`Sincronizacao concluida! ${totalRegistros} registros atualizados.`);
+                            }, 2000);
+                        }}
+                    >
+                        <RefreshCw className={cn('h-4 w-4', isSyncing && 'animate-spin')} /> Sincronizar Todos
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                        onClick={() => setShowNovaIntegracaoModal(true)}
+                    >
                         <Plus className="h-4 w-4" /> Nova Integracao
                     </button>
                 </div>
@@ -356,7 +374,10 @@ export default function ServicosExternos() {
                                     <Eye className="h-3.5 w-3.5" /> Detalhes
                                 </button>
                                 {servico.status === 'conectado' && (
-                                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-secondary/30 px-2.5 py-1.5 text-xs text-secondary hover:bg-secondary/5">
+                                    <button
+                                        className="inline-flex items-center gap-1.5 rounded-lg border border-secondary/30 px-2.5 py-1.5 text-xs text-secondary hover:bg-secondary/5"
+                                        onClick={() => alert(`Sincronizando ${servico.nome}...`)}
+                                    >
                                         <RefreshCw className="h-3.5 w-3.5" /> Sincronizar
                                     </button>
                                 )}
@@ -561,6 +582,118 @@ export default function ServicosExternos() {
                                         <Save className="h-4 w-4" /> Salvar
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Nova Integracao Modal */}
+            {showNovaIntegracaoModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowNovaIntegracaoModal(false)}
+                >
+                    <div
+                        className="w-[600px] max-w-[90%] max-h-[80vh] overflow-auto rounded-xl border border-border bg-card shadow-sm"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <span><Plus className="mr-1.5 inline-block h-4 w-4" /> Nova Integracao</span>
+                            <button
+                                className="rounded-lg bg-white/20 px-2 py-1 text-xs text-white hover:bg-white/30"
+                                onClick={() => setShowNovaIntegracaoModal(false)}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="p-5">
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Nome do Servico *</label>
+                                <input
+                                    type="text"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Ex: e-SUS AB"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Descricao</label>
+                                <input
+                                    type="text"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Descricao do servico"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Tipo *</label>
+                                <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="">Selecione o tipo</option>
+                                    <option value="governo">Governo/SUS</option>
+                                    <option value="parceiro">Parceiro</option>
+                                </select>
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">URL do Servico *</label>
+                                <input
+                                    type="text"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="https://api.exemplo.gov.br"
+                                />
+                            </div>
+                            <div className="mb-4 grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-foreground">Usuario *</label>
+                                    <input
+                                        type="text"
+                                        className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        placeholder="Nome de usuario"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-foreground">Senha *</label>
+                                    <input
+                                        type="password"
+                                        className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Chave de API (opcional)</label>
+                                <input
+                                    type="text"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Chave de autenticacao"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Intervalo de Sincronizacao</label>
+                                <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="15">A cada 15 minutos</option>
+                                    <option value="30">A cada 30 minutos</option>
+                                    <option value="60">A cada hora</option>
+                                    <option value="360">A cada 6 horas</option>
+                                    <option value="1440">Diariamente</option>
+                                    <option value="manual">Manual</option>
+                                </select>
+                            </div>
+
+                            <div className="mt-6 flex justify-end gap-2">
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                    onClick={() => setShowNovaIntegracaoModal(false)}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                                    onClick={() => {
+                                        alert('Integracao criada com sucesso!');
+                                        setShowNovaIntegracaoModal(false);
+                                    }}
+                                >
+                                    <Save className="h-4 w-4" /> Salvar Integracao
+                                </button>
                             </div>
                         </div>
                     </div>

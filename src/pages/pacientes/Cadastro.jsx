@@ -2,6 +2,27 @@ import { useState } from 'react';
 import { User, Phone, MapPin, Save, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+function formatCPF(value) {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
+function formatTelefone(value) {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 2) return digits.length ? `(${digits}` : '';
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+function formatCEP(value) {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
 export function Cadastro() {
   const [formData, setFormData] = useState({
     nome: '', cpf: '', dataNascimento: '', sexo: '',
@@ -11,6 +32,15 @@ export function Cadastro() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleMaskedChange = (e) => {
+    const { name, value } = e.target;
+    let formatted = value;
+    if (name === 'cpf') formatted = formatCPF(value);
+    else if (name === 'telefone') formatted = formatTelefone(value);
+    else if (name === 'cep') formatted = formatCEP(value);
+    setFormData({ ...formData, [name]: formatted });
   };
 
   const handleSubmit = (e) => {
@@ -43,7 +73,7 @@ export function Cadastro() {
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">CPF *</label>
-                <input type="text" name="cpf" value={formData.cpf} onChange={handleChange} placeholder="000.000.000-00" required
+                <input type="text" name="cpf" value={formData.cpf} onChange={handleMaskedChange} placeholder="000.000.000-00" maxLength={14} required
                   className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div>
@@ -61,7 +91,7 @@ export function Cadastro() {
                 </select>
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">Cartão SUS (CNS)</label>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Cartao SUS (CNS)</label>
                 <input type="text" name="cns" value={formData.cns} onChange={handleChange}
                   className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
@@ -77,7 +107,7 @@ export function Cadastro() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Telefone</label>
-                <input type="tel" name="telefone" value={formData.telefone} onChange={handleChange}
+                <input type="tel" name="telefone" value={formData.telefone} onChange={handleMaskedChange} placeholder="(00) 00000-0000" maxLength={15}
                   className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div>
@@ -88,25 +118,25 @@ export function Cadastro() {
             </div>
           </div>
 
-          {/* Endereço */}
+          {/* Endereco */}
           <div>
             <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-primary">
               <MapPin className="size-4" />
-              Endereço
+              Endereco
             </h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">CEP</label>
-                <input type="text" name="cep" value={formData.cep} onChange={handleChange}
+                <input type="text" name="cep" value={formData.cep} onChange={handleMaskedChange} placeholder="00000-000" maxLength={9}
                   className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-sm font-medium text-foreground">Endereço</label>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Endereco</label>
                 <input type="text" name="endereco" value={formData.endereco} onChange={handleChange}
                   className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">Número</label>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Numero</label>
                 <input type="text" name="numero" value={formData.numero} onChange={handleChange}
                   className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
@@ -125,7 +155,7 @@ export function Cadastro() {
                 <select name="uf" value={formData.uf} onChange={handleChange}
                   className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                   <option value="">Selecione</option>
-                  <option value="SP">São Paulo</option>
+                  <option value="SP">Sao Paulo</option>
                   <option value="RJ">Rio de Janeiro</option>
                   <option value="MG">Minas Gerais</option>
                 </select>

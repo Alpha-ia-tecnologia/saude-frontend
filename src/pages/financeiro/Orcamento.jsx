@@ -103,6 +103,30 @@ export default function Orcamento() {
     const [anoSelecionado, setAnoSelecionado] = useState('2025');
     const [unidadeSelecionada, setUnidadeSelecionada] = useState('todas');
     const [rubricaSelecionada, setRubricaSelecionada] = useState(null);
+    const [showNovaDotacaoModal, setShowNovaDotacaoModal] = useState(false);
+
+    const exportarRelatorio = () => {
+        const headers = ['Codigo', 'Nome', 'Categoria', 'Aprovado', 'Empenhado', 'Executado', 'Percentual (%)'];
+        const rows = rubricas.map(r => [
+            r.codigo,
+            r.nome,
+            r.categoria,
+            r.aprovado,
+            r.empenhado,
+            r.executado,
+            r.percentual
+        ]);
+        const csvContent = [headers.join(';'), ...rows.map(row => row.join(';'))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `relatorio_orcamento_${anoSelecionado}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -156,10 +180,16 @@ export default function Orcamento() {
                         <option value="2024">2024</option>
                         <option value="2023">2023</option>
                     </select>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                        onClick={exportarRelatorio}
+                    >
                         <FileText className="h-4 w-4" /> Relatorio
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+                    <button
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                        onClick={() => setShowNovaDotacaoModal(true)}
+                    >
                         <Plus className="h-4 w-4" /> Nova Dotacao
                     </button>
                 </div>
@@ -439,6 +469,93 @@ export default function Orcamento() {
                                 </button>
                                 <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark">
                                     <Plus className="h-4 w-4" /> Novo Empenho
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Nova Dotacao Modal */}
+            {showNovaDotacaoModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowNovaDotacaoModal(false)}
+                >
+                    <div
+                        className="w-[600px] max-w-[90%] rounded-xl border border-border bg-card shadow-sm"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between rounded-t-xl bg-primary px-5 py-3 text-sm font-semibold text-white">
+                            <span><Plus className="mr-1.5 inline-block h-4 w-4" /> Nova Dotacao Orcamentaria</span>
+                            <button
+                                className="rounded-lg bg-white/20 px-2 py-1 text-xs text-white hover:bg-white/30"
+                                onClick={() => setShowNovaDotacaoModal(false)}
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="p-5">
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Codigo da Rubrica *</label>
+                                <input
+                                    type="text"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Ex: 3.3.90.30"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Nome / Descricao *</label>
+                                <input
+                                    type="text"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="Ex: Material de Consumo"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Categoria *</label>
+                                <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="">Selecione a categoria</option>
+                                    <option value="Pessoal">Pessoal</option>
+                                    <option value="Custeio">Custeio</option>
+                                    <option value="Investimento">Investimento</option>
+                                </select>
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Valor Aprovado *</label>
+                                <input
+                                    type="number"
+                                    className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    placeholder="0,00"
+                                    min="0"
+                                    step="0.01"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="mb-1.5 block text-sm font-medium text-foreground">Fonte de Recursos *</label>
+                                <select className="h-10 w-full rounded-lg border border-input bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="">Selecione a fonte</option>
+                                    {fonteRecursos.map((f, i) => (
+                                        <option key={i} value={f.fonte}>{f.fonte}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="mt-6 flex justify-end gap-2">
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+                                    onClick={() => setShowNovaDotacaoModal(false)}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+                                    onClick={() => {
+                                        alert('Dotacao criada com sucesso!');
+                                        setShowNovaDotacaoModal(false);
+                                    }}
+                                >
+                                    <Plus className="h-4 w-4" /> Salvar Dotacao
                                 </button>
                             </div>
                         </div>

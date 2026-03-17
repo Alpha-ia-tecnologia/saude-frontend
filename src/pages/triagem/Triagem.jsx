@@ -3,7 +3,7 @@ import { triageService } from '../../services/triage.service';
 import {
   HeartPulse, Thermometer, Activity, Clock, AlertTriangle, Users,
   Stethoscope, Search, Loader2, Save, ChevronRight, Bell, Phone,
-  Eye, RefreshCw, Droplets, Gauge, Wind, Zap, User, ClipboardList
+  Eye, RefreshCw, Droplets, Gauge, Wind, Zap, User, ClipboardList, X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +40,59 @@ const PREDEFINED_SYMPTOMS = [
   { id: 'erupcao_cutanea', label: 'Erupcao cutanea' },
 ];
 
+const intensityLevels = [
+  { value: 1, label: '1', color: 'bg-green-400' },
+  { value: 2, label: '2', color: 'bg-green-500' },
+  { value: 3, label: '3', color: 'bg-lime-500' },
+  { value: 4, label: '4', color: 'bg-yellow-400' },
+  { value: 5, label: '5', color: 'bg-yellow-500' },
+  { value: 6, label: '6', color: 'bg-amber-500' },
+  { value: 7, label: '7', color: 'bg-orange-500' },
+  { value: 8, label: '8', color: 'bg-red-400' },
+  { value: 9, label: '9', color: 'bg-red-500' },
+  { value: 10, label: '10', color: 'bg-red-700' },
+];
+
+function getIntensityLabel(value) {
+  if (value <= 3) return 'Leve';
+  if (value <= 6) return 'Moderada';
+  return 'Severa';
+}
+
+function getIntensityColor(value) {
+  if (value <= 3) return 'text-green-600';
+  if (value <= 6) return 'text-amber-600';
+  return 'text-red-600';
+}
+
+function IntensityScale({ value, onChange }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <Gauge className="size-3.5 shrink-0 text-muted-foreground" />
+      <div className="flex gap-0.5">
+        {intensityLevels.map((level) => (
+          <button
+            key={level.value}
+            type="button"
+            onClick={() => onChange(level.value)}
+            className={cn(
+              'size-6 rounded text-[10px] font-bold transition-all',
+              value >= level.value
+                ? `${level.color} text-white shadow-sm`
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            )}
+          >
+            {level.label}
+          </button>
+        ))}
+      </div>
+      <span className={cn('ml-1 text-xs font-semibold', getIntensityColor(value))}>
+        {getIntensityLabel(value)}
+      </span>
+    </div>
+  );
+}
+
 const SAMPLE_PATIENTS = [
   { id: 'PAC-010', nome: 'Carlos Eduardo Martins', idade: 54, cns: '898.0010.0011.0012' },
   { id: 'PAC-011', nome: 'Fernanda Rodrigues', idade: 28, cns: '898.0011.0012.0013' },
@@ -63,38 +116,60 @@ function formatWaitTime(registeredAt) {
   return `${hours}h ${remainMin}min`;
 }
 
-function classifyLocally(vitalSigns, symptoms) {
+function classifyLocally(vitalSigns, symptomEntries) {
   const alerts = [];
   let level = 'BLUE';
 
+  // symptomEntries is now an array of { id, label, intensity, duration }
+  const symptomIds = symptomEntries.map(s => s.id);
+  const maxSymptomIntensity = symptomEntries.length > 0
+    ? Math.max(...symptomEntries.map(s => s.intensity || 0))
+    : 0;
+
+  // Check for symptoms with severe intensity (>= 8) and long duration
+  const hasSevereSymptom = symptomEntries.some(s => s.intensity >= 9);
+  const hasHighIntensitySymptom = symptomEntries.some(s => s.intensity >= 8);
+  const hasModerateSymptom = symptomEntries.some(s => s.intensity >= 5);
+  const hasLongDuration = symptomEntries.some(s => s.duration === 'mais_2_semanas' || s.duration === '1_2_semanas');
+
+  // RED level checks
   if (vitalSigns.temperature >= 39.5) { alerts.push(`Temperatura >= 39.5: ${vitalSigns.temperature}C`); level = 'RED'; }
   if (vitalSigns.oxygenSaturation < 90) { alerts.push(`SpO2 < 90%: ${vitalSigns.oxygenSaturation}%`); level = 'RED'; }
   if (vitalSigns.painLevel >= 9) { alerts.push('Dor nivel >= 9'); level = 'RED'; }
+  if (hasSevereSymptom) { alerts.push(`Sintoma com intensidade severa (${maxSymptomIntensity}/10)`); level = 'RED'; }
   if (vitalSigns.systolicBP > 200 || vitalSigns.systolicBP < 80) { alerts.push(`PA Sistolica critica: ${vitalSigns.systolicBP} mmHg`); level = 'RED'; }
   if (vitalSigns.heartRate > 140 || vitalSigns.heartRate < 40) { alerts.push(`FC critica: ${vitalSigns.heartRate} bpm`); level = 'RED'; }
-  if (symptoms.includes('perda_consciencia') || symptoms.includes('convulsao')) { alerts.push('Sintoma critico presente'); level = 'RED'; }
+  if (symptomIds.includes('perda_consciencia') || symptomIds.includes('convulsao')) { alerts.push('Sintoma critico presente'); level = 'RED'; }
 
+  // ORANGE level checks
   if (level !== 'RED') {
     if (vitalSigns.painLevel >= 8) { alerts.push('Dor nivel >= 8'); level = 'ORANGE'; }
+    if (hasHighIntensitySymptom) { alerts.push(`Sintoma com intensidade alta (${maxSymptomIntensity}/10)`); level = 'ORANGE'; }
     if (vitalSigns.oxygenSaturation >= 90 && vitalSigns.oxygenSaturation < 93) { alerts.push(`SpO2 baixa: ${vitalSigns.oxygenSaturation}%`); level = 'ORANGE'; }
     if (vitalSigns.systolicBP >= 180) { alerts.push(`PA elevada: ${vitalSigns.systolicBP} mmHg`); level = 'ORANGE'; }
-    if (symptoms.includes('dor_toracica')) { alerts.push('Dor toracica presente'); level = 'ORANGE'; }
-    if (symptoms.includes('confusao_mental')) { alerts.push('Confusao mental'); level = 'ORANGE'; }
+    if (symptomIds.includes('dor_toracica')) { alerts.push('Dor toracica presente'); level = 'ORANGE'; }
+    if (symptomIds.includes('confusao_mental')) { alerts.push('Confusao mental'); level = 'ORANGE'; }
+    if (hasLongDuration && hasModerateSymptom) { alerts.push('Sintoma moderado com duracao prolongada'); level = 'ORANGE'; }
   }
 
+  // YELLOW level checks
   if (level !== 'RED' && level !== 'ORANGE') {
     if (vitalSigns.temperature >= 38.5) { alerts.push(`Febre alta: ${vitalSigns.temperature}C`); level = 'YELLOW'; }
     if (vitalSigns.painLevel >= 5) { alerts.push(`Dor moderada: ${vitalSigns.painLevel}`); level = 'YELLOW'; }
+    if (hasModerateSymptom) { alerts.push(`Sintoma com intensidade moderada (${maxSymptomIntensity}/10)`); level = 'YELLOW'; }
     if (vitalSigns.systolicBP >= 160) { alerts.push(`PA elevada: ${vitalSigns.systolicBP} mmHg`); level = 'YELLOW'; }
     if (vitalSigns.heartRate > 100) { alerts.push(`FC elevada: ${vitalSigns.heartRate} bpm`); level = 'YELLOW'; }
-    if (symptoms.includes('dispneia')) { alerts.push('Dispneia presente'); level = 'YELLOW'; }
-    if (symptoms.includes('sangramento')) { alerts.push('Sangramento'); level = 'YELLOW'; }
+    if (symptomIds.includes('dispneia')) { alerts.push('Dispneia presente'); level = 'YELLOW'; }
+    if (symptomIds.includes('sangramento')) { alerts.push('Sangramento'); level = 'YELLOW'; }
+    if (hasLongDuration) { alerts.push('Sintoma com duracao prolongada'); level = 'YELLOW'; }
   }
 
+  // GREEN level checks
   if (level !== 'RED' && level !== 'ORANGE' && level !== 'YELLOW') {
     if (vitalSigns.temperature >= 37.5) { alerts.push(`Febre leve: ${vitalSigns.temperature}C`); level = 'GREEN'; }
     if (vitalSigns.painLevel >= 3) { alerts.push(`Dor leve: ${vitalSigns.painLevel}`); level = 'GREEN'; }
-    if (symptoms.length >= 3) { alerts.push('Multiplos sintomas'); level = 'GREEN'; }
+    if (symptomEntries.some(s => s.intensity >= 3)) { alerts.push(`Sintoma com dor leve`); level = 'GREEN'; }
+    if (symptomIds.length >= 3) { alerts.push('Multiplos sintomas'); level = 'GREEN'; }
   }
 
   return { level, alerts, colors: MANCHESTER_COLORS[level] };
@@ -117,7 +192,7 @@ export default function Triagem() {
     painLevel: 0,
     bloodGlucose: '',
   });
-  const [selectedSymptoms, setSelectedSymptoms] = useState([]);
+  const [selectedSymptoms, setSelectedSymptoms] = useState({});
   const [mainComplaint, setMainComplaint] = useState('');
   const [previewClassification, setPreviewClassification] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -153,10 +228,11 @@ export default function Triagem() {
       bloodGlucose: parseInt(vitalSigns.bloodGlucose) || 90,
     };
 
-    const hasAnyValue = vitalSigns.temperature || vitalSigns.systolicBP || vitalSigns.heartRate || vitalSigns.oxygenSaturation || vitalSigns.painLevel > 0 || selectedSymptoms.length > 0;
+    const symptomEntries = Object.values(selectedSymptoms);
+    const hasAnyValue = vitalSigns.temperature || vitalSigns.systolicBP || vitalSigns.heartRate || vitalSigns.oxygenSaturation || vitalSigns.painLevel > 0 || symptomEntries.length > 0;
 
     if (hasAnyValue) {
-      setPreviewClassification(classifyLocally(vs, selectedSymptoms));
+      setPreviewClassification(classifyLocally(vs, symptomEntries));
     } else {
       setPreviewClassification(null);
     }
@@ -193,8 +269,38 @@ export default function Triagem() {
     if (activeTab === 'alertas') loadAlerts();
   }, [activeTab, loadQueue, loadAlerts]);
 
-  const toggleSymptom = (id) => {
-    setSelectedSymptoms(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+  const toggleSymptom = (id, label) => {
+    setSelectedSymptoms(prev => {
+      const next = { ...prev };
+      if (next[id]) {
+        delete next[id];
+      } else {
+        next[id] = { id, label, intensity: 5, duration: '' };
+      }
+      return next;
+    });
+  };
+
+  const updateSymptomIntensity = (id, intensity) => {
+    setSelectedSymptoms(prev => ({
+      ...prev,
+      [id]: { ...prev[id], intensity },
+    }));
+  };
+
+  const updateSymptomDuration = (id, duration) => {
+    setSelectedSymptoms(prev => ({
+      ...prev,
+      [id]: { ...prev[id], duration },
+    }));
+  };
+
+  const removeSymptom = (id) => {
+    setSelectedSymptoms(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const updateVitalSign = (field, value) => {
@@ -230,7 +336,13 @@ export default function Triagem() {
           painLevel: vitalSigns.painLevel,
           bloodGlucose: parseInt(vitalSigns.bloodGlucose) || 90,
         },
-        symptoms: selectedSymptoms,
+        symptoms: Object.keys(selectedSymptoms),
+        symptomDetails: Object.values(selectedSymptoms).map(s => ({
+          id: s.id, label: s.label,
+          intensity: s.intensity,
+          intensityLabel: getIntensityLabel(s.intensity),
+          duration: s.duration,
+        })),
         mainComplaint,
         registeredBy: 'Enf. Sistema'
       });
@@ -240,7 +352,7 @@ export default function Triagem() {
       setSelectedPatient(null);
       setPatientSearch('');
       setVitalSigns({ temperature: '', systolicBP: '', diastolicBP: '', heartRate: '', respiratoryRate: '', oxygenSaturation: '', painLevel: 0, bloodGlucose: '' });
-      setSelectedSymptoms([]);
+      setSelectedSymptoms({});
       setMainComplaint('');
       setPreviewClassification(null);
 
@@ -467,20 +579,20 @@ export default function Triagem() {
                       <label key={s.id}
                         className={cn(
                           'flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors',
-                          selectedSymptoms.includes(s.id)
+                          selectedSymptoms[s.id]
                             ? 'border-primary bg-primary/5 text-primary font-medium'
                             : 'border-border bg-white text-muted-foreground hover:border-primary/40'
                         )}>
                         <input type="checkbox" className="sr-only"
-                          checked={selectedSymptoms.includes(s.id)}
-                          onChange={() => toggleSymptom(s.id)} />
+                          checked={!!selectedSymptoms[s.id]}
+                          onChange={() => toggleSymptom(s.id, s.label)} />
                         <span className={cn(
                           'flex size-4 shrink-0 items-center justify-center rounded border transition-colors',
-                          selectedSymptoms.includes(s.id)
+                          selectedSymptoms[s.id]
                             ? 'border-primary bg-primary text-white'
                             : 'border-border'
                         )}>
-                          {selectedSymptoms.includes(s.id) && (
+                          {selectedSymptoms[s.id] && (
                             <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
@@ -491,6 +603,47 @@ export default function Triagem() {
                     ))}
                   </div>
                 </div>
+
+                {/* Selected symptoms with individual intensity & duration */}
+                {Object.keys(selectedSymptoms).length > 0 && (
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium">
+                      Sintomas selecionados — intensidade e duracao
+                    </label>
+                    <div className="space-y-3">
+                      {Object.values(selectedSymptoms).map(s => (
+                        <div key={s.id} className="rounded-lg border border-border bg-muted/30 p-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <button onClick={() => removeSymptom(s.id)} type="button" className="shrink-0 text-muted-foreground hover:text-destructive">
+                              <X className="size-4" />
+                            </button>
+                            <span className="text-sm font-semibold text-foreground">
+                              {s.label}
+                            </span>
+                          </div>
+                          <div className="ml-6 space-y-2">
+                            <IntensityScale value={s.intensity} onChange={(v) => updateSymptomIntensity(s.id, v)} />
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground shrink-0">Duracao:</span>
+                              <select
+                                className="h-7 rounded border border-border bg-white px-2 text-xs focus:border-primary focus:outline-none"
+                                value={s.duration}
+                                onChange={(e) => updateSymptomDuration(s.id, e.target.value)}
+                              >
+                                <option value="">Selecione...</option>
+                                <option value="menos_24h">&lt; 24 horas</option>
+                                <option value="1_3_dias">1-3 dias</option>
+                                <option value="4_7_dias">4-7 dias</option>
+                                <option value="1_2_semanas">1-2 semanas</option>
+                                <option value="mais_2_semanas">&gt; 2 semanas</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Main Complaint */}
                 <div>

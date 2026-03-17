@@ -209,31 +209,28 @@ export default function Dashboard() {
                             <span className="inline-block size-3 bg-destructive" /> Urgências
                         </span>
                     </div>
-                    <div className="flex h-[200px] items-end justify-around gap-2">
+                    <div className="flex h-[220px] items-end justify-around gap-3 px-2">
                         {atendimentosDiarios.map((dia, i) => {
                             const total = dia.consultas + dia.procedimentos + dia.urgencias;
-                            const altura = (total / maxBarValue) * 180;
+                            const scale = 190 / maxBarValue;
                             return (
-                                <div key={i} className="flex flex-1 flex-col items-center">
-                                    <div
-                                        className="flex w-full max-w-[50px] flex-col"
-                                        style={{ height: `${altura}px` }}
-                                    >
+                                <div key={i} className="flex flex-1 flex-col items-center gap-1">
+                                    <div className="flex w-full max-w-[48px] flex-col overflow-hidden rounded-t-md">
                                         <div
-                                            className="rounded-t bg-destructive"
-                                            style={{ flex: dia.urgencias }}
+                                            className="w-full bg-destructive"
+                                            style={{ height: `${Math.round(dia.urgencias * scale)}px` }}
                                         />
                                         <div
-                                            className="bg-secondary"
-                                            style={{ flex: dia.procedimentos }}
+                                            className="w-full bg-secondary"
+                                            style={{ height: `${Math.round(dia.procedimentos * scale)}px` }}
                                         />
                                         <div
-                                            className="rounded-b bg-primary"
-                                            style={{ flex: dia.consultas }}
+                                            className="w-full bg-primary"
+                                            style={{ height: `${Math.round(dia.consultas * scale)}px` }}
                                         />
                                     </div>
-                                    <span className="mt-2 font-medium text-muted-foreground">{dia.dia}</span>
-                                    <small className="text-muted-foreground">{total}</small>
+                                    <span className="text-xs font-medium text-muted-foreground">{dia.dia}</span>
+                                    <span className="text-[11px] text-muted-foreground">{total}</span>
                                 </div>
                             );
                         })}

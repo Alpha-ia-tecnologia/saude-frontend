@@ -43,32 +43,34 @@ function createUbsIcon(color) {
 }
 
 // ── UBS (Unidades Básicas de Saúde) - São Luís, Maranhão ─────────
+// Coordenadas baseadas na localização real de cada bairro na ilha
 const ubsData = [
-  // ── Zona Central / Norte ──
-  { id: 1, nome: 'UBS Centro Histórico', bairro: 'Centro', cor: '#0054A6', lat: -2.5140, lng: -44.2820, raio: 800, responsavel: 'Dra. Helena Martins', telefone: '(98) 3232-1001', microareas: 3, agentes: 3, familias: 220, populacao: 880 },
-  { id: 2, nome: 'UBS Praia Grande', bairro: 'Praia Grande', cor: '#1D4ED8', lat: -2.5190, lng: -44.2880, raio: 700, responsavel: 'Dr. Antônio Reis', telefone: '(98) 3232-1002', microareas: 2, agentes: 2, familias: 160, populacao: 640 },
-  { id: 3, nome: 'UBS Desterro', bairro: 'Desterro', cor: '#0891B2', lat: -2.5080, lng: -44.2780, raio: 650, responsavel: 'Dra. Lúcia Campos', telefone: '(98) 3232-1003', microareas: 2, agentes: 2, familias: 140, populacao: 560 },
-  // ── Zona Leste ──
-  { id: 4, nome: 'UBS Turu', bairro: 'Turu', cor: '#8B5CF6', lat: -2.5200, lng: -44.2380, raio: 1200, responsavel: 'Dra. Fernanda Reis', telefone: '(98) 3232-1004', microareas: 4, agentes: 4, familias: 380, populacao: 1520 },
-  { id: 5, nome: 'UBS Cohama', bairro: 'Cohama', cor: '#7C3AED', lat: -2.5130, lng: -44.2320, raio: 1000, responsavel: 'Dr. Ricardo Alves', telefone: '(98) 3232-1005', microareas: 3, agentes: 3, familias: 290, populacao: 1160 },
-  { id: 6, nome: 'UBS Renascença', bairro: 'Renascença', cor: '#6366F1', lat: -2.5050, lng: -44.2600, raio: 900, responsavel: 'Dra. Marina Costa', telefone: '(98) 3232-1006', microareas: 3, agentes: 3, familias: 250, populacao: 1000 },
-  { id: 7, nome: 'UBS Calhau', bairro: 'Calhau', cor: '#2563EB', lat: -2.4950, lng: -44.2250, raio: 1100, responsavel: 'Dr. Bruno Soares', telefone: '(98) 3232-1007', microareas: 3, agentes: 3, familias: 270, populacao: 1080 },
-  { id: 8, nome: 'UBS Olho d\'Água', bairro: 'Olho d\'Água', cor: '#0EA5E9', lat: -2.5020, lng: -44.2130, raio: 1200, responsavel: 'Dra. Patrícia Mendes', telefone: '(98) 3232-1008', microareas: 4, agentes: 4, familias: 340, populacao: 1360 },
+  // ── Zona Central / Histórica ──
+  { id: 1, nome: 'UBS Centro Histórico', bairro: 'Centro', cor: '#0054A6', lat: -2.5297, lng: -44.3028, raio: 400, responsavel: 'Dra. Helena Martins', telefone: '(98) 3232-1001', microareas: 3, agentes: 3, familias: 220, populacao: 880 },
+  { id: 2, nome: 'UBS Praia Grande', bairro: 'Praia Grande', cor: '#1D4ED8', lat: -2.5270, lng: -44.3090, raio: 350, responsavel: 'Dr. Antônio Reis', telefone: '(98) 3232-1002', microareas: 2, agentes: 2, familias: 160, populacao: 640 },
+  { id: 3, nome: 'UBS Desterro', bairro: 'Desterro', cor: '#0891B2', lat: -2.5230, lng: -44.2970, raio: 350, responsavel: 'Dra. Lúcia Campos', telefone: '(98) 3232-1003', microareas: 2, agentes: 2, familias: 140, populacao: 560 },
+  // ── Zona Leste / Praias ──
+  { id: 4, nome: 'UBS Turu', bairro: 'Turu', cor: '#8B5CF6', lat: -2.5264, lng: -44.2203, raio: 550, responsavel: 'Dra. Fernanda Reis', telefone: '(98) 3232-1004', microareas: 4, agentes: 4, familias: 380, populacao: 1520 },
+  { id: 5, nome: 'UBS Cohama', bairro: 'Cohama', cor: '#7C3AED', lat: -2.5138, lng: -44.2497, raio: 500, responsavel: 'Dr. Ricardo Alves', telefone: '(98) 3232-1005', microareas: 3, agentes: 3, familias: 290, populacao: 1160 },
+  { id: 6, nome: 'UBS Renascença', bairro: 'Renascença', cor: '#6366F1', lat: -2.5030, lng: -44.2720, raio: 500, responsavel: 'Dra. Marina Costa', telefone: '(98) 3232-1006', microareas: 3, agentes: 3, familias: 250, populacao: 1000 },
+  { id: 7, nome: 'UBS Calhau', bairro: 'Calhau', cor: '#2563EB', lat: -2.4910, lng: -44.2130, raio: 550, responsavel: 'Dr. Bruno Soares', telefone: '(98) 3232-1007', microareas: 3, agentes: 3, familias: 270, populacao: 1080 },
+  { id: 8, nome: 'UBS Olho d\'Água', bairro: 'Olho d\'Água', cor: '#0EA5E9', lat: -2.5050, lng: -44.1950, raio: 600, responsavel: 'Dra. Patrícia Mendes', telefone: '(98) 3232-1008', microareas: 4, agentes: 4, familias: 340, populacao: 1360 },
+  // ── Zona Norte / Anil ──
+  { id: 9, nome: 'UBS Cohab Anil', bairro: 'Cohab Anil', cor: '#06B6D4', lat: -2.4880, lng: -44.2700, raio: 500, responsavel: 'Dr. Marcos Oliveira', telefone: '(98) 3232-1009', microareas: 3, agentes: 3, familias: 260, populacao: 1040 },
+  { id: 10, nome: 'UBS Anil', bairro: 'Anil', cor: '#14B8A6', lat: -2.4950, lng: -44.2560, raio: 450, responsavel: 'Dra. Carla Souza', telefone: '(98) 3232-1010', microareas: 3, agentes: 3, familias: 240, populacao: 960 },
   // ── Zona Sul ──
-  { id: 9, nome: 'UBS Cohab Anil', bairro: 'Cohab Anil', cor: '#06B6D4', lat: -2.4950, lng: -44.2650, raio: 1000, responsavel: 'Dr. Marcos Oliveira', telefone: '(98) 3232-1009', microareas: 3, agentes: 3, familias: 260, populacao: 1040 },
-  { id: 10, nome: 'UBS Anil', bairro: 'Anil', cor: '#14B8A6', lat: -2.4980, lng: -44.2530, raio: 900, responsavel: 'Dra. Carla Souza', telefone: '(98) 3232-1010', microareas: 3, agentes: 3, familias: 240, populacao: 960 },
-  { id: 11, nome: 'UBS Angelim', bairro: 'Angelim', cor: '#10B981', lat: -2.5380, lng: -44.2420, raio: 1100, responsavel: 'Dr. Pedro Nascimento', telefone: '(98) 3232-1011', microareas: 3, agentes: 3, familias: 310, populacao: 1240 },
-  { id: 12, nome: 'UBS Aurora', bairro: 'Aurora', cor: '#00A651', lat: -2.5300, lng: -44.2550, raio: 1000, responsavel: 'Dra. Sandra Lima', telefone: '(98) 3232-1012', microareas: 3, agentes: 3, familias: 280, populacao: 1120 },
+  { id: 11, nome: 'UBS Angelim', bairro: 'Angelim', cor: '#10B981', lat: -2.5450, lng: -44.2460, raio: 550, responsavel: 'Dr. Pedro Nascimento', telefone: '(98) 3232-1011', microareas: 3, agentes: 3, familias: 310, populacao: 1240 },
+  { id: 12, nome: 'UBS Aurora', bairro: 'Aurora', cor: '#00A651', lat: -2.5360, lng: -44.2640, raio: 500, responsavel: 'Dra. Sandra Lima', telefone: '(98) 3232-1012', microareas: 3, agentes: 3, familias: 280, populacao: 1120 },
   // ── Zona Oeste ──
-  { id: 13, nome: 'UBS Vila Palmeira', bairro: 'Vila Palmeira', cor: '#F59E0B', lat: -2.5250, lng: -44.2950, raio: 1000, responsavel: 'Dr. Paulo Henrique', telefone: '(98) 3232-1013', microareas: 3, agentes: 3, familias: 300, populacao: 1200 },
-  { id: 14, nome: 'UBS Liberdade', bairro: 'Liberdade', cor: '#EAB308', lat: -2.5180, lng: -44.2900, raio: 900, responsavel: 'Dra. Juliana Cardoso', telefone: '(98) 3232-1014', microareas: 3, agentes: 3, familias: 250, populacao: 1000 },
-  { id: 15, nome: 'UBS Fátima', bairro: 'Fátima', cor: '#D97706', lat: -2.5160, lng: -44.3000, raio: 800, responsavel: 'Dr. Gustavo Rocha', telefone: '(98) 3232-1015', microareas: 2, agentes: 2, familias: 190, populacao: 760 },
-  // ── Zona Rural / Periferia ──
-  { id: 16, nome: 'UBS Cidade Operária', bairro: 'Cidade Operária', cor: '#E63946', lat: -2.5500, lng: -44.2200, raio: 1400, responsavel: 'Dra. Amanda Barbosa', telefone: '(98) 3232-1016', microareas: 5, agentes: 5, familias: 420, populacao: 1680 },
-  { id: 17, nome: 'UBS Coroadinho', bairro: 'Coroadinho', cor: '#DC2626', lat: -2.5350, lng: -44.2800, raio: 1200, responsavel: 'Dr. Rafael Teixeira', telefone: '(98) 3232-1017', microareas: 4, agentes: 4, familias: 380, populacao: 1520 },
-  { id: 18, nome: 'UBS Vila Maranhão', bairro: 'Vila Maranhão', cor: '#B91C1C', lat: -2.5620, lng: -44.3100, raio: 1300, responsavel: 'Dra. Isabela Lima', telefone: '(98) 3232-1018', microareas: 4, agentes: 3, familias: 350, populacao: 1400 },
-  { id: 19, nome: 'UBS São Cristóvão', bairro: 'São Cristóvão', cor: '#BE185D', lat: -2.4850, lng: -44.2450, raio: 1100, responsavel: 'Dr. Thiago Ferreira', telefone: '(98) 3232-1019', microareas: 3, agentes: 3, familias: 280, populacao: 1120 },
-  { id: 20, nome: 'UBS Maiobão', bairro: 'Maiobão', cor: '#9333EA', lat: -2.5650, lng: -44.2500, raio: 1500, responsavel: 'Dra. Camila Duarte', telefone: '(98) 3232-1020', microareas: 5, agentes: 4, familias: 450, populacao: 1800 },
+  { id: 13, nome: 'UBS Vila Palmeira', bairro: 'Vila Palmeira', cor: '#F59E0B', lat: -2.5400, lng: -44.2920, raio: 450, responsavel: 'Dr. Paulo Henrique', telefone: '(98) 3232-1013', microareas: 3, agentes: 3, familias: 300, populacao: 1200 },
+  { id: 14, nome: 'UBS Liberdade', bairro: 'Liberdade', cor: '#EAB308', lat: -2.5340, lng: -44.2830, raio: 400, responsavel: 'Dra. Juliana Cardoso', telefone: '(98) 3232-1014', microareas: 3, agentes: 3, familias: 250, populacao: 1000 },
+  { id: 15, nome: 'UBS Fátima', bairro: 'Fátima', cor: '#D97706', lat: -2.5480, lng: -44.2810, raio: 400, responsavel: 'Dr. Gustavo Rocha', telefone: '(98) 3232-1015', microareas: 2, agentes: 2, familias: 190, populacao: 760 },
+  // ── Zona Periférica ──
+  { id: 16, nome: 'UBS Cidade Operária', bairro: 'Cidade Operária', cor: '#E63946', lat: -2.5580, lng: -44.2180, raio: 700, responsavel: 'Dra. Amanda Barbosa', telefone: '(98) 3232-1016', microareas: 5, agentes: 5, familias: 420, populacao: 1680 },
+  { id: 17, nome: 'UBS Coroadinho', bairro: 'Coroadinho', cor: '#DC2626', lat: -2.5631, lng: -44.2621, raio: 600, responsavel: 'Dr. Rafael Teixeira', telefone: '(98) 3232-1017', microareas: 4, agentes: 4, familias: 380, populacao: 1520 },
+  { id: 18, nome: 'UBS Vila Maranhão', bairro: 'Vila Maranhão', cor: '#B91C1C', lat: -2.5850, lng: -44.3150, raio: 650, responsavel: 'Dra. Isabela Lima', telefone: '(98) 3232-1018', microareas: 4, agentes: 3, familias: 350, populacao: 1400 },
+  { id: 19, nome: 'UBS São Cristóvão', bairro: 'São Cristóvão', cor: '#BE185D', lat: -2.4800, lng: -44.2380, raio: 550, responsavel: 'Dr. Thiago Ferreira', telefone: '(98) 3232-1019', microareas: 3, agentes: 3, familias: 280, populacao: 1120 },
+  { id: 20, nome: 'UBS Maiobão', bairro: 'Maiobão', cor: '#9333EA', lat: -2.5780, lng: -44.2350, raio: 700, responsavel: 'Dra. Camila Duarte', telefone: '(98) 3232-1020', microareas: 5, agentes: 4, familias: 450, populacao: 1800 },
 ];
 
 // ── Agentes de Saúde ─────────────────────────────────────────────

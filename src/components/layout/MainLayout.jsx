@@ -237,7 +237,7 @@ export function MainLayout() {
 
         {/* Footer */}
         <footer className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
-          &copy; 2026 PEC - Prontuario Eletronico do Cidadao &middot; Sistema Unico de Saude
+          &copy; 2026 SMARTH HEALTH &middot; Sistema Unico de Saude
         </footer>
       </div>
     </div>

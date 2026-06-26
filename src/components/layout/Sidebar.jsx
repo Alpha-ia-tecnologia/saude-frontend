@@ -265,7 +265,7 @@ export function Sidebar({ isOpen, onClose }) {
               <HeartPulse className="size-5 text-white" />
             </div>
             <div>
-              <h1 className="text-base font-bold text-white tracking-tight">PEC</h1>
+              <h1 className="text-base font-bold text-white tracking-tight">SMART HEALTH</h1>
               <p className="text-[10px] uppercase tracking-widest text-slate-500">Prontuário Eletrônico</p>
             </div>
           </div>

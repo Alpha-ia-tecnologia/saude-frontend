@@ -311,7 +311,7 @@ export default function PainelTV() {
             <HeartPulse className="text-white" size={24} strokeWidth={2.5} />
           </div>
           <div>
-            <h1 className="text-base font-bold text-white leading-tight">SMART HEALTH</h1>
+            <h1 className="text-base font-bold text-white leading-tight">Smart Health</h1>
             <p className="text-[10px] font-medium text-green-400/70">e-SUS Atencao Primaria</p>
           </div>
         </div>

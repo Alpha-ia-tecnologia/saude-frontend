@@ -44,7 +44,7 @@ export function Login() {
               <HeartPulse className="size-10" />
             </div>
           </div>
-          <h1 className="mb-3 text-4xl font-bold tracking-tight">SMART HEALTH</h1>
+          <h1 className="mb-3 text-4xl font-bold tracking-tight">Smart Health</h1>
           <p className="mb-2 text-xl font-light text-white/90">Prontuário Eletrônico do Cidadão</p>
           <p className="text-sm text-white/60">
             Sistema integrado de gestão de saúde pública com inteligência artificial
@@ -74,7 +74,7 @@ export function Login() {
             <div className="mb-4 inline-flex size-14 items-center justify-center rounded-xl bg-primary">
               <HeartPulse className="size-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-primary">PEC</h1>
+            <h1 className="text-2xl font-bold text-primary">Smart Health</h1>
             <p className="text-sm text-muted-foreground">Prontuário Eletrônico do Cidadão</p>
           </div>
 

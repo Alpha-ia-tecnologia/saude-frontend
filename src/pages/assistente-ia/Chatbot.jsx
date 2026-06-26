@@ -21,7 +21,7 @@ function renderMarkdown(text) {
 export function Chatbot() {
   const [messages, setMessages] = useState([
     {
-      role: 'assistant', content: `Olá! Sou o assistente de IA do **PEC (Prontuário Eletrônico do Cidadão)**, sistema de saúde pública do Brasil.
+      role: 'assistant', content: `Olá! Sou o assistente de IA do **Smart Health**, sistema de saúde pública do Brasil.
 
 **Minhas habilidades incluem:**
 - Apoio à decisão clínica baseada em evidências
